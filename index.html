@@ -9,6 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<!-- Cloudinary upload via REST API - sem SDK necessário -->
 
 <style>
 /* ─── TOKENS ─────────────────────────────────────── */
@@ -899,6 +900,10 @@ const firebaseConfig = {
 };
 
 let db, auth, currentUser;
+
+// ─── CLOUDINARY CONFIG ────────────────────────────
+const CLOUDINARY_CLOUD = 'do4vyqv58';
+const CLOUDINARY_PRESET = 'fora_do_retangulo';
 let appData = {
   viagens:[],
   reservas:[],
@@ -1524,8 +1529,18 @@ function renderMemorias(){
   const fotos = appData.fotos||[];
   const diario = appData.diario||[];
   let html='';
+
+  // Barra de progresso de upload (hidden by default)
+  html+=`<div id="upload-progress-bar" style="display:none;margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--text2);margin-bottom:.35rem">
+      <span id="upload-progress-label">A carregar...</span>
+      <span id="upload-progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div id="upload-progress-fill" class="progress-fill" style="width:0%;background:var(--accent)"></div></div>
+  </div>`;
+
   if(diario.length){
-    html+=`<div style="margin-bottom:1.25rem"><div class="section-title" style="margin-bottom:.75rem">📓 Diário</div>`;
+    html+=`<div style="margin-bottom:1.5rem"><div class="section-title" style="margin-bottom:.75rem">📓 Diário</div>`;
     diario.slice().reverse().forEach(e=>{
       html+=`<div class="diario-entry">
         <div class="diario-date">${e.data||''} ${e.local?'· '+e.local:''}</div>
@@ -1535,16 +1550,71 @@ function renderMemorias(){
     });
     html+='</div>';
   }
+
   if(fotos.length){
-    html+=`<div class="section-title" style="margin-bottom:.75rem">📷 Galeria</div>
+    html+=`<div class="section-title" style="margin-bottom:.75rem">📷 Galeria <span style="font-size:.78rem;color:var(--text3);font-weight:400">(${fotos.length} ficheiro${fotos.length!==1?'s':''})</span></div>
     <div class="photo-grid">
-      ${fotos.map(f=>`<img class="photo-thumb" src="${f.src}" alt="${f.nome||''}" onclick="verFoto('${f.id}')">`).join('')}
+      ${fotos.map(f=>`
+        <div style="position:relative;group" class="photo-item">
+          ${f.tipo&&f.tipo.startsWith('video')
+            ? `<video src="${f.url||f.src}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius);cursor:pointer" onclick="abrirLightbox('${f.id}')" preload="metadata"></video>
+               <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.8rem;pointer-events:none">▶</div>`
+            : `<img class="photo-thumb" src="${f.url||f.src}" alt="${f.nome||''}" loading="lazy" onclick="abrirLightbox('${f.id}')">`
+          }
+          <button onclick="eliminarFoto('${f.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:22px;height:22px;font-size:.7rem;cursor:pointer;line-height:1">✕</button>
+          <div style="font-size:.68rem;color:var(--text3);padding:.2rem .3rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.nome||''}</div>
+        </div>
+      `).join('')}
     </div>`;
   }
+
   if(!diario.length && !fotos.length){
-    html=`<div class="empty-state"><div class="empty-icon">📷</div><div>Sem memórias ainda. Adicione fotos ou escreva no diário!</div></div>`;
+    html+=`<div class="empty-state"><div class="empty-icon">📷</div><div>Sem memórias ainda.<br>Adicione fotos ou escreva no diário!</div></div>`;
   }
+
   document.getElementById('memorias-content').innerHTML=html;
+}
+
+// Lightbox
+let lightboxFotos=[];
+function abrirLightbox(id){
+  const fotos = appData.fotos||[];
+  lightboxFotos = fotos;
+  const idx = fotos.findIndex(f=>f.id===id);
+  if(idx<0) return;
+  mostrarLightboxIdx(idx);
+}
+function mostrarLightboxIdx(idx){
+  const f = lightboxFotos[idx];
+  if(!f) return;
+  const isVideo = f.tipo&&f.tipo.startsWith('video');
+  const overlay = document.createElement('div');
+  overlay.id='lightbox-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;padding:1rem';
+  overlay.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:900px;padding:0 .5rem">
+      <div style="font-size:.85rem;color:#aaa">${f.nome||''} <span style="color:#666">${idx+1}/${lightboxFotos.length}</span></div>
+      <button onclick="fecharLightbox()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.4rem .9rem;border-radius:6px;cursor:pointer;font-size:.85rem">✕ Fechar</button>
+    </div>
+    ${isVideo
+      ? `<video src="${f.url||f.src}" controls style="max-width:900px;max-height:75vh;border-radius:8px"></video>`
+      : `<img src="${f.url||f.src}" style="max-width:900px;max-height:75vh;object-fit:contain;border-radius:8px" alt="${f.nome||''}">`
+    }
+    <div style="display:flex;gap:1rem">
+      ${idx>0?`<button onclick="lightboxNav(${idx-1})" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.5rem 1.2rem;border-radius:6px;cursor:pointer">← Anterior</button>`:''}
+      ${idx<lightboxFotos.length-1?`<button onclick="lightboxNav(${idx+1})" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.5rem 1.2rem;border-radius:6px;cursor:pointer">Seguinte →</button>`:''}
+    </div>
+  `;
+  overlay.onclick=e=>{ if(e.target===overlay) fecharLightbox(); };
+  document.body.appendChild(overlay);
+}
+function lightboxNav(idx){
+  fecharLightbox();
+  setTimeout(()=>mostrarLightboxIdx(idx),50);
+}
+function fecharLightbox(){
+  const el=document.getElementById('lightbox-overlay');
+  if(el) el.remove();
 }
 
 function renderGastronomia(){
@@ -1675,16 +1745,99 @@ function eliminarDiario(id){
   saveFirestoreData(); renderMemorias();
 }
 
-function handlePhotoUpload(e){
+async function handlePhotoUpload(e){
   const files = Array.from(e.target.files);
-  files.forEach(file=>{
-    const reader = new FileReader();
-    reader.onload = ev=>{
-      appData.fotos.push({ id:genId(), nome:file.name, src:ev.target.result, data:new Date().toISOString() });
-      renderMemorias();
-    };
-    reader.readAsDataURL(file);
-  });
+  if(!files.length) return;
+  e.target.value='';
+
+  const progressBar = document.getElementById('upload-progress-bar');
+  const progressFill = document.getElementById('upload-progress-fill');
+  const progressLabel = document.getElementById('upload-progress-label');
+  const progressPct = document.getElementById('upload-progress-pct');
+
+  for(let i=0; i<files.length; i++){
+    const file = files[i];
+    const id = genId();
+    const isVideo = file.type.startsWith('video');
+
+    // Fallback para localStorage se não estiver autenticado
+    if(!currentUser){
+      const reader = new FileReader();
+      reader.onload = ev=>{
+        appData.fotos.push({ id, nome:file.name, src:ev.target.result, tipo:file.type, data:new Date().toISOString() });
+        renderMemorias();
+      };
+      reader.readAsDataURL(file);
+      continue;
+    }
+
+    // Upload para Cloudinary
+    if(progressBar) progressBar.style.display='block';
+    if(progressLabel) progressLabel.textContent=`A carregar ${i+1}/${files.length}: ${file.name}`;
+    if(progressFill) progressFill.style.width='0%';
+    if(progressPct) progressPct.textContent='0%';
+
+    try{
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_PRESET);
+      formData.append('public_id', `foradoretangulo/${currentUser.uid}/${id}`);
+
+      const resourceType = isVideo ? 'video' : 'image';
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${resourceType}/upload`;
+
+      // XMLHttpRequest para barra de progresso real
+      await new Promise((resolve, reject)=>{
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadUrl);
+        xhr.upload.onprogress = ev=>{
+          if(ev.lengthComputable){
+            const pct = Math.round((ev.loaded/ev.total)*100);
+            if(progressFill) progressFill.style.width=pct+'%';
+            if(progressPct) progressPct.textContent=pct+'%';
+          }
+        };
+        xhr.onload = async ()=>{
+          if(xhr.status===200){
+            const res = JSON.parse(xhr.responseText);
+            const foto = {
+              id, nome:file.name,
+              url: res.secure_url,
+              publicId: res.public_id,
+              tipo: file.type,
+              data: new Date().toISOString()
+            };
+            appData.fotos.push(foto);
+            await saveFirestoreData();
+            renderMemorias();
+            resolve();
+          } else {
+            reject(new Error('Erro Cloudinary: '+xhr.status));
+          }
+        };
+        xhr.onerror = ()=>reject(new Error('Erro de rede'));
+        xhr.send(formData);
+      });
+
+    } catch(err){
+      console.error('Erro no upload:', err);
+      alert('Erro ao carregar "'+file.name+'": '+err.message);
+    }
+  }
+
+  if(progressBar) progressBar.style.display='none';
+}
+
+async function eliminarFoto(id){
+  if(!confirm('Eliminar esta foto/vídeo?')) return;
+  const foto = appData.fotos.find(f=>f.id===id);
+  if(!foto) return;
+
+  // Nota: eliminação do Cloudinary requer assinatura server-side
+  // O ficheiro fica no Cloudinary mas é removido da app
+  appData.fotos = appData.fotos.filter(f=>f.id!==id);
+  await saveFirestoreData();
+  renderMemorias();
 }
 
 function addParagem(){
