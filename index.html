@@ -391,37 +391,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .section-title{font-size:1rem;font-weight:600}
 .collapsible-content{overflow:hidden;transition:max-height .3s ease}
 
-/* ─── BADGES PAGO ────────────────────────────────── */
-.badge-pago{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);font-size:.68rem;font-weight:600;padding:.1rem .4rem;border-radius:10px;display:inline-block}
-.badge-porpagar{background:rgba(210,153,34,.15);color:var(--orange);border:1px solid rgba(210,153,34,.3);font-size:.68rem;font-weight:600;padding:.1rem .4rem;border-radius:10px;display:inline-block}
-.doc-link{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--purple);margin-top:.25rem;text-decoration:none;padding:.15rem .4rem;border:1px solid rgba(188,140,255,.3);border-radius:4px;transition:all .15s}
-.doc-link:hover{background:rgba(188,140,255,.1)}
-/* ─── SUPERMERCADOS ──────────────────────────────── */
-.supermercado-box{background:rgba(63,185,80,.06);border:1px solid rgba(63,185,80,.25);border-radius:var(--radius);padding:.9rem 1.1rem;margin-top:.75rem}
-.supermercado-box h5{color:var(--green);font-size:.82rem;font-weight:600;margin-bottom:.5rem}
-.supermercado-box ul{list-style:none;padding:0}
-.supermercado-box li{font-size:.8rem;color:var(--text2);padding:.2rem 0;display:flex;align-items:start;gap:.5rem;line-height:1.4}
-.supermercado-box li::before{content:"🛒";flex-shrink:0}
-/* ─── CHECKLIST ──────────────────────────────────── */
-.check-item{display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;border-bottom:1px solid var(--border);transition:background .15s}
-.check-item:last-child{border-bottom:none}
-.check-item:hover{background:rgba(88,166,255,.03)}
-.check-item input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--green)}
-.check-item label{flex:1;font-size:.88rem;cursor:pointer;line-height:1.4}
-.check-item label.done{text-decoration:line-through;color:var(--text3)}
-/* ─── PESQUISA GLOBAL ────────────────────────────── */
-#global-search-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:flex-start;justify-content:center;padding:5rem 1rem;backdrop-filter:blur(6px)}
-#global-search-overlay.open{display:flex}
-.global-search-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius2);width:100%;max-width:620px;box-shadow:var(--shadow)}
-.global-search-input{width:100%;padding:1rem 1.25rem;background:transparent;border:none;color:var(--text);font-size:1rem;font-family:var(--font)}
-.global-search-input:focus{outline:none}
-.global-search-results{border-top:1px solid var(--border);max-height:380px;overflow-y:auto}
-.gs-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.1rem;cursor:pointer;transition:background .1s}
-.gs-item:hover,.gs-item.gs-active{background:rgba(88,166,255,.08)}
-.gs-type{font-size:.72rem;color:var(--text3);width:60px;flex-shrink:0}
-.gs-text{font-size:.88rem;flex:1}
-.gs-hint{font-size:.75rem;color:var(--text3)}
-
 /* ─── RESPONSIVE ─────────────────────────────────── */
 @media(max-width:768px){
   .sidebar{display:none}
@@ -434,15 +403,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 </style>
 </head>
 <body>
-
-<!-- PESQUISA GLOBAL Ctrl+K -->
-<div id="global-search-overlay" onclick="if(event.target===this)closeGlobalSearch()">
-  <div class="global-search-box">
-    <input class="global-search-input" id="gs-input" placeholder="🔍  Pesquisa global... (Esc para fechar)"
-      oninput="updateGlobalSearch()" onkeydown="handleGsKey(event)" autocomplete="off">
-    <div class="global-search-results" id="gs-results"></div>
-  </div>
-</div>
 
 <!-- LOGIN -->
 <div id="login-screen">
@@ -466,7 +426,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     </div>
     <div class="header-meta">
       <div class="sync-badge">☁ Sincronizado</div>
-      <button class="btn-secondary" style="font-size:.8rem;padding:.35rem .75rem" onclick="openGlobalSearch()" title="Ctrl+K">🔍 Pesquisar</button>
       <button class="btn-new" onclick="openModal('modal-nova-viagem')">+ Nova viagem</button>
       <div class="user-info" onclick="signOut()">
         <img class="user-avatar" id="user-avatar" src="" alt="">
@@ -492,7 +451,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
       <div class="nav-section">Memórias</div>
       <div class="nav-item" onclick="showTab('tab-memorias')"><span class="icon">📷</span> Fotos & Diário</div>
-      <div class="nav-item" onclick="showTab('tab-checklist')"><span class="icon">✅</span> O que levar</div>
       <div class="nav-item" onclick="showTab('tab-gastronomia')"><span class="icon">🍷</span> Gastronomia</div>
       <div class="nav-item" onclick="showTab('tab-pesquisa')"><span class="icon">🔍</span> Pesquisa</div>
     </nav>
@@ -519,16 +477,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
             </div>
             <div class="card-body" id="orcamento-resumo-painel"></div>
           </div>
-        </div>
-        <!-- Reservas resumo -->
-        <div class="card" style="margin-top:1rem">
-          <div class="card-header">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div class="card-title">🎫 Reservas · estado de pagamento</div>
-              <button class="btn-secondary" style="font-size:.78rem;padding:.3rem .7rem" onclick="showTab('tab-reservas')">Ver todas →</button>
-            </div>
-          </div>
-          <div class="card-body" id="reservas-resumo-painel"></div>
         </div>
       </div>
 
@@ -624,7 +572,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
             <button class="btn-new" onclick="openModal('modal-nova-reserva')">+ Nova reserva</button>
           </div>
         </div>
-        <div id="reservas-totais-bar" style="margin-bottom:1rem"></div>
         <div id="reservas-list"></div>
       </div>
 
@@ -654,24 +601,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         </div>
         <input type="file" id="photo-input" accept="image/*,video/*" multiple style="display:none" onchange="handlePhotoUpload(event)">
         <div id="memorias-content"></div>
-      </div>
-
-      <!-- ── CHECKLIST ── -->
-      <div id="tab-checklist" class="tab">
-        <div class="page-header">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div class="page-title">✅ O que levar</div>
-              <div class="page-sub">Checklist de viagem · Luxemburgo, Suíça & Itália 2026</div>
-            </div>
-            <div style="display:flex;gap:.5rem">
-              <button class="btn-secondary" onclick="resetChecklist()" style="font-size:.8rem">↺ Repor</button>
-              <button class="btn-new" onclick="openModal('modal-checklist-item')">+ Item</button>
-            </div>
-          </div>
-        </div>
-        <div id="checklist-progress" style="margin-bottom:1.25rem"></div>
-        <div id="checklist-content"></div>
       </div>
 
       <!-- ── GASTRONOMIA ── -->
@@ -797,11 +726,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Estado de pagamento</label>
-        <select class="form-select" id="nr-pago">
-          <option value="pago">✅ Pago</option>
-          <option value="porpagar">⏳ Por pagar</option>
-        </select>
+        <label class="form-label">Valor pago (€)</label>
+        <input class="form-input" type="number" id="nr-valor" placeholder="0.00">
       </div>
     </div>
     <div class="form-group">
@@ -810,36 +736,23 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Valor pago (€)</label>
-        <input class="form-input" type="number" id="nr-valor" placeholder="0.00" step="0.01">
-      </div>
-      <div class="form-group">
         <label class="form-label">Data</label>
         <input class="form-input" type="date" id="nr-data">
       </div>
-    </div>
-    <div class="form-row">
       <div class="form-group">
         <label class="form-label">Hora</label>
         <input class="form-input" type="time" id="nr-hora">
       </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
         <label class="form-label">Nº Reserva / Referência</label>
         <input class="form-input" id="nr-ref" placeholder="Ex: TP1234">
       </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Fornecedor / Empresa</label>
-      <input class="form-input" id="nr-fornecedor" placeholder="Ex: TAP Air Portugal">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Link da reserva (URL)</label>
-      <input class="form-input" type="url" id="nr-link" placeholder="https://...">
-    </div>
-    <div class="form-group">
-      <label class="form-label">📎 Upload bilhete / documento (opcional)</label>
-      <input type="file" id="nr-doc" accept=".pdf,image/*" class="form-input" style="padding:.45rem" onchange="previewDoc(this)">
-      <div id="nr-doc-preview" style="margin-top:.4rem;font-size:.78rem;color:var(--text3)"></div>
+      <div class="form-group">
+        <label class="form-label">Fornecedor / Empresa</label>
+        <input class="form-input" id="nr-fornecedor" placeholder="Ex: TAP Air Portugal">
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">Notas</label>
@@ -886,16 +799,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <input class="form-input" type="date" id="nd-data">
       </div>
       <div class="form-group">
-        <label class="form-label">Estado</label>
-        <select class="form-select" id="nd-estado">
-          <option value="confirmada">✅ Confirmada / Paga</option>
-          <option value="pendente">⏳ Pendente / Estimativa</option>
+        <label class="form-label">Viagem</label>
+        <select class="form-select" id="nd-viagem">
+          <option value="Luxemburgo, Suíça & Itália 2026">Luxemburgo, Suíça & Itália 2026</option>
         </select>
       </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Local associado</label>
-      <input class="form-input" id="nd-local" placeholder="Ex: Lauterbrunnen">
     </div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal('modal-nova-despesa')">Cancelar</button>
@@ -977,47 +885,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   </div>
 </div>
 
-<!-- Checklist item -->
-<div class="modal-overlay" id="modal-checklist-item">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">🎒 Adicionar item</div>
-      <button class="modal-close" onclick="closeModal('modal-checklist-item')">✕</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Item *</label>
-      <input class="form-input" id="ci-nome" placeholder="Ex: Passaporte">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Categoria</label>
-        <select class="form-select" id="ci-cat">
-          <option>👕 Roupa</option>
-          <option>👟 Calçado</option>
-          <option>🧴 Higiene</option>
-          <option>📄 Documentos</option>
-          <option>📱 Electrónica</option>
-          <option>💊 Medicamentos</option>
-          <option>🕶️ Acessórios</option>
-          <option>📦 Outro</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Quantidade</label>
-        <input class="form-input" type="number" id="ci-qtd" value="1" min="1">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notas</label>
-      <input class="form-input" id="ci-notas" placeholder="Opcional">
-    </div>
-    <div class="form-actions">
-      <button class="btn-secondary" onclick="closeModal('modal-checklist-item')">Cancelar</button>
-      <button class="btn-primary" onclick="adicionarChecklistItem()">✓ Adicionar</button>
-    </div>
-  </div>
-</div>
-
 <script>
 /* ═══════════════════════════════════════════════════
    FIREBASE CONFIG
@@ -1033,7 +900,13 @@ const firebaseConfig = {
 
 let db, auth, currentUser;
 let appData = {
-  viagens:[],reservas:[],despesas:[],diario:[],fotos:[],notas:[],paragens_extra:{},checklist:[]
+  viagens:[],
+  reservas:[],
+  despesas:[],
+  diario:[],
+  fotos:[],
+  notas:[],
+  paragens_extra:{}
 };
 let roteiroAtivo = 'dia2';
 
@@ -1108,39 +981,24 @@ function initDefaultData(){
     }
   ];
   appData.reservas = [
-    {id:'r1',tipo:'✈',desc:'TAP Lisboa → Genebra (TP531)',data:'2026-05-26',hora:'06:15',ref:'TP531LIS',fornecedor:'TAP Air Portugal',valor:420,pago:'pago',notas:'Check-in online 24h antes',doc:null,link:''},
-    {id:'r2',tipo:'✈',desc:'Luxemburgo → Lisboa (TP538)',data:'2026-05-30',hora:'21:40',ref:'TP538LUX',fornecedor:'TAP Air Portugal',valor:380,pago:'pago',notas:'',doc:null,link:''},
-    {id:'r3',tipo:'🚗',desc:'Hertz · Geneva Airport',data:'2026-05-26',hora:'09:00',ref:'HERTZ2026',fornecedor:'Hertz',valor:285,pago:'pago',notas:'Classe C ou superior · Devolver Luxemburgo',doc:null,link:''},
-    {id:'r4',tipo:'🏨',desc:'Mooshof Buchsi Apartments · Münchenbuchsee (2 noites)',data:'2026-05-26',hora:'14:00',ref:'BUCHSI26',fornecedor:'Mooshof',valor:210,pago:'pago',notas:'Moosgasse 39 · Check-in 14h',doc:null,link:''},
-    {id:'r5',tipo:'🏨',desc:'Krattigstrasse 35 · Spiez (1 noite)',data:'2026-05-27',hora:'22:00',ref:'SPIEZ26',fornecedor:'Airbnb',valor:145,pago:'pago',notas:'Vista para Lago de Thun',doc:null,link:''},
-    {id:'r6',tipo:'🏨',desc:'Hotel Blue Relais Maggiore · Castelletto (1 noite)',data:'2026-05-28',hora:'20:30',ref:'BLUERELAIS26',fornecedor:'Hotel',valor:185,pago:'pago',notas:'Via Sempione 182 · Junto a Malpensa',doc:null,link:''},
-    {id:'r7',tipo:'🏨',desc:'Hotel Alpenrose beim Ballenberg · Brienz (1 noite)',data:'2026-05-29',hora:'21:45',ref:'ALPENROSE26',fornecedor:'Hotel Alpenrose',valor:165,pago:'porpagar',notas:'Dorfstrasse 60 · Hofstetten b. Brienz',doc:null,link:''}
+    {id:'r1',tipo:'✈',desc:'TAP Lisboa → Genebra (TP531)',data:'2026-05-26',hora:'06:15',ref:'TP531LIS',fornecedor:'TAP Air Portugal',valor:420,notas:'Check-in online 24h antes'},
+    {id:'r2',tipo:'✈',desc:'Luxemburgo → Lisboa (TP538)',data:'2026-05-30',hora:'21:40',ref:'TP538LUX',fornecedor:'TAP Air Portugal',valor:380,notas:''},
+    {id:'r3',tipo:'🚗',desc:'Hertz · Geneva Airport',data:'2026-05-26',hora:'09:00',ref:'HERTZ2026',fornecedor:'Hertz',valor:285,notas:'Classe C ou superior · Devolver Luxemburgo'},
+    {id:'r4',tipo:'🏨',desc:'Mooshof Buchsi Apartments · Münchenbuchsee (2 noites)',data:'2026-05-26',hora:'14:00',ref:'BUCHSI26',fornecedor:'Mooshof',valor:210,notas:'Moosgasse 39 · Check-in 14h'},
+    {id:'r5',tipo:'🏨',desc:'Krattigstrasse 35 · Spiez (1 noite)',data:'2026-05-27',hora:'22:00',ref:'SPIEZ26',fornecedor:'Airbnb',valor:145,notas:'Vista para Lago de Thun'},
+    {id:'r6',tipo:'🏨',desc:'Hotel Blue Relais Maggiore · Castelletto (1 noite)',data:'2026-05-28',hora:'20:30',ref:'BLUERELAIS26',fornecedor:'Hotel',valor:185,notas:'Via Sempione 182 · Junto a Malpensa'},
+    {id:'r7',tipo:'🏨',desc:'Hotel Alpenrose beim Ballenberg · Brienz (1 noite)',data:'2026-05-29',hora:'21:45',ref:'ALPENROSE26',fornecedor:'Hotel Alpenrose',valor:165,notas:'Dorfstrasse 60 · Hofstetten b. Brienz'}
   ];
   appData.despesas = [
-    {id:'d1',desc:'Combustível A6 Berna→Thun',cat:'Transporte',valor:28,data:'2026-05-27',estado:'confirmada'},
-    {id:'d2',desc:'Bilhetes Trümmelbach Falls (x2)',cat:'Actividades',valor:44,data:'2026-05-27',estado:'confirmada'},
-    {id:'d3',desc:'Almoço Lauterbrunnen',cat:'Alimentação',valor:62,data:'2026-05-27',estado:'confirmada'},
-    {id:'d4',desc:'Parking Thun (2h)',cat:'Transporte',valor:8,data:'2026-05-27',estado:'confirmada'}
+    {id:'d1',desc:'Combustível A6 Berna→Thun',cat:'Transporte',valor:28,data:'2026-05-27'},
+    {id:'d2',desc:'Bilhetes Trümmelbach Falls (x2)',cat:'Actividades',valor:44,data:'2026-05-27'},
+    {id:'d3',desc:'Almoço Lauterbrunnen',cat:'Alimentação',valor:62,data:'2026-05-27'},
+    {id:'d4',desc:'Parking Thun (2h)',cat:'Transporte',valor:8,data:'2026-05-27'}
   ];
-  appData.diario=[];appData.fotos=[];appData.notas=[];appData.paragens_extra={};
-  appData.checklist = [
-    {id:'c1',nome:'Passaportes (validade +6 meses)',cat:'📄 Documentos',feito:false,qtd:2},
-    {id:'c2',nome:'Seguro de viagem impresso',cat:'📄 Documentos',feito:false,qtd:1},
-    {id:'c3',nome:'Carta de condução internacional',cat:'📄 Documentos',feito:false,qtd:1},
-    {id:'c4',nome:'Confirmação reserva Hertz',cat:'📄 Documentos',feito:false,qtd:1},
-    {id:'c5',nome:'Confirmações hotéis impressas',cat:'📄 Documentos',feito:false,qtd:4},
-    {id:'c6',nome:'Cartões bancários + dinheiro em CHF',cat:'📄 Documentos',feito:false,qtd:1},
-    {id:'c7',nome:'Calças impermeáveis / softshell',cat:'👕 Roupa',feito:false,qtd:1},
-    {id:'c8',nome:'Casaco quente (goretex ou similar)',cat:'👕 Roupa',feito:false,qtd:1},
-    {id:'c9',nome:'Roupa interior térmica',cat:'👕 Roupa',feito:false,qtd:2},
-    {id:'c10',nome:'Luvas e gorro (Gornergrat 0°C)',cat:'🕶️ Acessórios',feito:false,qtd:1},
-    {id:'c11',nome:'Botas de caminhada impermeáveis',cat:'👟 Calçado',feito:false,qtd:1},
-    {id:'c12',nome:'Protetor solar SPF50+',cat:'🧴 Higiene',feito:false,qtd:1},
-    {id:'c13',nome:'Carregador universal + adaptador',cat:'📱 Electrónica',feito:false,qtd:1},
-    {id:'c14',nome:'Power bank carregado',cat:'📱 Electrónica',feito:false,qtd:1},
-    {id:'c15',nome:'Medicamentos básicos (paracetamol, ibuprofeno)',cat:'💊 Medicamentos',feito:false,qtd:1},
-    {id:'c16',nome:'Impermeável leve (para cataratas)',cat:'🕶️ Acessórios',feito:false,qtd:2}
-  ];
+  appData.diario = [];
+  appData.fotos = [];
+  appData.notas = [];
+  appData.paragens_extra = {};
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1178,11 +1036,6 @@ const ROTEIROS = {
       ]}
     ],
     refeicoes:{almoco:"Restaurant Silberhorn — €17-44/p | Café Oberland (estação) — €16/p | Restaurant zum Schützen (Thun) — €20-25/p",jantar:"Harder Kulm Restaurant — €60/p | Restaurant Schuh (Hoheweg 56) — €31-44/p | Rügenbrau Brauerei (económico) — €27-35/p"},
-    supermercados:[
-      "Coop Thun Centro (Hauptgasse 46) — aberto 7h-20h · Piquenique: croissants, queijo gruyère, presunto, fruta → ~€8-10/p",
-      "Migros Interlaken (Rugenparkstrasse) — aberto 8h-20h · Sanduíches prontas, iogurtes, bebidas → ~€7-9/p",
-      "Coop Lauterbrunnen (junto à estação) — snacks, chocolates Lindt, bebidas quentes → ~€5-8/p"
-    ],
     alertas:["Trümmelbach Falls — confirmar abertura em truemmelbachfaelle.ch","⚠️ Teleférico First — verificar último horário em firstflyer.ch","Teleférico Stechelberg→Mürren — schilthornbahn.ch","Harder Kulm — último funicular ~21h00; reservar mesa em hardergipfel.ch","ThunerseeSCHLÖSSER-Card — acesso combinado 3 castelos com desconto"],
     tempo:[
       {local:"Münchenbuchsee/Berna (07h)",min:"~10°C",max:"~20°C",cond:"Sol com nuvens matinal",equip:"Casaco leve"},
@@ -1218,11 +1071,6 @@ const ROTEIROS = {
       ]}
     ],
     refeicoes:{almoco:"Grampi's Bar (Bahnhofstrasse, Zermatt) — €27-38/p | Coop Supermarket Zermatt — €16/p | Brown Cow Pub — €20/p",jantar:"Grottino Ticinese (Locarno) — €29-38/p | Grotto Broggini (Losone) — €38-46/p | Ristorante Fiorentina — €24-29/p"},
-    supermercados:[
-      "Coop Zermatt (Bahnhofstrasse) — aberto 8h-19h · Sanduíches, queijo raclette embalado, frutos secos, Toblerone → ~€10-14/p",
-      "Migros Visp (na rota de regresso, A9) — aberto até 20h · Abastecimento geral → ~€8-12/p",
-      "Spar Kandersteg (junto à estação) — snacks para o teleférico, bebidas quentes → ~€5-8/p"
-    ],
     alertas:["⚠️ Teleférico Oeschinen — chegar antes das 08h00 ao sábado. oeschinensee.ch","Gornergrat Railway — reservar em gornergrat.ch","Matterhorn Glacier Paradise fecha às 15h30","⚠️ Locarno/Ascona: 64% prob. precipitação — verificar meteoswiss.admin.ch","Zermatt ZONA LIVRE DE CARROS — estacionar em Täsch (multa elevada se entrar de carro)"],
     tempo:[
       {local:"Spiez/Kandersteg (07h)",min:"~-1°C",max:"~9°C",cond:"Variável — nuvens, possível chuva",equip:"Casaco + botas impermeáveis"},
@@ -1258,11 +1106,6 @@ const ROTEIROS = {
       ]}
     ],
     refeicoes:{almoco:"Ristorante Bilacus (Bellagio) — €17-22/p | Osteria Quatro Pass (Varenna) — €20-25/p | Salumeria/piquenique — €12/p",jantar:"Grottino Ticinese (Locarno) — €29-38/p | Grotto Broggini (Losone) — €38-46/p | La Tinera (Lugano) — €27-33/p"},
-    supermercados:[
-      "Esselunga Como (Via Bellinzona) — aberto 8h-21h · Focaccia, mozzarella, prosciutto, vinho local → ~€8-12/p",
-      "Conad Varenna (centro) — pequena loja local · Pão, queijo, fruta, água → ~€6-9/p",
-      "Migros Lugano (Via Soave) — aberto 8h-19h · Snacks suíços, bebidas, chocolates → ~€7-10/p"
-    ],
     alertas:["⚠️ Villa del Balbianello — encerrada Seg e Qua! Reservar bilhetes online.","Villa Olmo — jardins encerrados à segunda-feira","Balsa Bellagio→Varenna — verificar em navigazionelaghi.it","⚠️ SS340/SP583 Lago de Como — estrada estreita e sinuosa, atenção nos túneis","Grotto no Ticino — confirmar abertura e reservar com antecedência"],
     tempo:[
       {local:"Castelletto→Como (08h)",min:"~13°C",max:"~23°C",cond:"Sol com nuvens, ameno",equip:"Roupa leve, óculos de sol"},
@@ -1301,11 +1144,6 @@ const ROTEIROS = {
       ]}
     ],
     refeicoes:{almoco:"Da Ernesto (Rathausquai 11, Lucerna) — €46/p | Wirtshaus Taube — €33-38/p | Tibits Estação (vegetariano) — €22/p",jantar:"La Soi (Colmar, tarte flambée) — €12/p | La Stub (Petite Venise) — €15-22/p | Bistrot Gourmand — €20/p"},
-    supermercados:[
-      "Migros Luzern (Bahnhofstrasse) — aberto 8h-20h · Snacks, queijo emmental, amendoins, sumos → ~€7-10/p",
-      "Aldi Colmar (Rue de la Forêt-Noire) — aberto até 20h Sábado · Tarte flambée congelada, Riesling, fromage blanc → ~€9-13/p",
-      "Lidl Freiburg im Breisgau (rota A35) — reabastecimento barato na fronteira · Queijo, presunto, bebidas → ~€6-8/p"
-    ],
     alertas:["Pilatus cremalheira — reservar online em pilatus.ch (esgota em época alta)","Rigi vs Pilatus no mesmo dia — se tempo limitado, escolher só Pilatus","Barco Vitznau→Lucerna — verificar horários em lakelucerne.ch","La Soi (Colmar) — reservar com antecedência para sábado à noite","⚠️ Brünigstrasse (07h) — piso húmido ao amanhecer; reduzir velocidade"],
     tempo:[
       {local:"Brienz/Brünig (07h)",min:"~8°C",max:"~16°C",cond:"Nuvens com aberturas de sol",equip:"Casaco leve"},
@@ -1377,7 +1215,6 @@ function renderAll(){
   renderReservas();
   renderOrcamento();
   renderMemorias();
-  renderChecklist();
   renderGastronomia();
 }
 
@@ -1400,17 +1237,15 @@ function renderPainel(){
       <div class="countdown-viagem" style="color:var(--green)">Viagem a decorrer ou concluída!</div>
     </div>`;
   }
-  // Stats — só despesas confirmadas
-  const totalGasto = appData.despesas.filter(d=>d.estado==='confirmada'||!d.estado).reduce((a,b)=>a+(b.valor||0),0);
-  const totalPago = appData.reservas.filter(r=>r.pago==='pago').reduce((a,b)=>a+(b.valor||0),0);
-  const totalPorPagar = appData.reservas.filter(r=>r.pago==='porpagar').reduce((a,b)=>a+(b.valor||0),0);
+  // Stats
+  const totalGasto = appData.despesas.reduce((a,b)=>a+(b.valor||0),0);
   document.getElementById('stats-row').innerHTML=`
     <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${appData.viagens.length}</div><div class="stat-label">Viagens</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--green)">${appData.reservas.length}</div><div class="stat-label">Reservas</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--green)">€${totalPago.toFixed(0)}</div><div class="stat-label">Reservas pagas</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--orange)">€${totalPorPagar.toFixed(0)}</div><div class="stat-label">Por pagar</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--red)">€${totalGasto.toFixed(0)}</div><div class="stat-label">Despesas conf.</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--orange)">${appData.despesas.length}</div><div class="stat-label">Despesas</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--purple)">4</div><div class="stat-label">Países</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red)">€${totalGasto.toFixed(0)}</div><div class="stat-label">Gasto total</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--teal)">5</div><div class="stat-label">Dias de viagem</div></div>
   `;
   // Próximas
   document.getElementById('proximas-viagens').innerHTML = appData.viagens.map(v=>`
@@ -1426,19 +1261,20 @@ function renderPainel(){
   // Orçamento resumo
   const orcTotal = appData.viagens.reduce((a,b)=>a+(b.orcamento||0),0);
   const catMap = {};
-  appData.despesas.filter(d=>d.estado==='confirmada'||!d.estado).forEach(d=>{ catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0); });
+  appData.despesas.forEach(d=>{ catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0); });
+  const cats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
   const catColors = {Alojamento:'#58a6ff',Transporte:'#3fb950',Alimentação:'#d29922',Actividades:'#bc8cff',Compras:'#f85149',Outro:'#8b949e'};
   document.getElementById('orcamento-resumo-painel').innerHTML=`
-    <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
+    <div style="display:flex;justify-content:space-between;margin-bottom:.75rem">
       <span style="color:var(--text2);font-size:.85rem">Orçamento total</span>
       <span style="font-weight:600">€${orcTotal.toLocaleString()}</span>
     </div>
     <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
-      <span style="color:var(--text2);font-size:.85rem">Gasto confirmado</span>
+      <span style="color:var(--text2);font-size:.85rem">Gasto registado</span>
       <span style="font-weight:600;color:var(--orange)">€${totalGasto.toFixed(2)}</span>
     </div>
     <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,(totalGasto/orcTotal)*100||0)}%;background:var(--accent)"></div></div>
-    ${Object.entries(catMap).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>`
+    ${cats.map(([cat,val])=>`
       <div style="display:flex;justify-content:space-between;font-size:.82rem;margin:.35rem 0">
         <span style="color:var(--text2);display:flex;align-items:center;gap:.4rem"><span style="width:8px;height:8px;border-radius:50%;background:${catColors[cat]||'#888'};display:inline-block"></span>${cat}</span>
         <span>€${val.toFixed(2)}</span>
@@ -1446,23 +1282,8 @@ function renderPainel(){
     `).join('')||'<div style="font-size:.82rem;color:var(--text3);text-align:center;padding:.5rem">Sem despesas registadas</div>'}
     <div class="divider"></div>
     <div style="font-size:.8rem;color:var(--text3)">
-      💡 Estimativas: Dia 2: €159–335 · Dia 3: €145–288 · Dia 4: €75–130 · Dia 5: €108–211 /p
+      💡 Custo estimado Dia 2: €159–335/p · Dia 3: €145–288/p · Dia 4: €75–130/p · Dia 5: €108–211/p
     </div>
-  `;
-  // Resumo reservas no painel
-  const rPagas = appData.reservas.filter(r=>r.pago==='pago');
-  const rPP = appData.reservas.filter(r=>r.pago==='porpagar');
-  const elRP = document.getElementById('reservas-resumo-painel');
-  if(elRP) elRP.innerHTML=`
-    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem">
-      <div><div style="font-size:1.4rem;font-weight:700;color:var(--green)">€${totalPago.toFixed(2)}</div><div style="font-size:.75rem;color:var(--text3)">Total pago (${rPagas.length} reservas)</div></div>
-      <div><div style="font-size:1.4rem;font-weight:700;color:var(--orange)">€${totalPorPagar.toFixed(2)}</div><div style="font-size:.75rem;color:var(--text3)">Por pagar (${rPP.length} reservas)</div></div>
-      <div><div style="font-size:1.4rem;font-weight:700;color:var(--accent)">€${(totalPago+totalPorPagar).toFixed(2)}</div><div style="font-size:.75rem;color:var(--text3)">Total reservas</div></div>
-    </div>
-    ${rPP.length ? `<div style="font-size:.82rem;color:var(--orange);margin-bottom:.5rem">⏳ Reservas por pagar:</div>
-    ${rPP.map(r=>`<div style="display:flex;justify-content:space-between;font-size:.82rem;padding:.3rem 0;border-bottom:1px solid var(--border)">
-      <span>${r.tipo} ${r.desc}</span><span style="font-weight:600">€${(r.valor||0).toFixed(2)}</span>
-    </div>`).join('')}` : '<div style="font-size:.85rem;color:var(--green)">✅ Todas as reservas pagas!</div>'}
   `;
 }
 
@@ -1564,7 +1385,7 @@ function renderRoteiroContent(){
     </div>
   </div>`;
 
-  // Refeições + supermercados
+  // Refeições
   html+=`<div class="card" style="margin-top:1rem">
     <div class="card-header"><div class="card-title">🍽️ Sugestões de refeições</div></div>
     <div class="card-body">
@@ -1572,10 +1393,6 @@ function renderRoteiroContent(){
         <div class="refeicao-card"><h5>🥗 Almoço</h5><p>${r.refeicoes.almoco}</p></div>
         <div class="refeicao-card"><h5>🥂 Jantar</h5><p>${r.refeicoes.jantar}</p></div>
       </div>
-      ${r.supermercados ? `<div class="supermercado-box">
-        <h5>🏪 Alternativas económicas em supermercado · ~€6-14/pessoa</h5>
-        <ul>${r.supermercados.map(s=>`<li>${s}</li>`).join('')}</ul>
-      </div>` : ''}
     </div>
   </div>`;
 
@@ -1600,28 +1417,12 @@ function toggleSeccao(el){
 }
 
 function renderReservas(){
-  const totalPago = appData.reservas.filter(r=>r.pago==='pago').reduce((a,b)=>a+(b.valor||0),0);
-  const totalPP = appData.reservas.filter(r=>r.pago==='porpagar').reduce((a,b)=>a+(b.valor||0),0);
-  const elBar = document.getElementById('reservas-totais-bar');
-  if(elBar) elBar.innerHTML=`
-    <div style="display:flex;gap:1rem;flex-wrap:wrap">
-      <div class="stat-card" style="flex:1;min-width:120px;padding:.85rem;margin:0">
-        <div class="stat-num" style="font-size:1.4rem;color:var(--green)">€${totalPago.toFixed(2)}</div>
-        <div class="stat-label">✅ Total pago</div>
-      </div>
-      <div class="stat-card" style="flex:1;min-width:120px;padding:.85rem;margin:0">
-        <div class="stat-num" style="font-size:1.4rem;color:var(--orange)">€${totalPP.toFixed(2)}</div>
-        <div class="stat-label">⏳ Por pagar</div>
-      </div>
-      <div class="stat-card" style="flex:1;min-width:120px;padding:.85rem;margin:0">
-        <div class="stat-num" style="font-size:1.4rem;color:var(--accent)">€${(totalPago+totalPP).toFixed(2)}</div>
-        <div class="stat-label">Total reservas</div>
-      </div>
-    </div>`;
   const tipos = ['✈','🏨','🚗','🎟','⛴','🚂','📄'];
   const grupos = {};
   tipos.forEach(t=>{ grupos[t]=[]; });
+  grupos['📄']=[];
   appData.reservas.forEach(r=>{ (grupos[r.tipo]||(grupos['📄'])).push(r); });
+
   let html='';
   Object.entries(grupos).forEach(([tipo,lista])=>{
     if(!lista.length) return;
@@ -1632,16 +1433,14 @@ function renderReservas(){
         ${lista.map(r=>`<div class="reserva-item">
           <div class="reserva-icon">${r.tipo}</div>
           <div class="reserva-info">
-            <div class="reserva-nome">${r.desc} <span class="${r.pago==='pago'?'badge-pago':'badge-porpagar'}">${r.pago==='pago'?'✅ Pago':'⏳ Por pagar'}</span></div>
-            <div class="reserva-det">${r.data||''} ${r.hora?'· '+r.hora:''} ${r.fornecedor?'· '+r.fornecedor:''}</div>
+            <div class="reserva-nome">${r.desc}</div>
+            <div class="reserva-det">${r.data||''} ${r.hora||''} · ${r.fornecedor||''}</div>
             ${r.ref?`<div class="reserva-ref">Ref: ${r.ref}</div>`:''}
             ${r.notas?`<div style="font-size:.75rem;color:var(--text3);margin-top:.2rem">${r.notas}</div>`:''}
-            ${r.link?`<a href="${r.link}" target="_blank" class="doc-link">🔗 Ver reserva online</a>`:''}
-            ${r.doc?`<a href="${r.doc}" download="bilhete_${r.id}" class="doc-link">📎 Descarregar documento</a>`:''}
           </div>
-          <div style="text-align:right;flex-shrink:0">
+          <div style="text-align:right">
             <div class="reserva-valor">${r.valor?'€'+r.valor.toFixed(2):''}</div>
-            <button onclick="eliminarReserva('${r.id}')" class="btn-danger" style="font-size:.72rem;padding:.2rem .5rem;margin-top:.3rem">🗑</button>
+            <button onclick="eliminarReserva('${r.id}')" class="btn-danger" style="font-size:.72rem;padding:.15rem .4rem;margin-top:.3rem">🗑</button>
           </div>
         </div>`).join('')}
       </div>
@@ -1652,11 +1451,7 @@ function renderReservas(){
 
 function renderOrcamento(){
   const totalOrc = appData.viagens.reduce((a,b)=>a+(b.orcamento||0),0);
-  const confirmadas = appData.despesas.filter(d=>d.estado==='confirmada'||!d.estado);
-  const pendentes = appData.despesas.filter(d=>d.estado==='pendente');
-  const totalConf = confirmadas.reduce((a,b)=>a+(b.valor||0),0);
-  const totalPend = pendentes.reduce((a,b)=>a+(b.valor||0),0);
-  const totalGasto = totalConf;
+  const totalGasto = appData.despesas.reduce((a,b)=>a+(b.valor||0),0);
   const catColors = {Alojamento:'#58a6ff',Transporte:'#3fb950',Alimentação:'#d29922',Actividades:'#bc8cff',Compras:'#f85149',Outro:'#8b949e'};
   const catMap = {};
   appData.despesas.forEach(d=>{ catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0); });
@@ -1664,9 +1459,8 @@ function renderOrcamento(){
   let html=`
     <div class="stats-row" style="margin-bottom:1.5rem">
       <div class="stat-card"><div class="stat-num" style="color:var(--accent)">€${totalOrc.toLocaleString()}</div><div class="stat-label">Orçamento total</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--orange)">€${totalConf.toFixed(0)}</div><div class="stat-label">Confirmado / Pago</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--text3)">€${totalPend.toFixed(0)}</div><div class="stat-label">Pendente / Estimativa</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--green)">€${(totalOrc-totalConf).toFixed(0)}</div><div class="stat-label">Disponível</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--orange)">€${totalGasto.toFixed(0)}</div><div class="stat-label">Gasto registado</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">€${(totalOrc-totalGasto).toFixed(0)}</div><div class="stat-label">Disponível</div></div>
     </div>
     <div class="grid-2">
       <div class="card">
@@ -1696,7 +1490,7 @@ function renderOrcamento(){
               <div class="cat-dot" style="background:${catColors[d.cat]||'#888'}"></div>
               <div class="despesa-info">
                 <div class="despesa-nome">${d.desc}</div>
-                <div class="despesa-cat">${d.cat} · ${d.data||''} · <span style="color:${d.estado==='pendente'?'var(--text3)':'var(--green)'}">${d.estado==='pendente'?'Estimativa':'✓ Pago'}</span></div>
+                <div class="despesa-cat">${d.cat} · ${d.data||''}</div>
               </div>
               <div style="display:flex;align-items:center;gap:.4rem">
                 <div class="despesa-valor" style="color:var(--orange)">€${(d.valor||0).toFixed(2)}</div>
@@ -1794,7 +1588,7 @@ function showTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const map = {'tab-painel':0,'tab-destinos':1,'tab-mapa':2,'tab-roteiro':3,'tab-reservas':4,'tab-orcamento':5,'tab-memorias':6,'tab-checklist':7,'tab-gastronomia':8,'tab-pesquisa':9};
+  const map = {'tab-painel':0,'tab-destinos':1,'tab-mapa':2,'tab-roteiro':3,'tab-reservas':4,'tab-orcamento':5,'tab-memorias':6,'tab-gastronomia':7,'tab-pesquisa':8};
   const items = document.querySelectorAll('.nav-item');
   if(items[map[id]]) items[map[id]].classList.add('active');
 }
@@ -1827,40 +1621,23 @@ function criarViagem(){
 function guardarReserva(){
   const desc = document.getElementById('nr-desc').value.trim();
   if(!desc){ alert('Preencha a descrição.'); return; }
-  const base = {
+  const r = {
     id:genId(), tipo:document.getElementById('nr-tipo').value, desc,
     data:document.getElementById('nr-data').value, hora:document.getElementById('nr-hora').value,
     ref:document.getElementById('nr-ref').value, fornecedor:document.getElementById('nr-fornecedor').value,
     valor:parseFloat(document.getElementById('nr-valor').value)||0,
-    pago:document.getElementById('nr-pago').value,
-    link:document.getElementById('nr-link').value||'',
-    notas:document.getElementById('nr-notas').value,
-    doc:null
+    notas:document.getElementById('nr-notas').value
   };
-  const docFile = document.getElementById('nr-doc').files[0];
-  if(docFile){
-    const reader = new FileReader();
-    reader.onload = ev=>{
-      base.doc = ev.target.result;
-      appData.reservas.push(base);
-      saveFirestoreData(); closeModal('modal-nova-reserva'); renderReservas(); renderPainel();
-    };
-    reader.readAsDataURL(docFile);
-  } else {
-    appData.reservas.push(base);
-    saveFirestoreData(); closeModal('modal-nova-reserva'); renderReservas(); renderPainel();
-  }
-}
-
-function previewDoc(input){
-  const f = input.files[0];
-  document.getElementById('nr-doc-preview').textContent = f ? `📎 ${f.name} (${(f.size/1024).toFixed(0)} KB)` : '';
+  appData.reservas.push(r);
+  saveFirestoreData();
+  closeModal('modal-nova-reserva');
+  renderReservas();
 }
 
 function eliminarReserva(id){
   if(!confirm('Eliminar esta reserva?')) return;
   appData.reservas = appData.reservas.filter(r=>r.id!==id);
-  saveFirestoreData(); renderReservas(); renderPainel();
+  saveFirestoreData(); renderReservas();
 }
 
 function guardarDespesa(){
@@ -1869,8 +1646,7 @@ function guardarDespesa(){
   const d = {
     id:genId(), desc, cat:document.getElementById('nd-cat').value,
     valor:parseFloat(document.getElementById('nd-valor').value)||0,
-    data:document.getElementById('nd-data').value,
-    estado:document.getElementById('nd-estado').value||'confirmada'
+    data:document.getElementById('nd-data').value
   };
   appData.despesas.push(d);
   saveFirestoreData();
@@ -1942,119 +1718,6 @@ function exportRoteiro(){
 
 function toggleDark(){
   document.body.classList.toggle('light-mode');
-}
-
-/* ─── CHECKLIST ──────────────────────────────────── */
-function renderChecklist(){
-  const items = appData.checklist||[];
-  const feitos = items.filter(i=>i.feito).length;
-  const pct = items.length ? Math.round((feitos/items.length)*100) : 0;
-  const elProg = document.getElementById('checklist-progress');
-  if(elProg) elProg.innerHTML=`
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1rem">
-      <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
-        <span style="font-weight:600">${feitos} / ${items.length} itens prontos</span>
-        <span style="color:var(--accent);font-weight:700">${pct}%</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--green)"></div></div>
-    </div>`;
-  const cats = {};
-  items.forEach(i=>{ (cats[i.cat]=cats[i.cat]||[]).push(i); });
-  let html = '';
-  Object.entries(cats).forEach(([cat,list])=>{
-    const n = list.filter(i=>i.feito).length;
-    html+=`<div class="card" style="margin-bottom:1rem">
-      <div class="card-header">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div class="card-title">${cat}</div>
-          <span style="font-size:.78rem;color:var(--text3)">${n}/${list.length}</span>
-        </div>
-      </div>
-      <div style="padding:0">
-        ${list.map(i=>`<div class="check-item">
-          <input type="checkbox" id="ck-${i.id}" ${i.feito?'checked':''} onchange="toggleCheck('${i.id}')">
-          <label for="ck-${i.id}" class="${i.feito?'done':''}">${i.nome}${i.qtd>1?` (x${i.qtd})`:''}</label>
-          ${i.notas?`<span style="font-size:.72rem;color:var(--text3)">${i.notas}</span>`:''}
-          <button onclick="eliminarCheck('${i.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem;padding:.2rem">✕</button>
-        </div>`).join('')}
-      </div>
-    </div>`;
-  });
-  const elCont = document.getElementById('checklist-content');
-  if(elCont) elCont.innerHTML = html||`<div class="empty-state"><div class="empty-icon">✅</div><div>Sem itens. Adicione o primeiro!</div></div>`;
-}
-
-function toggleCheck(id){
-  const item = appData.checklist.find(i=>i.id===id);
-  if(item){ item.feito=!item.feito; saveFirestoreData(); renderChecklist(); }
-}
-function eliminarCheck(id){
-  appData.checklist = appData.checklist.filter(i=>i.id!==id);
-  saveFirestoreData(); renderChecklist();
-}
-function resetChecklist(){
-  if(!confirm('Repor todos os itens como por fazer?')) return;
-  appData.checklist.forEach(i=>i.feito=false);
-  saveFirestoreData(); renderChecklist();
-}
-function adicionarChecklistItem(){
-  const nome = document.getElementById('ci-nome').value.trim();
-  if(!nome){ alert('Preencha o nome do item.'); return; }
-  appData.checklist.push({
-    id:genId(), nome,
-    cat:document.getElementById('ci-cat').value,
-    qtd:parseInt(document.getElementById('ci-qtd').value)||1,
-    notas:document.getElementById('ci-notas').value,
-    feito:false
-  });
-  saveFirestoreData(); closeModal('modal-checklist-item'); renderChecklist();
-}
-
-/* ─── PESQUISA GLOBAL Ctrl+K ─────────────────────── */
-function openGlobalSearch(){
-  document.getElementById('global-search-overlay').classList.add('open');
-  setTimeout(()=>document.getElementById('gs-input').focus(),50);
-}
-function closeGlobalSearch(){
-  document.getElementById('global-search-overlay').classList.remove('open');
-  document.getElementById('gs-input').value='';
-  document.getElementById('gs-results').innerHTML='';
-}
-document.addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==='k'){ e.preventDefault(); openGlobalSearch(); }
-  if(e.key==='Escape'&&document.getElementById('global-search-overlay').classList.contains('open')) closeGlobalSearch();
-});
-let gsIdx=-1;
-function handleGsKey(e){
-  const items=document.querySelectorAll('#gs-results .gs-item');
-  if(e.key==='ArrowDown'){ gsIdx=Math.min(gsIdx+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('gs-active',i===gsIdx)); e.preventDefault(); }
-  else if(e.key==='ArrowUp'){ gsIdx=Math.max(gsIdx-1,0); items.forEach((el,i)=>el.classList.toggle('gs-active',i===gsIdx)); e.preventDefault(); }
-  else if(e.key==='Enter'){ if(gsIdx>=0&&items[gsIdx]) items[gsIdx].click(); }
-  else if(e.key==='Escape') closeGlobalSearch();
-}
-window._gsActions=[];
-function updateGlobalSearch(){
-  const q=document.getElementById('gs-input').value.toLowerCase().trim();
-  gsIdx=-1;
-  if(!q){ document.getElementById('gs-results').innerHTML=''; return; }
-  const results=[];
-  appData.reservas.forEach(r=>{ if(r.desc.toLowerCase().includes(q)||r.fornecedor?.toLowerCase().includes(q)) results.push({tipo:'Reserva',texto:`${r.tipo} ${r.desc}`,hint:`€${r.valor||0} · ${r.pago==='pago'?'Pago':'Por pagar'}`,action:()=>{showTab('tab-reservas');closeGlobalSearch();}}); });
-  appData.despesas.forEach(d=>{ if(d.desc.toLowerCase().includes(q)||d.cat?.toLowerCase().includes(q)) results.push({tipo:'Despesa',texto:d.desc,hint:`€${d.valor||0} · ${d.cat}`,action:()=>{showTab('tab-orcamento');closeGlobalSearch();}}); });
-  appData.diario.forEach(d=>{ if(d.texto?.toLowerCase().includes(q)||d.local?.toLowerCase().includes(q)) results.push({tipo:'Diário',texto:`${d.local||'Diário'} — ${d.data||''}`,hint:(d.texto||'').slice(0,50),action:()=>{showTab('tab-memorias');closeGlobalSearch();}}); });
-  Object.entries(ROTEIROS).forEach(([k,r])=>{
-    if(r.titulo.toLowerCase().includes(q)||r.rota.toLowerCase().includes(q)) results.push({tipo:'Roteiro',texto:r.titulo,hint:r.date,action:()=>{setRoteiro(k);showTab('tab-roteiro');closeGlobalSearch();}});
-    r.seccoes.forEach(s=>s.paragens.forEach(p=>{ if(p.local.toLowerCase().includes(q)||p.desc?.toLowerCase().includes(q)) results.push({tipo:'Paragem',texto:p.local,hint:`${r.titulo} · ${p.hora||''}`,action:()=>{setRoteiro(k);showTab('tab-roteiro');closeGlobalSearch();}}); }));
-  });
-  (appData.checklist||[]).forEach(i=>{ if(i.nome.toLowerCase().includes(q)) results.push({tipo:'Checklist',texto:i.nome,hint:i.cat,action:()=>{showTab('tab-checklist');closeGlobalSearch();}}); });
-  window._gsActions=results.slice(0,10).map(r=>r.action);
-  const el=document.getElementById('gs-results');
-  el.innerHTML=results.slice(0,10).map((r,i)=>`
-    <div class="gs-item" onclick="window._gsActions[${i}]()">
-      <span class="gs-type">${r.tipo}</span>
-      <span class="gs-text">${r.texto}</span>
-      <span class="gs-hint">${r.hint||''}</span>
-    </div>
-  `).join('')||(q?`<div style="padding:1rem;text-align:center;color:var(--text3);font-size:.85rem">Sem resultados para "${q}"</div>`:'');
 }
 </script>
 </body>
