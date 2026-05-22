@@ -400,6 +400,150 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   .paragem{grid-template-columns:70px 1fr}
   .p-custo{display:none}
 }
+
+/* ─── MOBILE BOTTOM NAV ──────────────────────── */
+.mnav{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg2);border-top:1px solid var(--border);
+  z-index:200;padding:.25rem 0 .5rem;
+}
+@media(max-width:768px){ .mnav{display:flex} .content{padding-bottom:70px} }
+.mnav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:.1rem;padding:.35rem .25rem;cursor:pointer;font-size:.65rem;
+  color:var(--text3);background:none;border:none;transition:color .15s;
+}
+.mnav-item.active,.mnav-item:hover{color:var(--accent)}
+.mnav-item .mni{font-size:1.25rem;line-height:1}
+.mnav-more-panel{
+  display:none;position:fixed;bottom:58px;left:0;right:0;
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:1rem;z-index:199;flex-wrap:wrap;gap:.5rem;
+}
+.mnav-more-panel.open{display:flex}
+.mnav-more-btn{
+  display:flex;align-items:center;gap:.5rem;padding:.5rem .85rem;
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+  color:var(--text);font-size:.82rem;cursor:pointer;
+}
+
+/* ─── ALERTAS ────────────────────────────────── */
+.alerta-banner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.65rem 1rem;margin-bottom:.6rem;border-radius:var(--radius);
+  font-size:.85rem;border-left:3px solid;
+}
+.alerta-banner.urgente{background:rgba(248,81,73,.1);border-color:var(--red);color:var(--red)}
+.alerta-banner.aviso{background:rgba(210,153,34,.1);border-color:var(--orange);color:var(--orange)}
+.alerta-banner.info{background:rgba(88,166,255,.1);border-color:var(--accent);color:var(--accent)}
+.alerta-dismiss{background:none;border:none;color:inherit;cursor:pointer;font-size:.9rem;padding:0 .25rem}
+#alertas-container{margin-bottom:.5rem}
+
+/* ─── CHECKLIST ──────────────────────────────── */
+.checklist-item{
+  display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;
+  border-bottom:1px solid var(--border);transition:background .15s;
+}
+.checklist-item:hover{background:var(--bg3)}
+.checklist-item.done .ci-desc{text-decoration:line-through;color:var(--text3)}
+.ci-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border2);
+  background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem}
+.ci-check.checked{background:var(--green2);border-color:var(--green)}
+.ci-desc{flex:1;font-size:.88rem}
+.ci-cat{font-size:.72rem;padding:.1rem .4rem;border-radius:10px;background:var(--bg3);color:var(--text3)}
+.checklist-progress{
+  background:var(--bg3);border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:1rem;
+  display:flex;align-items:center;gap:1rem;
+}
+.ci-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem;opacity:.5}
+.ci-del:hover{opacity:1;color:var(--red)}
+
+/* ─── CONVERSOR CHF ──────────────────────────── */
+.conversor-widget{
+  display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+  padding:.6rem 1rem;margin-bottom:1rem;
+}
+.conv-field{display:flex;align-items:center;gap:.4rem;font-size:.85rem}
+.conv-field label{color:var(--text2);font-size:.78rem;font-weight:600;width:30px}
+.conv-field input{width:90px;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:6px;padding:.3rem .5rem;color:var(--text);font-size:.85rem}
+.conv-arrow{font-size:1.1rem;color:var(--text3)}
+.conv-rate{font-size:.72rem;color:var(--text3);white-space:nowrap}
+
+/* ─── TIMELINE ───────────────────────────────── */
+.timeline-wrap{
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1rem;margin-bottom:1rem;overflow-x:auto;
+}
+.timeline-bar{display:flex;height:36px;border-radius:6px;overflow:hidden;min-width:500px}
+.tl-block{
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;font-weight:600;color:#fff;overflow:hidden;
+  white-space:nowrap;padding:0 .25rem;cursor:default;position:relative;
+}
+.tl-block:hover .tl-tooltip{display:block}
+.tl-tooltip{
+  display:none;position:absolute;bottom:42px;left:50%;transform:translateX(-50%);
+  background:var(--bg2);border:1px solid var(--border);border-radius:6px;
+  padding:.4rem .6rem;font-size:.72rem;z-index:10;white-space:nowrap;
+}
+.tl-now{width:3px;background:var(--red);position:absolute;top:0;bottom:0}
+.timeline-now-label{font-size:.72rem;color:var(--red);margin-top:.25rem;text-align:center}
+
+/* ─── SEARCH OVERLAY ─────────────────────────── */
+.search-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:300;align-items:flex-start;justify-content:center;padding-top:80px;
+}
+.search-overlay.open{display:flex}
+.search-box{
+  width:100%;max-width:600px;background:var(--bg2);
+  border:1px solid var(--border2);border-radius:var(--radius2);overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.search-input-wrap{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+.search-input-wrap input{
+  flex:1;background:none;border:none;font-size:1rem;color:var(--text);outline:none;
+}
+.search-results{max-height:400px;overflow-y:auto}
+.sr-item{
+  display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;cursor:pointer;
+  transition:background .1s;border-bottom:1px solid var(--border);
+}
+.sr-item:hover,.sr-item.focused{background:var(--bg3)}
+.sr-type{font-size:.7rem;color:var(--text3);background:var(--bg3);padding:.1rem .35rem;border-radius:4px;flex-shrink:0}
+.sr-name{font-size:.88rem;flex:1}
+.sr-detail{font-size:.75rem;color:var(--text3)}
+.search-empty{padding:2rem;text-align:center;color:var(--text3);font-size:.88rem}
+.search-hint{padding:.5rem 1rem;font-size:.75rem;color:var(--text3);border-top:1px solid var(--border)}
+
+/* ─── PDF DROP ZONE ──────────────────────────── */
+.pdf-drop-zone{
+  border:2px dashed var(--border2);border-radius:var(--radius);
+  padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;
+  color:var(--text2);
+}
+.pdf-drop-zone:hover,.pdf-drop-zone.drag-over{border-color:var(--accent);background:rgba(88,166,255,.05)}
+.drop-icon{font-size:2rem;margin-bottom:.5rem}
+.pdf-extracting{
+  display:flex;align-items:center;gap:.75rem;padding:1rem;
+  background:rgba(88,166,255,.08);border-radius:var(--radius);
+  margin-top:.75rem;font-size:.88rem;color:var(--accent);
+}
+
+/* ─── DONUT CHART ────────────────────────────── */
+.donut-wrap{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.donut-legend{display:flex;flex-direction:column;gap:.4rem;flex:1}
+.donut-leg-item{display:flex;align-items:center;gap:.5rem;font-size:.82rem}
+.donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ─── DIVISÃO POR PESSOA ─────────────────────── */
+.split-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.split-table th{text-align:left;padding:.5rem .75rem;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border)}
+.split-table td{padding:.5rem .75rem;border-bottom:1px solid var(--border)}
+.split-table tr:last-child td{font-weight:700;border-top:2px solid var(--border2)}
+
 </style>
 </head>
 <body>
@@ -433,6 +577,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <span style="font-size:.8rem;color:var(--text3)">↗</span>
       </div>
       <button class="btn-icon" onclick="toggleDark()" title="Modo claro/escuro">🌙</button>
+      <button class="btn-icon" onclick="openSearchOverlay()" title="Pesquisa global (Ctrl+K)">🔍</button>
     </div>
   </header>
 
@@ -449,8 +594,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <div class="nav-item" onclick="showTab('tab-reservas')"><span class="icon">🎫</span> Reservas</div>
       <div class="nav-item" onclick="showTab('tab-orcamento')"><span class="icon">💰</span> Orçamento</div>
 
-      <div class="nav-section">Memórias</div>
+      <div class="nav-section">Memórias & Prep.</div>
       <div class="nav-item" onclick="showTab('tab-memorias')"><span class="icon">📷</span> Fotos & Diário</div>
+      <div class="nav-item" onclick="showTab('tab-checklist')"><span class="icon">✅</span> Checklist</div>
       <div class="nav-item" onclick="showTab('tab-gastronomia')"><span class="icon">🍷</span> Gastronomia</div>
       <div class="nav-item" onclick="showTab('tab-pesquisa')"><span class="icon">🔍</span> Pesquisa</div>
     </nav>
@@ -460,6 +606,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
       <!-- ── PAINEL ── -->
       <div id="tab-painel" class="tab active">
+        <div id="alertas-container"></div>
         <div id="countdown-container"></div>
         <div class="stats-row" id="stats-row"></div>
         <div class="grid-2">
@@ -473,9 +620,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
           <!-- Resumo orçamento -->
           <div class="card">
             <div class="card-header">
-              <div class="card-title">💰 Orçamento · Luxemburgo, Suíça & Itália</div>
+              <div class="card-title">💰 Orçamento · resumo</div>
             </div>
             <div class="card-body" id="orcamento-resumo-painel"></div>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:1rem">
+          <!-- Checklist progress -->
+          <div class="card">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+              <div class="card-title">✅ Checklist pré-viagem</div>
+              <button class="btn-secondary" style="font-size:.75rem;padding:.25rem .6rem" onclick="showTab('tab-checklist')">Ver tudo</button>
+            </div>
+            <div class="card-body" id="checklist-painel"></div>
+          </div>
+          <!-- Pagamentos pendentes -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">🎫 Pagamentos pendentes</div></div>
+            <div class="card-body" id="pagamentos-pendentes"></div>
           </div>
         </div>
       </div>
@@ -548,8 +710,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
           <div class="page-sub">Luxemburgo, Suíça & Itália · 26–30 Maio 2026 · 5 dias</div>
         </div>
 
+        <!-- Conversor CHF/EUR -->
+        <div class="conversor-widget" id="conversor-widget">
+          <span style="font-size:.8rem;font-weight:600;color:var(--text2)">💱 Conversor</span>
+          <div class="conv-field">
+            <label>CHF</label>
+            <input type="number" id="conv-chf" value="100" oninput="convertCHF('chf',this.value)" min="0" step="1">
+          </div>
+          <div class="conv-arrow">⇄</div>
+          <div class="conv-field">
+            <label>EUR</label>
+            <input type="number" id="conv-eur" value="" oninput="convertCHF('eur',this.value)" min="0" step="0.01" placeholder="…">
+          </div>
+          <span class="conv-rate" id="conv-rate-label">A carregar taxa…</span>
+        </div>
+
         <!-- Selector de dia -->
         <div class="roteiro-selector" id="roteiro-selector"></div>
+
+        <!-- Toggle timeline -->
+        <div style="margin-bottom:.75rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+          <button class="btn-secondary" id="timeline-toggle" onclick="toggleTimeline()" style="font-size:.78rem;padding:.3rem .75rem">📊 Ver timeline do dia</button>
+        </div>
+        <div id="roteiro-timeline" style="display:none;margin-bottom:1.25rem"></div>
 
         <!-- Conteúdo roteiro -->
         <div id="roteiro-content"></div>
@@ -564,12 +747,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <!-- ── RESERVAS ── -->
       <div id="tab-reservas" class="tab">
         <div class="page-header">
-          <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
             <div>
               <div class="page-title">🎫 Reservas</div>
               <div class="page-sub">Voos, hotéis, veículos e entradas</div>
             </div>
-            <button class="btn-new" onclick="openModal('modal-nova-reserva')">+ Nova reserva</button>
+            <div style="display:flex;gap:.5rem">
+              <button class="btn-secondary" onclick="openModal('modal-importar-pdf')" style="font-size:.82rem">📎 Importar PDF</button>
+              <button class="btn-new" onclick="openModal('modal-nova-reserva')">+ Nova reserva</button>
+            </div>
           </div>
         </div>
         <div id="reservas-list"></div>
@@ -578,12 +764,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <!-- ── ORÇAMENTO ── -->
       <div id="tab-orcamento" class="tab">
         <div class="page-header">
-          <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
             <div>
               <div class="page-title">💰 Orçamento</div>
               <div class="page-sub">Controlo de despesas por viagem</div>
             </div>
-            <button class="btn-new" onclick="openModal('modal-nova-despesa')">+ Registar despesa</button>
+            <div style="display:flex;gap:.5rem">
+              <button class="btn-secondary" onclick="exportCSV()" style="font-size:.82rem">⬇ CSV</button>
+              <button class="btn-new" onclick="openModal('modal-nova-despesa')">+ Registar despesa</button>
+            </div>
           </div>
         </div>
         <div id="orcamento-content"></div>
@@ -601,6 +790,23 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         </div>
         <input type="file" id="photo-input" accept="image/*,video/*" multiple style="display:none" onchange="handlePhotoUpload(event)">
         <div id="memorias-content"></div>
+      </div>
+
+      <!-- ── CHECKLIST ── -->
+      <div id="tab-checklist" class="tab">
+        <div class="page-header">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+            <div>
+              <div class="page-title">✅ Checklist pré-viagem</div>
+              <div class="page-sub">Tarefas antes da partida</div>
+            </div>
+            <div style="display:flex;gap:.5rem">
+              <button class="btn-secondary" onclick="resetChecklist()" style="font-size:.82rem">↺ Repor</button>
+              <button class="btn-new" onclick="openModal('modal-nova-tarefa')">+ Nova tarefa</button>
+            </div>
+          </div>
+        </div>
+        <div id="checklist-content"></div>
       </div>
 
       <!-- ── GASTRONOMIA ── -->
@@ -885,17 +1091,221 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   </div>
 </div>
 
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mnav">
+  <button class="mnav-item active" id="mnav-painel" onclick="showTab('tab-painel');setMnav('mnav-painel')">
+    <span class="mni">🏠</span>Painel
+  </button>
+  <button class="mnav-item" id="mnav-roteiro" onclick="showTab('tab-roteiro');setMnav('mnav-roteiro')">
+    <span class="mni">🗺️</span>Roteiro
+  </button>
+  <button class="mnav-item" id="mnav-reservas" onclick="showTab('tab-reservas');setMnav('mnav-reservas')">
+    <span class="mni">🎫</span>Reservas
+  </button>
+  <button class="mnav-item" id="mnav-orcamento" onclick="showTab('tab-orcamento');setMnav('mnav-orcamento')">
+    <span class="mni">💰</span>Orçamento
+  </button>
+  <button class="mnav-item" id="mnav-mais" onclick="toggleMnavMore()">
+    <span class="mni">⋯</span>Mais
+  </button>
+</nav>
+<div class="mnav-more-panel" id="mnav-more-panel">
+  <button class="mnav-more-btn" onclick="showTab('tab-destinos');closeMnavMore()">📍 Destinos</button>
+  <button class="mnav-more-btn" onclick="showTab('tab-mapa');closeMnavMore()">🌍 Mapa</button>
+  <button class="mnav-more-btn" onclick="showTab('tab-memorias');closeMnavMore()">📷 Fotos</button>
+  <button class="mnav-more-btn" onclick="showTab('tab-checklist');closeMnavMore()">✅ Checklist</button>
+  <button class="mnav-more-btn" onclick="showTab('tab-gastronomia');closeMnavMore()">🍷 Gastronomia</button>
+  <button class="mnav-more-btn" onclick="showTab('tab-pesquisa');closeMnavMore()">🔍 Pesquisa</button>
+  <button class="mnav-more-btn" onclick="openModal('modal-nova-viagem');closeMnavMore()">✈ Nova viagem</button>
+</div>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="search-overlay" onclick="if(event.target===this)closeSearchOverlay()">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <span style="color:var(--text3)">🔍</span>
+      <input type="text" id="search-input" placeholder="Pesquisar reservas, despesas, roteiro, diário…" 
+        oninput="doSearch(this.value)" onkeydown="handleSearchKey(event)" autocomplete="off">
+      <button onclick="closeSearchOverlay()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.85rem">ESC</button>
+    </div>
+    <div class="search-results" id="search-results"></div>
+    <div class="search-hint">↑↓ navegar · Enter para ir · ESC para fechar · Ctrl+K para abrir</div>
+  </div>
+</div>
+
+<!-- Modal editar reserva -->
+<div class="modal-overlay" id="modal-editar-reserva">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar reserva</div>
+      <button class="modal-close" onclick="closeModal('modal-editar-reserva')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" id="er-tipo">
+          <option value="✈">✈ Voo / Avião</option>
+          <option value="🏨">🏨 Hotel / Alojamento</option>
+          <option value="🚗">🚗 Veículo / Transfer</option>
+          <option value="🎟">🎟 Bilhete / Entrada</option>
+          <option value="⛴">⛴ Ferry / Barco</option>
+          <option value="🚂">🚂 Comboio / Autocarro</option>
+          <option value="📄">📄 Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor (€)</label>
+        <input class="form-input" type="number" id="er-valor" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição *</label>
+      <input class="form-input" id="er-desc">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input class="form-input" type="date" id="er-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hora</label>
+        <input class="form-input" type="time" id="er-hora">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Referência</label>
+        <input class="form-input" id="er-ref">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fornecedor</label>
+        <input class="form-input" id="er-fornecedor">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notas</label>
+      <textarea class="form-textarea" id="er-notas"></textarea>
+    </div>
+    <input type="hidden" id="er-id">
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-editar-reserva')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEdicaoReserva()">✓ Guardar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar despesa -->
+<div class="modal-overlay" id="modal-editar-despesa">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar despesa</div>
+      <button class="modal-close" onclick="closeModal('modal-editar-despesa')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição *</label>
+      <input class="form-input" id="ed-desc">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="form-select" id="ed-cat">
+          <option value="Alojamento">🏨 Alojamento</option>
+          <option value="Transporte">✈ Transporte</option>
+          <option value="Alimentação">🍽️ Alimentação</option>
+          <option value="Actividades">🎟 Actividades</option>
+          <option value="Compras">🛍️ Compras</option>
+          <option value="Outro">📦 Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor (€)</label>
+        <input class="form-input" type="number" id="ed-valor" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Data</label>
+      <input class="form-input" type="date" id="ed-data">
+    </div>
+    <input type="hidden" id="ed-id">
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-editar-despesa')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEdicaoDespesa()">✓ Guardar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nova tarefa checklist -->
+<div class="modal-overlay" id="modal-nova-tarefa">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✅ Nova tarefa</div>
+      <button class="modal-close" onclick="closeModal('modal-nova-tarefa')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição *</label>
+      <input class="form-input" id="nt-desc" placeholder="Ex: Confirmar reserva Hertz">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="form-select" id="nt-cat">
+          <option value="Documentos">📄 Documentos</option>
+          <option value="Reservas">🎫 Reservas</option>
+          <option value="Packing">🧳 Packing</option>
+          <option value="Técnico">📱 Técnico</option>
+          <option value="Saúde">💊 Saúde</option>
+          <option value="Outro">📦 Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Prazo (opcional)</label>
+        <input class="form-input" type="date" id="nt-prazo">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-nova-tarefa')">Cancelar</button>
+      <button class="btn-primary" onclick="adicionarTarefa()">✓ Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal importar PDF -->
+<div class="modal-overlay" id="modal-importar-pdf">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📎 Importar confirmação (PDF / imagem)</div>
+      <button class="modal-close" onclick="closeModal('modal-importar-pdf')">✕</button>
+    </div>
+    <p style="font-size:.85rem;color:var(--text2);margin-bottom:1rem">
+      Arraste ou selecione um PDF/imagem de confirmação de voo, hotel ou aluguer. O Claude extrai automaticamente os dados e pré-preenche o formulário.
+    </p>
+    <div class="pdf-drop-zone" id="pdf-drop-zone" onclick="document.getElementById('pdf-file-input').click()"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="handlePdfDrop(event)">
+      <div class="drop-icon">📄</div>
+      <div style="font-weight:600;margin-bottom:.25rem">Clique ou arraste aqui</div>
+      <div style="font-size:.8rem;color:var(--text3)">PDF, PNG, JPG ou JPEG · Máx. 5MB</div>
+    </div>
+    <input type="file" id="pdf-file-input" accept="application/pdf,image/*" style="display:none" onchange="handlePdfImport(event)">
+    <div id="pdf-extract-status" style="display:none" class="pdf-extracting">
+      <div style="font-size:1.2rem">⏳</div>
+      <div>A extrair dados com IA… aguarde.</div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ═══════════════════════════════════════════════════
    FIREBASE CONFIG
 ═══════════════════════════════════════════════════ */
 const firebaseConfig = {
-  apiKey:"AIzaSyDummyKeyReplaceWithYours",
+  apiKey:"AIzaSyBJmth1gb1m3ou0XCM6q_wsG-kQjowPeRo",
   authDomain:"fora-do-retangulo.firebaseapp.com",
   projectId:"fora-do-retangulo",
-  storageBucket:"fora-do-retangulo.appspot.com",
-  messagingSenderId:"000000000000",
-  appId:"1:000000000000:web:0000000000000000"
+  storageBucket:"fora-do-retangulo.firebasestorage.app",
+  messagingSenderId:"78445229416",
+  appId:"1:78445229416:web:5c246c0f226a88db40d2dd"
 };
 
 let db, auth, currentUser;
@@ -906,9 +1316,16 @@ let appData = {
   diario:[],
   fotos:[],
   notas:[],
-  paragens_extra:{}
+  paragens_extra:{},
+  checklist:[],
+  dismissedAlerts:[]
 };
 let roteiroAtivo = 'dia2';
+let chfRate = null;
+let timelineVisible = false;
+let donutChart = null;
+let searchFocusIdx = -1;
+let countdownInterval = null;
 
 try {
   firebase.initializeApp(firebaseConfig);
@@ -999,6 +1416,8 @@ function initDefaultData(){
   appData.fotos = [];
   appData.notas = [];
   appData.paragens_extra = {};
+  appData.dismissedAlerts = [];
+  initDefaultChecklist();
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1216,38 +1635,116 @@ function renderAll(){
   renderOrcamento();
   renderMemorias();
   renderGastronomia();
+  renderChecklist();
+  loadChfRate();
+}
+
+function renderChecklist(){
+  const cl = appData.checklist||[];
+  const cats = [...new Set(cl.map(t=>t.cat))];
+  const catColors2 = {Documentos:'var(--accent)',Reservas:'var(--orange)',Packing:'var(--purple)',Técnico:'var(--green)',Saúde:'var(--red)',Outro:'var(--text3)'};
+  const done = cl.filter(t=>t.done).length;
+  const pct = cl.length ? Math.round((done/cl.length)*100) : 0;
+  let html = `<div class="checklist-progress">
+    <div style="flex:1">
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.35rem">
+        <span style="color:var(--text2)">${done} de ${cl.length} concluídas</span>
+        <span style="font-weight:700;color:${pct===100?'var(--green)':'var(--accent)'}">${pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${pct===100?'var(--green)':'var(--accent)'}"></div></div>
+    </div>
+  </div>`;
+  if(!cl.length){
+    html += `<div class="empty-state"><div class="empty-icon">✅</div><div>Sem tarefas. Clique em "+ Nova tarefa" para começar.</div></div>`;
+  } else {
+    cats.forEach(cat=>{
+      const items = cl.filter(t=>t.cat===cat);
+      html += `<div class="card" style="margin-bottom:1rem">
+        <div class="card-header"><div class="card-title" style="color:${catColors2[cat]||'var(--text)'}">${cat}</div></div>
+        <div style="padding:0">
+          ${items.map(t=>`
+            <div class="checklist-item ${t.done?'done':''}">
+              <div class="ci-check ${t.done?'checked':''}" onclick="toggleTarefa('${t.id}')">${t.done?'✓':''}</div>
+              <div class="ci-desc">${t.desc}</div>
+              ${t.prazo?`<span style="font-size:.72rem;color:var(--text3)">${t.prazo}</span>`:''}
+              <button class="ci-del" onclick="eliminarTarefa('${t.id}')">✕</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    });
+  }
+  const el = document.getElementById('checklist-content');
+  if(el) el.innerHTML = html;
+  renderPainel();
 }
 
 function renderPainel(){
-  // Countdown
+  // ── Alertas automáticos ──
   const hoje = new Date();
-  const viagem = new Date('2026-05-26');
-  const diff = Math.ceil((viagem - hoje)/(1000*60*60*24));
+  const alertas = [];
+  appData.reservas.forEach(r=>{
+    if(!r.data) return;
+    const d = new Date(r.data);
+    const diff = Math.ceil((d-hoje)/(1000*60*60*24));
+    const key = 'alert_'+r.id;
+    if(appData.dismissedAlerts && appData.dismissedAlerts.includes(key)) return;
+    if(diff===1) alertas.push({key,msg:`⚡ Amanhã: ${r.desc}`,cls:'urgente'});
+    else if(diff===3) alertas.push({key,msg:`⚠️ Em 3 dias: ${r.desc}`,cls:'aviso'});
+    else if(diff===7) alertas.push({key,msg:`📅 Em 7 dias: ${r.desc}`,cls:'info'});
+  });
+  const ac = document.getElementById('alertas-container');
+  if(ac) ac.innerHTML = alertas.map(a=>`
+    <div class="alerta-banner ${a.cls}">
+      <span>${a.msg}</span>
+      <button class="alerta-dismiss" onclick="dismissAlerta('${a.key}')">✕</button>
+    </div>
+  `).join('');
+
+  // ── Countdown em tempo real ──
+  if(countdownInterval) clearInterval(countdownInterval);
   const cc = document.getElementById('countdown-container');
-  if(diff > 0){
-    cc.innerHTML=`<div class="countdown-widget">
-      <div class="countdown-dias">${diff}</div>
-      <div class="countdown-viagem">dias para</div>
-      <div class="countdown-viagem" style="font-size:1.1rem;color:var(--accent)">Luxemburgo, Suíça & Itália</div>
-      <div class="countdown-texto">26 — 30 de Maio de 2026 · 5 dias · 4 países</div>
-    </div>`;
-  } else {
-    cc.innerHTML=`<div class="countdown-widget" style="border-color:rgba(63,185,80,.3)">
-      <div style="font-size:2rem">🎒</div>
-      <div class="countdown-viagem" style="color:var(--green)">Viagem a decorrer ou concluída!</div>
-    </div>`;
+  function updateCountdown(){
+    const now = new Date();
+    const target = new Date('2026-05-26T06:15:00');
+    const diff = target - now;
+    if(diff > 0){
+      const days = Math.floor(diff/(1000*60*60*24));
+      const hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+      const mins = Math.floor((diff%(1000*60*60))/(1000*60));
+      const secs = Math.floor((diff%(1000*60))/1000);
+      cc.innerHTML=`<div class="countdown-widget">
+        <div class="countdown-dias">${days}</div>
+        <div class="countdown-viagem">dias</div>
+        <div style="font-size:.9rem;color:var(--text2);margin:.1rem 0">${String(hours).padStart(2,'0')}h ${String(mins).padStart(2,'0')}m ${String(secs).padStart(2,'0')}s</div>
+        <div class="countdown-viagem" style="font-size:1.05rem;color:var(--accent)">Luxemburgo, Suíça & Itália</div>
+        <div class="countdown-texto">✈ TP531 · 26 Mai · 06h15 · Lisboa → Genebra</div>
+      </div>`;
+    } else {
+      cc.innerHTML=`<div class="countdown-widget" style="border-color:rgba(63,185,80,.3)">
+        <div style="font-size:2rem">🎒</div>
+        <div class="countdown-viagem" style="color:var(--green)">Viagem a decorrer ou concluída!</div>
+      </div>`;
+      clearInterval(countdownInterval);
+    }
   }
-  // Stats
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+
+  // ── Stats ──
   const totalGasto = appData.despesas.reduce((a,b)=>a+(b.valor||0),0);
+  const checkDone = (appData.checklist||[]).filter(t=>t.done).length;
+  const checkTotal = (appData.checklist||[]).length;
   document.getElementById('stats-row').innerHTML=`
     <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${appData.viagens.length}</div><div class="stat-label">Viagens</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--green)">${appData.reservas.length}</div><div class="stat-label">Reservas</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--orange)">${appData.despesas.length}</div><div class="stat-label">Despesas</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--purple)">4</div><div class="stat-label">Países</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--red)">€${totalGasto.toFixed(0)}</div><div class="stat-label">Gasto total</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--teal)">5</div><div class="stat-label">Dias de viagem</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--teal)">${checkDone}/${checkTotal||'–'}</div><div class="stat-label">Checklist</div></div>
   `;
-  // Próximas
+
+  // ── Próximas viagens ──
   document.getElementById('proximas-viagens').innerHTML = appData.viagens.map(v=>`
     <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--border)">
       <div style="font-size:1.5rem">✈</div>
@@ -1258,7 +1755,8 @@ function renderPainel(){
       <span class="status-badge ${v.estado==='visited'?'status-visited':'status-planned'}">${v.estado==='visited'?'Visitado':'Planeado'}</span>
     </div>
   `).join('')||'<div class="empty-state"><div class="empty-icon">✈</div><div>Sem viagens registadas</div></div>';
-  // Orçamento resumo
+
+  // ── Orçamento resumo ──
   const orcTotal = appData.viagens.reduce((a,b)=>a+(b.orcamento||0),0);
   const catMap = {};
   appData.despesas.forEach(d=>{ catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0); });
@@ -1282,9 +1780,44 @@ function renderPainel(){
     `).join('')||'<div style="font-size:.82rem;color:var(--text3);text-align:center;padding:.5rem">Sem despesas registadas</div>'}
     <div class="divider"></div>
     <div style="font-size:.8rem;color:var(--text3)">
-      💡 Custo estimado Dia 2: €159–335/p · Dia 3: €145–288/p · Dia 4: €75–130/p · Dia 5: €108–211/p
+      💡 Estimativa Dia 2: €159–335/p · Dia 3: €145–288/p · Dia 4: €75–130/p · Dia 5: €108–211/p
     </div>
   `;
+
+  // ── Checklist painel ──
+  const cl = appData.checklist||[];
+  const cpEl = document.getElementById('checklist-painel');
+  if(cpEl){
+    const pct = cl.length ? Math.round((cl.filter(t=>t.done).length/cl.length)*100) : 0;
+    cpEl.innerHTML = cl.length ? `
+      <div style="margin-bottom:.75rem">
+        <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.35rem">
+          <span style="color:var(--text2)">${cl.filter(t=>t.done).length} de ${cl.length} concluídas</span>
+          <span style="font-weight:600;color:${pct===100?'var(--green)':'var(--accent)'}">${pct}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${pct===100?'var(--green)':'var(--accent)'}"></div></div>
+      </div>
+      ${cl.filter(t=>!t.done).slice(0,4).map(t=>`
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;font-size:.82rem;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text3)">☐</span>
+          <span>${t.desc}</span>
+          <span style="font-size:.7rem;color:var(--text3);margin-left:auto">${t.cat}</span>
+        </div>
+      `).join('')}
+    ` : '<div style="color:var(--text3);font-size:.85rem">Sem tarefas. Adicione na secção Checklist.</div>';
+  }
+
+  // ── Pagamentos pendentes ──
+  const ppEl = document.getElementById('pagamentos-pendentes');
+  if(ppEl){
+    const pendentes = appData.reservas.filter(r=>r.estado==='pending'||!r.estado||r.estado==='');
+    ppEl.innerHTML = pendentes.length ? pendentes.map(r=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.82rem">
+        <span>${r.tipo} ${r.desc}</span>
+        <span style="color:var(--orange);font-weight:600">${r.valor?'€'+r.valor.toFixed(2):''}</span>
+      </div>
+    `).join('') : '<div style="color:var(--text3);font-size:.85rem">Todas as reservas pagas ✓</div>';
+  }
 }
 
 function renderDestinos(){
@@ -1440,7 +1973,10 @@ function renderReservas(){
           </div>
           <div style="text-align:right">
             <div class="reserva-valor">${r.valor?'€'+r.valor.toFixed(2):''}</div>
-            <button onclick="eliminarReserva('${r.id}')" class="btn-danger" style="font-size:.72rem;padding:.15rem .4rem;margin-top:.3rem">🗑</button>
+            <div style="display:flex;gap:.25rem;margin-top:.3rem;justify-content:flex-end">
+              <button onclick="editarReserva('${r.id}')" class="btn-secondary" style="font-size:.72rem;padding:.15rem .4rem">✏️</button>
+              <button onclick="eliminarReserva('${r.id}')" class="btn-danger" style="font-size:.72rem;padding:.15rem .4rem">🗑</button>
+            </div>
           </div>
         </div>`).join('')}
       </div>
@@ -1494,6 +2030,7 @@ function renderOrcamento(){
               </div>
               <div style="display:flex;align-items:center;gap:.4rem">
                 <div class="despesa-valor" style="color:var(--orange)">€${(d.valor||0).toFixed(2)}</div>
+                <button onclick="editarDespesa('${d.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem">✏️</button>
                 <button onclick="eliminarDespesa('${d.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem">✕</button>
               </div>
             </div>
@@ -1588,9 +2125,11 @@ function showTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const map = {'tab-painel':0,'tab-destinos':1,'tab-mapa':2,'tab-roteiro':3,'tab-reservas':4,'tab-orcamento':5,'tab-memorias':6,'tab-gastronomia':7,'tab-pesquisa':8};
+  const map = {'tab-painel':0,'tab-destinos':1,'tab-mapa':2,'tab-roteiro':3,'tab-reservas':4,'tab-orcamento':5,'tab-memorias':6,'tab-checklist':7,'tab-gastronomia':8,'tab-pesquisa':9};
   const items = document.querySelectorAll('.nav-item');
   if(items[map[id]]) items[map[id]].classList.add('active');
+  if(id==='tab-roteiro'){ loadChfRate(); if(timelineVisible) renderTimeline(); }
+  closeMnavMore();
 }
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
@@ -1718,6 +2257,324 @@ function exportRoteiro(){
 
 function toggleDark(){
   document.body.classList.toggle('light-mode');
+}
+
+// ─── EDITAR RESERVA ───────────────────────────
+function editarReserva(id){
+  const r = appData.reservas.find(x=>x.id===id);
+  if(!r) return;
+  document.getElementById('er-id').value = id;
+  document.getElementById('er-tipo').value = r.tipo||'✈';
+  document.getElementById('er-desc').value = r.desc||'';
+  document.getElementById('er-data').value = r.data||'';
+  document.getElementById('er-hora').value = r.hora||'';
+  document.getElementById('er-ref').value = r.ref||'';
+  document.getElementById('er-fornecedor').value = r.fornecedor||'';
+  document.getElementById('er-valor').value = r.valor||'';
+  document.getElementById('er-notas').value = r.notas||'';
+  openModal('modal-editar-reserva');
+}
+function guardarEdicaoReserva(){
+  const id = document.getElementById('er-id').value;
+  const r = appData.reservas.find(x=>x.id===id);
+  if(!r) return;
+  r.tipo = document.getElementById('er-tipo').value;
+  r.desc = document.getElementById('er-desc').value;
+  r.data = document.getElementById('er-data').value;
+  r.hora = document.getElementById('er-hora').value;
+  r.ref = document.getElementById('er-ref').value;
+  r.fornecedor = document.getElementById('er-fornecedor').value;
+  r.valor = parseFloat(document.getElementById('er-valor').value)||0;
+  r.notas = document.getElementById('er-notas').value;
+  saveFirestoreData();
+  closeModal('modal-editar-reserva');
+  renderReservas();
+}
+
+// ─── EDITAR DESPESA ───────────────────────────
+function editarDespesa(id){
+  const d = appData.despesas.find(x=>x.id===id);
+  if(!d) return;
+  document.getElementById('ed-id').value = id;
+  document.getElementById('ed-desc').value = d.desc||'';
+  document.getElementById('ed-cat').value = d.cat||'Outro';
+  document.getElementById('ed-valor').value = d.valor||'';
+  document.getElementById('ed-data').value = d.data||'';
+  openModal('modal-editar-despesa');
+}
+function guardarEdicaoDespesa(){
+  const id = document.getElementById('ed-id').value;
+  const d = appData.despesas.find(x=>x.id===id);
+  if(!d) return;
+  d.desc = document.getElementById('ed-desc').value;
+  d.cat = document.getElementById('ed-cat').value;
+  d.valor = parseFloat(document.getElementById('ed-valor').value)||0;
+  d.data = document.getElementById('ed-data').value;
+  saveFirestoreData();
+  closeModal('modal-editar-despesa');
+  renderOrcamento(); renderPainel();
+}
+
+// ─── ALERTAS ─────────────────────────────────
+function dismissAlerta(key){
+  if(!appData.dismissedAlerts) appData.dismissedAlerts=[];
+  if(!appData.dismissedAlerts.includes(key)) appData.dismissedAlerts.push(key);
+  saveFirestoreData();
+  renderPainel();
+}
+
+// ─── CHECKLIST ───────────────────────────────
+function toggleTarefa(id){
+  const t = (appData.checklist||[]).find(x=>x.id===id);
+  if(t){ t.done=!t.done; saveFirestoreData(); renderChecklist(); }
+}
+function adicionarTarefa(){
+  const desc = document.getElementById('nt-desc').value.trim();
+  if(!desc){ alert('Preencha a descrição.'); return; }
+  if(!appData.checklist) appData.checklist=[];
+  appData.checklist.push({
+    id:genId(), desc, cat:document.getElementById('nt-cat').value,
+    prazo:document.getElementById('nt-prazo').value, done:false
+  });
+  document.getElementById('nt-desc').value='';
+  saveFirestoreData(); closeModal('modal-nova-tarefa'); renderChecklist();
+}
+function eliminarTarefa(id){
+  appData.checklist=(appData.checklist||[]).filter(t=>t.id!==id);
+  saveFirestoreData(); renderChecklist();
+}
+function resetChecklist(){
+  if(!confirm('Repor todas as tarefas como não concluídas?')) return;
+  (appData.checklist||[]).forEach(t=>t.done=false);
+  saveFirestoreData(); renderChecklist();
+}
+
+// ─── DEFAULTS: adicionar checklist pré-preenchido ──
+function initDefaultChecklist(){
+  if(appData.checklist&&appData.checklist.length) return;
+  appData.checklist=[
+    {id:'c1',desc:'Verificar validade do passaporte (min. 6 meses)',cat:'Documentos',done:false},
+    {id:'c2',desc:'Carta de condução internacional',cat:'Documentos',done:false},
+    {id:'c3',desc:'Cartão europeu de saúde (CESD)',cat:'Documentos',done:false},
+    {id:'c4',desc:'Confirmar check-in online TAP TP531',cat:'Reservas',done:false},
+    {id:'c5',desc:'Confirmar reserva Hertz Geneva Airport',cat:'Reservas',done:false},
+    {id:'c6',desc:'Verificar check-in Mooshof Buchsi',cat:'Reservas',done:false},
+    {id:'c7',desc:'Descarregar mapas offline Switzerland (Google Maps)',cat:'Técnico',done:false},
+    {id:'c8',desc:'Ativar roaming internacional',cat:'Técnico',done:false},
+    {id:'c9',desc:'Descarregar app Swisstopo',cat:'Técnico',done:false},
+    {id:'c10',desc:'Calçado impermeável e bom grip',cat:'Packing',done:false},
+    {id:'c11',desc:'Casaco impermeável',cat:'Packing',done:false},
+    {id:'c12',desc:'Carregador e adaptador europeu',cat:'Packing',done:false},
+    {id:'c13',desc:'Seguro de viagem',cat:'Documentos',done:false},
+    {id:'c14',desc:'Comprar CHF / verificar Revolut',cat:'Reservas',done:false},
+    {id:'c15',desc:'Protetor solar para altitude',cat:'Saúde',done:false},
+    {id:'c16',desc:'Medicamentos básicos (dores, estômago)',cat:'Saúde',done:false}
+  ];
+}
+
+// ─── CHF CONVERSOR ───────────────────────────
+async function loadChfRate(){
+  try{
+    const r=await fetch('https://api.frankfurter.app/latest?from=CHF&to=EUR');
+    const data=await r.json();
+    chfRate=data.rates.EUR;
+    const label=document.getElementById('conv-rate-label');
+    if(label) label.textContent=`1 CHF = ${chfRate.toFixed(4)} EUR`;
+    convertCHF('chf',100);
+  }catch(e){
+    chfRate=0.9265;
+    const label=document.getElementById('conv-rate-label');
+    if(label) label.textContent=`1 CHF ≈ ${chfRate.toFixed(4)} EUR (offline)`;
+    convertCHF('chf',100);
+  }
+}
+function convertCHF(dir,val){
+  if(!chfRate) return;
+  const n=parseFloat(val)||0;
+  if(dir==='chf'){
+    const el=document.getElementById('conv-eur');
+    if(el) el.value=(n*chfRate).toFixed(2);
+  } else {
+    const el=document.getElementById('conv-chf');
+    if(el) el.value=(n/chfRate).toFixed(2);
+  }
+}
+
+// ─── TIMELINE ────────────────────────────────
+function toggleTimeline(){
+  timelineVisible=!timelineVisible;
+  const wrap=document.getElementById('roteiro-timeline');
+  const btn=document.getElementById('timeline-toggle');
+  if(wrap) wrap.style.display=timelineVisible?'block':'none';
+  if(btn) btn.textContent=timelineVisible?'📊 Ocultar timeline':'📊 Ver timeline do dia';
+  if(timelineVisible) renderTimeline();
+}
+function renderTimeline(){
+  const r=ROTEIROS[roteiroAtivo];
+  const wrap=document.getElementById('roteiro-timeline');
+  if(!wrap||!r) return;
+  const colors=['#58a6ff','#3fb950','#d29922','#bc8cff','#f85149','#39d353','#e3b341'];
+  let allParagens=[];
+  r.seccoes.forEach(s=>s.paragens.forEach(p=>allParagens.push({...p,seccao:s.nome})));
+  const now=new Date();
+  const roteiroDate=new Date(r.date);
+  const isToday=now.toDateString()===roteiroDate.toDateString();
+  const startH=7,endH=23;
+  const totalMins=(endH-startH)*60;
+  const blocks=allParagens.filter(p=>p.hora).map((p,i)=>{
+    const [h,m]=(p.hora.replace('h',':').split(':').map(Number));
+    return{...p,startMin:(h-startH)*60+(m||0),color:colors[i%colors.length]};
+  });
+  let html=`<div class="timeline-wrap"><div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text3);margin-bottom:.35rem">`;
+  for(let h=startH;h<=endH;h+=2) html+=`<span>${h}h</span>`;
+  html+=`</div><div class="timeline-bar" style="position:relative">`;
+  blocks.forEach((b,i)=>{
+    const next=blocks[i+1];
+    const dur=next?next.startMin-b.startMin:60;
+    const w=Math.max(4,(dur/totalMins)*100);
+    const l=(b.startMin/totalMins)*100;
+    html+=`<div class="tl-block" style="width:${w}%;background:${b.color};position:absolute;left:${l}%;height:100%;border-right:1px solid var(--bg)">
+      ${dur>30?b.local.split(' ')[0]:''}
+      <div class="tl-tooltip">${b.hora} ${b.local}</div>
+    </div>`;
+  });
+  if(isToday){
+    const nowMin=(now.getHours()-startH)*60+now.getMinutes();
+    const pct=Math.max(0,Math.min(100,(nowMin/totalMins)*100));
+    html+=`<div class="tl-now" style="left:${pct}%"></div>`;
+  }
+  html+=`</div>`;
+  if(isToday) html+=`<div class="timeline-now-label">▲ Agora</div>`;
+  html+=`</div>`;
+  wrap.innerHTML=html;
+}
+
+// ─── SEARCH GLOBAL ───────────────────────────
+function openSearchOverlay(){
+  document.getElementById('search-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('search-input').focus(),50);
+}
+function closeSearchOverlay(){
+  document.getElementById('search-overlay').classList.remove('open');
+  document.getElementById('search-input').value='';
+  document.getElementById('search-results').innerHTML='';
+  searchFocusIdx=-1;
+}
+function doSearch(q){
+  q=q.trim().toLowerCase();
+  const el=document.getElementById('search-results');
+  if(!q){ el.innerHTML=''; return; }
+  const results=[];
+  appData.reservas.forEach(r=>{ if((r.desc+r.fornecedor+r.ref).toLowerCase().includes(q)) results.push({tipo:'🎫 Reserva',nome:r.desc,det:r.data+' · '+r.fornecedor,tab:'tab-reservas'}); });
+  appData.despesas.forEach(d=>{ if((d.desc+d.cat).toLowerCase().includes(q)) results.push({tipo:'💰 Despesa',nome:d.desc,det:'€'+d.valor+' · '+d.cat,tab:'tab-orcamento'}); });
+  appData.diario.forEach(d=>{ if((d.texto+d.local).toLowerCase().includes(q)) results.push({tipo:'📓 Diário',nome:d.local,det:d.data,tab:'tab-memorias'}); });
+  (appData.checklist||[]).forEach(t=>{ if(t.desc.toLowerCase().includes(q)) results.push({tipo:'✅ Tarefa',nome:t.desc,det:t.cat,tab:'tab-checklist'}); });
+  Object.values(ROTEIROS).forEach(r=>{
+    r.seccoes.forEach(s=>s.paragens.forEach(p=>{ if(p.local.toLowerCase().includes(q)) results.push({tipo:'📍 Roteiro',nome:p.local,det:r.titulo,tab:'tab-roteiro'}); }));
+  });
+  searchFocusIdx=-1;
+  if(!results.length){ el.innerHTML=`<div class="search-empty">Sem resultados para "${q}"</div>`; return; }
+  el.innerHTML=results.slice(0,12).map((r,i)=>`
+    <div class="sr-item" data-tab="${r.tab}" onclick="searchGo('${r.tab}')">
+      <span class="sr-type">${r.tipo}</span>
+      <span class="sr-name">${r.nome}</span>
+      <span class="sr-detail">${r.det}</span>
+    </div>
+  `).join('');
+}
+function searchGo(tab){
+  closeSearchOverlay();
+  showTab(tab);
+}
+function handleSearchKey(e){
+  const items=document.querySelectorAll('.sr-item');
+  if(e.key==='ArrowDown'){ e.preventDefault(); searchFocusIdx=Math.min(searchFocusIdx+1,items.length-1); items.forEach((el,i)=>el.classList.toggle('focused',i===searchFocusIdx)); items[searchFocusIdx]?.scrollIntoView({block:'nearest'}); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); searchFocusIdx=Math.max(searchFocusIdx-1,0); items.forEach((el,i)=>el.classList.toggle('focused',i===searchFocusIdx)); items[searchFocusIdx]?.scrollIntoView({block:'nearest'}); }
+  else if(e.key==='Enter'&&searchFocusIdx>=0){ items[searchFocusIdx]?.click(); }
+  else if(e.key==='Escape'){ closeSearchOverlay(); }
+}
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='k'){ e.preventDefault(); openSearchOverlay(); } });
+
+// ─── MOBILE NAV ──────────────────────────────
+function setMnav(id){
+  document.querySelectorAll('.mnav-item').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el) el.classList.add('active');
+  closeMnavMore();
+}
+function toggleMnavMore(){
+  document.getElementById('mnav-more-panel').classList.toggle('open');
+}
+function closeMnavMore(){
+  document.getElementById('mnav-more-panel').classList.remove('open');
+}
+
+// ─── IMPORTAR PDF COM IA ─────────────────────
+function handlePdfDrop(e){
+  e.preventDefault();
+  document.getElementById('pdf-drop-zone').classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];
+  if(file) processarPdfReserva(file);
+}
+function handlePdfImport(e){
+  const file=e.target.files[0];
+  if(file) processarPdfReserva(file);
+}
+async function processarPdfReserva(file){
+  const status=document.getElementById('pdf-extract-status');
+  status.style.display='flex';
+  try{
+    const base64=await new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result.split(',')[1]);
+      r.onerror=rej;
+      r.readAsDataURL(file);
+    });
+    const mediaType=file.type||'application/pdf';
+    const response=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:[
+          {type:mediaType.startsWith('image')?'image':'document',source:{type:'base64',media_type:mediaType,data:base64}},
+          {type:'text',text:'Extrai os dados desta confirmação de reserva. Responde APENAS em JSON sem markdown, com estes campos: {"tipo":"✈|🏨|🚗|🎟|⛴|🚂|📄","desc":"descrição curta","data":"YYYY-MM-DD","hora":"HH:MM","ref":"referência","fornecedor":"empresa","valor":0.00,"notas":"informações relevantes"}. Se não houver, usa string vazia ou 0.'}
+        ]}]
+      })
+    });
+    const data=await response.json();
+    const text=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(text);
+    status.style.display='none';
+    closeModal('modal-importar-pdf');
+    // Pré-preencher o modal de nova reserva
+    document.getElementById('nr-tipo').value=parsed.tipo||'📄';
+    document.getElementById('nr-desc').value=parsed.desc||'';
+    document.getElementById('nr-data').value=parsed.data||'';
+    document.getElementById('nr-hora').value=parsed.hora||'';
+    document.getElementById('nr-ref').value=parsed.ref||'';
+    document.getElementById('nr-fornecedor').value=parsed.fornecedor||'';
+    document.getElementById('nr-valor').value=parsed.valor||'';
+    document.getElementById('nr-notas').value=parsed.notas||'';
+    openModal('modal-nova-reserva');
+  }catch(err){
+    status.style.display='none';
+    alert('Não foi possível extrair os dados. Verifique o ficheiro e tente novamente.\n'+err.message);
+  }
+}
+
+// ─── EXPORTAR CSV ─────────────────────────────
+function exportCSV(){
+  const rows=[['Tipo','Descrição','Categoria','Valor','Data','Fornecedor','Referência']];
+  appData.reservas.forEach(r=>rows.push(['Reserva',r.desc,'',r.valor||0,r.data||'',r.fornecedor||'',r.ref||'']));
+  appData.despesas.forEach(d=>rows.push(['Despesa',d.desc,d.cat,d.valor||0,d.data||'','','']));
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='fora-do-retangulo-orcamento.csv'; a.click();
+  URL.revokeObjectURL(url);
 }
 </script>
 </body>
