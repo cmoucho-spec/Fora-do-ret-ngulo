@@ -348,78 +348,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .gastro-table tr:hover td{background:rgba(88,166,255,.04)}
 .stars-gold{color:var(--gold)}
 
-/* ─── NOTIFICATION BANNER ────────────────────────── */
-#notif-banner{
-  display:none;align-items:center;justify-content:center;gap:.6rem;
-  padding:.55rem 1.5rem;
-  background:rgba(88,166,255,.12);
-  border-bottom:1px solid rgba(88,166,255,.25);
-  font-size:.82rem;color:var(--text);flex-shrink:0;position:relative;
-}
-#notif-banner.visible{display:flex}
-#notif-banner .notif-icon{font-size:1rem}
-#notif-banner .notif-text{flex:1;text-align:center}
-#notif-banner .notif-text strong{color:var(--accent)}
-#notif-banner .notif-close{
-  background:none;border:none;color:var(--text3);cursor:pointer;
-  font-size:1rem;padding:.1rem .4rem;border-radius:4px;transition:color .2s;
-  position:absolute;right:.75rem;top:50%;transform:translateY(-50%);
-}
-#notif-banner .notif-close:hover{color:var(--text)}
-
 /* ─── COUNTDOWN ──────────────────────────────────── */
 .countdown-widget{
   background:linear-gradient(135deg,rgba(88,166,255,.1),rgba(188,140,255,.08));
   border:1px solid rgba(88,166,255,.3);border-radius:var(--radius2);
-  padding:1.5rem 1.25rem 1.25rem;text-align:center;margin-bottom:1.5rem;
+  padding:1.25rem;text-align:center;margin-bottom:1.5rem;
 }
-.countdown-dias{font-size:3.5rem;font-weight:800;line-height:1;color:var(--accent)}
-.countdown-hms{font-size:.95rem;color:var(--text3);margin:.25rem 0;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.countdown-dias{font-size:3rem;font-weight:800;line-height:1;color:var(--accent)}
 .countdown-texto{font-size:.88rem;color:var(--text2)}
 .countdown-viagem{font-weight:600;color:var(--text);margin:.25rem 0}
-.countdown-voo{
-  display:inline-flex;align-items:center;gap:.4rem;margin-top:.6rem;
-  font-size:.82rem;color:var(--text2);background:rgba(88,166,255,.08);
-  border:1px solid rgba(88,166,255,.2);border-radius:20px;padding:.25rem .75rem;
-}
-
-/* ─── CHECKLIST ──────────────────────────────────── */
-.checklist-progress-bar{
-  height:5px;background:var(--bg4);border-radius:3px;margin:.65rem 0 1rem;overflow:hidden;
-}
-.checklist-progress-fill{
-  height:100%;background:var(--green);border-radius:3px;transition:width .4s ease;
-}
-.checklist-item{
-  display:flex;align-items:flex-start;gap:.6rem;padding:.55rem 0;
-  border-bottom:1px solid var(--border);cursor:pointer;
-}
-.checklist-item:last-child{border-bottom:none}
-.checklist-item input[type=checkbox]{
-  margin-top:.15rem;accent-color:var(--green);width:15px;height:15px;flex-shrink:0;cursor:pointer;
-}
-.checklist-item.done .checklist-label{text-decoration:line-through;color:var(--text3)}
-.checklist-label{flex:1;font-size:.85rem;line-height:1.4}
-.checklist-cat{
-  font-size:.7rem;padding:.1rem .45rem;border-radius:10px;white-space:nowrap;flex-shrink:0;
-  background:rgba(88,166,255,.12);color:var(--accent);border:1px solid rgba(88,166,255,.2);
-}
-.checklist-cat.cat-doc{background:rgba(188,140,255,.12);color:var(--purple);border-color:rgba(188,140,255,.25)}
-.checklist-cat.cat-res{background:rgba(88,166,255,.12);color:var(--accent);border-color:rgba(88,166,255,.25)}
-.checklist-cat.cat-bag{background:rgba(63,185,80,.12);color:var(--green);border-color:rgba(63,185,80,.25)}
-.checklist-cat.cat-fin{background:rgba(210,153,34,.12);color:var(--orange);border-color:rgba(210,153,34,.25)}
-.checklist-progress-label{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--text2)}
-.checklist-pct{color:var(--accent);font-weight:600}
-
-/* ─── PAGAMENTOS PENDENTES ───────────────────────── */
-.pagamento-item{
-  display:flex;align-items:center;gap:.6rem;
-  padding:.6rem 0;border-bottom:1px solid var(--border);
-}
-.pagamento-item:last-child{border-bottom:none}
-.pagamento-icon{font-size:1rem;flex-shrink:0}
-.pagamento-desc{flex:1;font-size:.85rem;line-height:1.3}
-.pagamento-valor{font-size:.88rem;font-weight:600;color:var(--orange);white-space:nowrap}
 
 /* ─── PESQUISA ───────────────────────────────────── */
 .search-result{
@@ -499,13 +436,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     </div>
   </header>
 
-  <!-- NOTIFICATION BANNER -->
-  <div id="notif-banner">
-    <span class="notif-icon">🗓️</span>
-    <span class="notif-text" id="notif-text"></span>
-    <button class="notif-close" onclick="document.getElementById('notif-banner').style.display='none'" title="Fechar">✕</button>
-  </div>
-
   <div class="app-body">
     <!-- SIDEBAR -->
     <nav class="sidebar">
@@ -546,24 +476,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
               <div class="card-title">💰 Orçamento · Luxemburgo, Suíça & Itália</div>
             </div>
             <div class="card-body" id="orcamento-resumo-painel"></div>
-          </div>
-        </div>
-        <!-- Segunda linha -->
-        <div class="grid-2">
-          <!-- Checklist pré-viagem -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">✅ Checklist pré-viagem</div>
-              <button class="btn-secondary" style="font-size:.75rem;padding:.25rem .65rem" onclick="showTab('tab-mochila')">Ver tudo</button>
-            </div>
-            <div class="card-body" id="checklist-painel"></div>
-          </div>
-          <!-- Pagamentos pendentes -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">💳 Pagamentos pendentes</div>
-            </div>
-            <div class="card-body" id="pagamentos-painel"></div>
           </div>
         </div>
       </div>
@@ -978,12 +890,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
    FIREBASE CONFIG
 ═══════════════════════════════════════════════════ */
 const firebaseConfig = {
-  apiKey:"AIzaSyDummyKeyReplaceWithYours",
+  apiKey:"AIzaSyBJmth1gb1m3ou0XCM6q_wsG-kQjowPeRo",
   authDomain:"fora-do-retangulo.firebaseapp.com",
   projectId:"fora-do-retangulo",
-  storageBucket:"fora-do-retangulo.appspot.com",
-  messagingSenderId:"000000000000",
-  appId:"1:000000000000:web:0000000000000000"
+  storageBucket:"fora-do-retangulo.firebasestorage.app",
+  messagingSenderId:"78445229416",
+  appId:"1:78445229416:web:5c246c0f226a88db40d2dd"
 };
 
 let db, auth, currentUser;
@@ -1038,8 +950,6 @@ async function loadFirestoreData(){
     if(snap.exists){ Object.assign(appData, snap.data()); }
     // Defaults se vazio
     if(!appData.viagens.length) initDefaultData();
-    // Garantir checklist sempre presente
-    if(!appData.checklist||!appData.checklist.length) initChecklistDefault();
     renderAll();
   } catch(e){ initDemo(); }
 }
@@ -1089,28 +999,6 @@ function initDefaultData(){
   appData.fotos = [];
   appData.notas = [];
   appData.paragens_extra = {};
-  initChecklistDefault();
-}
-
-function initChecklistDefault(){
-  appData.checklist = [
-    {id:'c1',label:'Verificar validade do passaporte (min. 6 meses)',cat:'doc',done:false},
-    {id:'c2',label:'Carta de condução internacional',cat:'doc',done:false},
-    {id:'c3',label:'Cartão europeu de saúde (CESD)',cat:'doc',done:false},
-    {id:'c4',label:'Confirmar check-in online TAP TP531',cat:'res',done:false},
-    {id:'c5',label:'Imprimir/guardar voucher Hertz',cat:'res',done:false},
-    {id:'c6',label:'Descarregar mapas offline (Google Maps)',cat:'res',done:false},
-    {id:'c7',label:'Seguro de viagem activo',cat:'doc',done:false},
-    {id:'c8',label:'Adaptadores de tomada (tipo J — Suíça)',cat:'bag',done:false},
-    {id:'c9',label:'Roupa para frio (0°C — Alpes)',cat:'bag',done:false},
-    {id:'c10',label:'Impermeável e calçado impermeável',cat:'bag',done:false},
-    {id:'c11',label:'Câmara fotográfica carregada',cat:'bag',done:false},
-    {id:'c12',label:'Levantar/confirmar euros em dinheiro',cat:'fin',done:false},
-    {id:'c13',label:'Confirmar francos suíços (CHF)',cat:'fin',done:false},
-    {id:'c14',label:'Informar banco sobre viagem ao estrangeiro',cat:'fin',done:false},
-    {id:'c15',label:'Reservas de restaurante confirmadas',cat:'res',done:false},
-    {id:'c16',label:'Power bank carregado',cat:'bag',done:false},
-  ];
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1320,110 +1208,6 @@ const GASTRONOMIA = {
 /* ═══════════════════════════════════════════════════
    RENDER FUNCTIONS
 ═══════════════════════════════════════════════════ */
-function startCountdown(){
-  if(_cdInterval) clearInterval(_cdInterval);
-  function tick(){
-    const now = new Date();
-    const viagem = new Date('2026-05-26T06:15:00');
-    const diff = viagem - now;
-    const cc = document.getElementById('countdown-container');
-    if(!cc) return;
-    if(diff > 0){
-      const totalSec = Math.floor(diff/1000);
-      const dias = Math.floor(totalSec/(60*60*24));
-      const horas = Math.floor((totalSec%(60*60*24))/(60*60));
-      const mins = Math.floor((totalSec%(60*60))/60);
-      const segs = totalSec%60;
-      const pad = n=>String(n).padStart(2,'0');
-      // próximo voo
-      const voo = (appData.reservas||[]).find(r=>r.tipo==='✈' && r.data==='2026-05-26');
-      const vooHTML = voo ? `<div class="countdown-voo">✈ ${voo.ref||'TP531'} · 26 Mai · ${voo.hora||'06h15'} · Lisboa → Genebra</div>` : '';
-      cc.innerHTML=`<div class="countdown-widget">
-        <div class="countdown-dias">${dias}</div>
-        <div class="countdown-hms">${pad(horas)}h ${pad(mins)}m ${pad(segs)}s</div>
-        <div class="countdown-viagem" style="font-size:1.1rem;color:var(--accent)">Luxemburgo, Suíça & Itália</div>
-        <div class="countdown-texto">26 — 30 de Maio de 2026 · 5 dias · 4 países</div>
-        ${vooHTML}
-      </div>`;
-    } else {
-      clearInterval(_cdInterval);
-      cc.innerHTML=`<div class="countdown-widget" style="border-color:rgba(63,185,80,.3)">
-        <div style="font-size:2rem">🎒</div>
-        <div class="countdown-viagem" style="color:var(--green)">Viagem a decorrer ou concluída!</div>
-      </div>`;
-    }
-  }
-  tick();
-  _cdInterval = setInterval(tick, 1000);
-}
-
-function renderNotifBanner(){
-  const banner = document.getElementById('notif-banner');
-  const textEl = document.getElementById('notif-text');
-  if(!banner||!textEl) return;
-  const now = new Date();
-  // encontrar reserva mais próxima nos próximos 7 dias
-  const upcoming = (appData.reservas||[])
-    .map(r=>{ const d=new Date(r.data+'T'+(r.hora||'00:00')+':00'); return {r,d}; })
-    .filter(({d})=>{ const diff=(d-now)/(1000*60*60*24); return diff>0&&diff<=7; })
-    .sort((a,b)=>a.d-b.d);
-  if(upcoming.length===0){ banner.classList.remove('visible'); return; }
-  const {r,d} = upcoming[0];
-  const dias = Math.ceil((d-now)/(1000*60*60*24));
-  const label = dias===1?'amanhã':`em ${dias} dias`;
-  textEl.innerHTML=`<strong>Daqui a ${dias} dia${dias===1?'':'s'}:</strong> ${r.desc}`;
-  banner.classList.add('visible');
-}
-
-function renderChecklistPainel(){
-  const el = document.getElementById('checklist-painel');
-  if(!el) return;
-  if(!appData.checklist) appData.checklist=[];
-  const total = appData.checklist.length;
-  const done = appData.checklist.filter(i=>i.done).length;
-  const pct = total ? Math.round(done/total*100) : 0;
-  const catClass = {doc:'cat-doc',res:'cat-res',bag:'cat-bag',fin:'cat-fin'};
-  const catLabel = {doc:'Documentos',res:'Reservas',bag:'Bagagem',fin:'Finanças'};
-  // mostrar os primeiros 4 itens não concluídos + concluídos no fim
-  const pending = appData.checklist.filter(i=>!i.done).slice(0,4);
-  const rows = pending.map(item=>`
-    <label class="checklist-item${item.done?' done':''}">
-      <input type="checkbox" ${item.done?'checked':''} onchange="toggleChecklist('${item.id}',this.checked)">
-      <span class="checklist-label">${item.label}</span>
-      <span class="checklist-cat ${catClass[item.cat]||''}">${catLabel[item.cat]||item.cat}</span>
-    </label>`).join('');
-  el.innerHTML=`
-    <div class="checklist-progress-label">
-      <span>${done} de ${total} concluídas</span>
-      <span class="checklist-pct">${pct}%</span>
-    </div>
-    <div class="checklist-progress-bar"><div class="checklist-progress-fill" style="width:${pct}%"></div></div>
-    ${rows||'<div class="empty-state" style="padding:1rem 0"><div>✅ Tudo concluído!</div></div>'}
-  `;
-}
-
-function toggleChecklist(id, checked){
-  if(!appData.checklist) return;
-  const item = appData.checklist.find(i=>i.id===id);
-  if(item){ item.done=checked; saveFirestoreData(); renderChecklistPainel(); }
-}
-
-function renderPagamentosPainel(){
-  const el = document.getElementById('pagamentos-painel');
-  if(!el) return;
-  const pendentes = (appData.reservas||[]).filter(r=>r.estado!=='pago');
-  if(!pendentes.length){
-    el.innerHTML='<div class="empty-state" style="padding:1rem 0">✅ Sem pagamentos pendentes</div>';
-    return;
-  }
-  el.innerHTML = pendentes.map(r=>`
-    <div class="pagamento-item">
-      <span class="pagamento-icon">${r.tipo||'📄'}</span>
-      <span class="pagamento-desc">${r.desc}</span>
-      <span class="pagamento-valor">€${(r.valor||0).toFixed(2)}</span>
-    </div>`).join('');
-}
-
 function renderAll(){
   renderPainel();
   renderDestinos();
@@ -1434,17 +1218,25 @@ function renderAll(){
   renderGastronomia();
 }
 
-// Countdown interval handle
-let _cdInterval = null;
-
 function renderPainel(){
-  // Live countdown
-  startCountdown();
-  // Notification banner — próxima reserva em ≤7 dias
-  renderNotifBanner();
-  // Checklist & Pagamentos
-  renderChecklistPainel();
-  renderPagamentosPainel();
+  // Countdown
+  const hoje = new Date();
+  const viagem = new Date('2026-05-26');
+  const diff = Math.ceil((viagem - hoje)/(1000*60*60*24));
+  const cc = document.getElementById('countdown-container');
+  if(diff > 0){
+    cc.innerHTML=`<div class="countdown-widget">
+      <div class="countdown-dias">${diff}</div>
+      <div class="countdown-viagem">dias para</div>
+      <div class="countdown-viagem" style="font-size:1.1rem;color:var(--accent)">Luxemburgo, Suíça & Itália</div>
+      <div class="countdown-texto">26 — 30 de Maio de 2026 · 5 dias · 4 países</div>
+    </div>`;
+  } else {
+    cc.innerHTML=`<div class="countdown-widget" style="border-color:rgba(63,185,80,.3)">
+      <div style="font-size:2rem">🎒</div>
+      <div class="countdown-viagem" style="color:var(--green)">Viagem a decorrer ou concluída!</div>
+    </div>`;
+  }
   // Stats
   const totalGasto = appData.despesas.reduce((a,b)=>a+(b.valor||0),0);
   document.getElementById('stats-row').innerHTML=`
