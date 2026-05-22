@@ -4,12 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fora do Retângulo · Dashboard de Viagens</title>
+
+<!-- Firebase compat (não ES modules) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <style>
+/* ─── TOKENS ─────────────────────────────────────── */
 :root{
   --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;
   --border:#30363d;--border2:#444c56;
@@ -19,7 +21,8 @@
   --orange:#d29922;--orange2:#9e6a03;
   --red:#f85149;--red2:#da3633;
   --purple:#bc8cff;--purple2:#8957e5;
-  --teal:#39d353;--gold:#e3b341;
+  --teal:#39d353;
+  --gold:#e3b341;
   --radius:8px;--radius2:12px;--radius3:16px;
   --shadow:0 8px 24px rgba(0,0,0,.4);
   --font:'Segoe UI',system-ui,-apple-system,sans-serif;
@@ -27,213 +30,400 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;line-height:1.6}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
-#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);background-image:radial-gradient(ellipse at 30% 20%,rgba(88,166,255,.08) 0,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(188,140,255,.06) 0,transparent 60%)}
-.login-card{text-align:center;padding:3rem 2.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius3);max-width:400px;width:90%;box-shadow:var(--shadow)}
-.login-logo{font-size:3rem;margin-bottom:1rem}.login-title{font-size:1.8rem;font-weight:700;letter-spacing:-.03em;margin-bottom:.25rem}
+
+/* ─── SCROLLBAR ──────────────────────────────────── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+
+/* ─── LOGIN ──────────────────────────────────────── */
+#login-screen{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;background:var(--bg);
+  background-image:radial-gradient(ellipse at 30% 20%,rgba(88,166,255,.08) 0,transparent 60%),
+    radial-gradient(ellipse at 70% 80%,rgba(188,140,255,.06) 0,transparent 60%);
+}
+.login-card{
+  text-align:center;padding:3rem 2.5rem;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius3);max-width:400px;width:90%;
+  box-shadow:var(--shadow),0 0 60px rgba(88,166,255,.06);
+}
+.login-logo{font-size:3rem;margin-bottom:1rem}
+.login-title{font-size:1.8rem;font-weight:700;letter-spacing:-.03em;margin-bottom:.25rem}
 .login-subtitle{color:var(--text2);font-size:.9rem;margin-bottom:2rem;line-height:1.5}
-.btn-google{display:inline-flex;align-items:center;gap:.75rem;padding:.85rem 2rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:.95rem;font-weight:500;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-google{
+  display:inline-flex;align-items:center;gap:.75rem;
+  padding:.85rem 2rem;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--radius);color:var(--text);font-size:.95rem;font-weight:500;
+  cursor:pointer;transition:all .2s;text-decoration:none;
+}
 .btn-google:hover{background:var(--bg4);border-color:var(--accent);transform:translateY(-1px)}
 .btn-google img{width:20px;height:20px}
+
+/* ─── LAYOUT ─────────────────────────────────────── */
 #app{display:none;flex-direction:column;height:100vh;overflow:hidden}
 #app.visible{display:flex}
-.header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;z-index:100}
+
+/* ─── HEADER ─────────────────────────────────────── */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.5rem;background:var(--bg2);
+  border-bottom:1px solid var(--border);flex-shrink:0;z-index:100;
+}
+.header-logo{display:flex;align-items:center;gap:.75rem}
 .header-logo span{font-size:1.25rem;font-weight:700;letter-spacing:-.02em}
 .header-logo span em{color:var(--accent);font-style:normal}
 .header-meta{display:flex;align-items:center;gap:1rem}
-.sync-badge{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--green);padding:.25rem .6rem;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);border-radius:20px}
-.user-info{display:flex;align-items:center;gap:.6rem;cursor:pointer;padding:.35rem .7rem;border-radius:var(--radius);transition:background .2s}
+.sync-badge{
+  display:flex;align-items:center;gap:.4rem;font-size:.78rem;
+  color:var(--green);padding:.25rem .6rem;background:rgba(63,185,80,.1);
+  border:1px solid rgba(63,185,80,.2);border-radius:20px;
+}
+.user-info{display:flex;align-items:center;gap:.6rem;cursor:pointer;padding:.35rem .7rem;
+  border-radius:var(--radius);transition:background .2s}
 .user-info:hover{background:var(--bg3)}
 .user-avatar{width:30px;height:30px;border-radius:50%;border:2px solid var(--border2)}
 .user-name{font-size:.85rem;color:var(--text2)}
 .btn-icon{background:none;border:none;color:var(--text2);cursor:pointer;padding:.5rem;border-radius:var(--radius);transition:all .2s;font-size:1.1rem}
 .btn-icon:hover{background:var(--bg3);color:var(--text)}
-.btn-new{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;background:var(--green2);border:1px solid var(--green);border-radius:var(--radius);color:#fff;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-new{
+  display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;
+  background:var(--green2);border:1px solid var(--green);border-radius:var(--radius);
+  color:#fff;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;
+}
 .btn-new:hover{background:var(--green);transform:translateY(-1px)}
+
+/* ─── MAIN LAYOUT ────────────────────────────────── */
 .app-body{display:flex;flex:1;overflow:hidden}
-.sidebar{width:230px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1rem 0;overflow-y:auto}
-.nav-section{padding:0 .75rem .5rem;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-top:1rem}
-.nav-item{display:flex;align-items:center;gap:.65rem;padding:.55rem 1rem;color:var(--text2);cursor:pointer;transition:all .15s;font-size:.88rem;border-left:3px solid transparent}
+.sidebar{
+  width:220px;flex-shrink:0;background:var(--bg2);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  padding:1rem 0;overflow-y:auto;
+}
+.nav-section{padding:0 .75rem .5rem;font-size:.72rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-top:1rem}
+.nav-item{
+  display:flex;align-items:center;gap:.65rem;padding:.55rem 1rem;
+  color:var(--text2);cursor:pointer;transition:all .15s;font-size:.88rem;
+  border-left:3px solid transparent;
+}
 .nav-item:hover{background:var(--bg3);color:var(--text)}
 .nav-item.active{color:var(--accent);background:rgba(88,166,255,.08);border-left-color:var(--accent)}
 .nav-item .icon{font-size:1rem;width:20px;text-align:center}
+
+/* ─── CONTENT ────────────────────────────────────── */
 .content{flex:1;overflow-y:auto;padding:1.5rem}
 .tab{display:none}.tab.active{display:block}
+
+/* ─── CARDS / GRIDS ──────────────────────────────── */
 .page-header{margin-bottom:1.5rem}
 .page-title{font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
 .page-sub{color:var(--text2);font-size:.9rem;margin-top:.25rem}
 .grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem}
 .grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;transition:all .2s}
+.card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius2);overflow:hidden;transition:all .2s;
+}
 .card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
 .card-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
 .card-body{padding:1.25rem}
 .card-title{font-weight:600;margin-bottom:.25rem}
 .card-sub{font-size:.82rem;color:var(--text2)}
+
+/* ─── STATS ──────────────────────────────────────── */
 .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem;text-align:center;transition:border-color .2s}
+.stat-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:1.25rem;text-align:center;
+  transition:border-color .2s;
+}
 .stat-card:hover{border-color:var(--border2)}
 .stat-num{font-size:2rem;font-weight:700;line-height:1}
 .stat-label{font-size:.78rem;color:var(--text2);margin-top:.35rem;text-transform:uppercase;letter-spacing:.05em}
-/* Roteiro */
-.roteiro-selector{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:.75rem}
-.roteiro-btn{flex:1;min-width:140px;padding:.75rem 1rem;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;transition:all .2s;text-align:center;font-size:.83rem}
+
+/* ─── ITINERARY ROTEIRO ──────────────────────────── */
+.roteiro-selector{
+  display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+  padding:.75rem;
+}
+.roteiro-btn{
+  flex:1;min-width:140px;padding:.75rem 1rem;
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+  color:var(--text2);cursor:pointer;transition:all .2s;text-align:center;font-size:.83rem;
+}
 .roteiro-btn:hover{border-color:var(--border2);color:var(--text)}
 .roteiro-btn.active{background:rgba(88,166,255,.1);border-color:var(--accent);color:var(--accent)}
 .roteiro-btn .dia{font-size:.75rem;color:var(--text3);display:block;margin-bottom:.2rem}
 .roteiro-btn .titulo{font-weight:600;font-size:.82rem;line-height:1.3}
-.roteiro-header{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem;margin-bottom:1.25rem}
+
+.roteiro-header{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+  padding:1.25rem;margin-bottom:1.25rem;
+}
 .roteiro-meta{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.75rem}
-.meta-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;padding:.3rem .7rem;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2)}
+.meta-badge{
+  display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;
+  padding:.3rem .7rem;background:var(--bg3);border:1px solid var(--border);
+  border-radius:20px;color:var(--text2);
+}
 .rota-text{font-size:.85rem;color:var(--text2);margin-top:.5rem;font-style:italic}
+
 .seccao{margin-bottom:1.25rem}
-.seccao-titulo{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;cursor:pointer;font-weight:600;font-size:.9rem}
+.seccao-titulo{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem 1rem;background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius) var(--radius) 0 0;cursor:pointer;
+  font-weight:600;font-size:.9rem;
+}
 .seccao-titulo .periodo{font-size:.78rem;color:var(--text2);font-weight:400}
-.seccao-content{border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);overflow:hidden}
-.paragem{display:grid;grid-template-columns:80px 1fr auto;gap:1rem;align-items:start;padding:.9rem 1rem;border-bottom:1px solid var(--border);transition:background .15s}
+.seccao-content{
+  border:1px solid var(--border);border-top:none;
+  border-radius:0 0 var(--radius) var(--radius);overflow:hidden;
+}
+.paragem{
+  display:grid;grid-template-columns:80px 1fr auto;gap:1rem;align-items:start;
+  padding:.9rem 1rem;border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
 .paragem:last-child{border-bottom:none}
 .paragem:hover{background:rgba(88,166,255,.04)}
 .p-hora{font-size:.82rem;font-weight:600;color:var(--accent);font-family:var(--font-mono);padding-top:.1rem}
 .p-local{font-weight:600;font-size:.9rem;margin-bottom:.2rem}
 .p-desc{font-size:.82rem;color:var(--text2);line-height:1.5}
 .p-custo{font-size:.78rem;font-weight:600;color:var(--green);white-space:nowrap;padding-top:.1rem}
-.p-maps{display:inline-flex;align-items:center;gap:.3rem;font-size:.75rem;color:var(--accent);margin-top:.35rem;text-decoration:none;padding:.2rem .5rem;border:1px solid rgba(88,166,255,.3);border-radius:4px;transition:all .15s;cursor:pointer}
+.p-maps{
+  display:inline-flex;align-items:center;gap:.3rem;font-size:.75rem;
+  color:var(--accent);margin-top:.35rem;text-decoration:none;
+  padding:.2rem .5rem;border:1px solid rgba(88,166,255,.3);border-radius:4px;
+  transition:all .15s;cursor:pointer;
+}
 .p-maps:hover{background:rgba(88,166,255,.1)}
-.trecho-dist{display:flex;align-items:center;gap:.5rem;padding:.35rem 1rem;background:rgba(88,166,255,.03);border-bottom:1px solid var(--border);font-size:.75rem}
-.dist-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.12rem .5rem;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2)}
-.alertas-box{background:rgba(226,183,65,.06);border:1px solid rgba(226,183,65,.3);border-radius:var(--radius2);padding:1rem 1.25rem;margin-top:1.25rem}
+
+/* ─── ALERTAS ────────────────────────────────────── */
+.alertas-box{
+  background:rgba(226,183,65,.06);border:1px solid rgba(226,183,65,.3);
+  border-radius:var(--radius2);padding:1rem 1.25rem;margin-top:1.25rem;
+}
 .alertas-box h4{color:var(--gold);font-size:.9rem;margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
 .alertas-box ul{list-style:none;padding:0}
 .alertas-box li{font-size:.83rem;color:var(--text2);padding:.3rem 0;display:flex;align-items:start;gap:.5rem}
 .alertas-box li::before{content:"→";color:var(--gold);flex-shrink:0}
+
+/* ─── PREVISÃO TEMPO ─────────────────────────────── */
 .tempo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;margin-top:1rem}
-.tempo-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem 1rem}
+.tempo-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:.9rem 1rem;
+}
 .tempo-local{font-size:.82rem;font-weight:600;margin-bottom:.4rem}
 .tempo-range{font-size:1.1rem;font-weight:700;color:var(--accent)}
 .tempo-cond{font-size:.78rem;color:var(--text2);margin:.2rem 0}
 .tempo-equip{font-size:.75rem;color:var(--orange)}
+
+/* ─── REFEIÇÕES ──────────────────────────────────── */
 .refeicoes-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
-.refeicao-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem}
-.refeicao-card h5{font-size:.82rem;font-weight:600;margin-bottom:.5rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
+.refeicao-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;
+}
+.refeicao-card h5{font-size:.82rem;font-weight:600;margin-bottom:.5rem;
+  color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
 .refeicao-card p{font-size:.82rem;color:var(--text);line-height:1.6}
-#leaflet-map{width:100%;height:500px;border-radius:var(--radius2)}
+
+/* ─── MAPA ───────────────────────────────────────── */
+#map-container{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius2);overflow:hidden;position:relative;
+}
+#world-svg{width:100%;height:420px;display:block}
 .map-legend{display:flex;gap:1.5rem;margin-top:.75rem}
 .legend-item{display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--text2)}
 .legend-dot{width:10px;height:10px;border-radius:50%}
-/* Destinos */
-.dest-tabs{display:flex;gap:.5rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border);padding-bottom:.75rem}
-.dest-tab-btn{padding:.45rem 1rem;background:none;border:1px solid transparent;border-radius:var(--radius);color:var(--text2);cursor:pointer;font-size:.85rem;transition:all .2s}
-.dest-tab-btn.active{background:rgba(88,166,255,.1);border-color:var(--accent);color:var(--accent)}
-.dest-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1.1rem;transition:all .2s;cursor:pointer;position:relative}
+
+/* ─── DEST CARDS ─────────────────────────────────── */
+.dest-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+  padding:1.1rem;transition:all .2s;cursor:pointer;position:relative;
+}
 .dest-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.dest-flag{font-size:1.4rem;margin-bottom:.4rem}
 .dest-name{font-weight:600;font-size:.95rem}
 .dest-country{font-size:.8rem;color:var(--text2);margin-bottom:.5rem}
 .dest-dates{font-size:.78rem;color:var(--text3)}
 .stars{color:var(--gold);font-size:.85rem}
-.status-badge{position:absolute;top:.75rem;right:.75rem;font-size:.7rem;font-weight:600;padding:.2rem .5rem;border-radius:20px}
+.status-badge{
+  position:absolute;top:.75rem;right:.75rem;font-size:.7rem;font-weight:600;
+  padding:.2rem .5rem;border-radius:20px;
+}
 .status-visited{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
 .status-planned{background:rgba(88,166,255,.12);color:var(--accent);border:1px solid rgba(88,166,255,.3)}
-/* Reservas */
-.reserva-item{display:flex;align-items:start;gap:1rem;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);transition:background .15s}
+
+/* ─── RESERVAS ───────────────────────────────────── */
+.reserva-item{
+  display:flex;align-items:center;gap:1rem;padding:.85rem 1.1rem;
+  border-bottom:1px solid var(--border);transition:background .15s;
+}
 .reserva-item:last-child{border-bottom:none}
 .reserva-item:hover{background:rgba(88,166,255,.04)}
-.reserva-icon{font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;margin-top:.1rem}
-.reserva-info{flex:1;min-width:0}
+.reserva-icon{font-size:1.4rem;width:36px;text-align:center}
+.reserva-info{flex:1}
 .reserva-nome{font-weight:600;font-size:.9rem}
 .reserva-det{font-size:.8rem;color:var(--text2)}
-.reserva-ref{font-size:.75rem;color:var(--text3)}
 .reserva-valor{font-size:.85rem;font-weight:600;color:var(--green);text-align:right}
-.pago-badge{font-size:.7rem;font-weight:600;padding:.15rem .4rem;border-radius:20px}
-.pago-sim{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
-.pago-nao{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}
-/* Orçamento */
+.reserva-ref{font-size:.75rem;color:var(--text3)}
+
+/* ─── ORÇAMENTO ──────────────────────────────────── */
+.budget-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
 .progress-bar{background:var(--bg4);border-radius:4px;height:8px;overflow:hidden;margin:.4rem 0}
 .progress-fill{height:100%;border-radius:4px;transition:width .3s}
-.despesa-item{display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--border)}
+.despesa-item{
+  display:flex;align-items:center;gap:1rem;padding:.7rem 0;
+  border-bottom:1px solid var(--border);
+}
 .despesa-item:last-child{border-bottom:none}
 .cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .despesa-info{flex:1}
 .despesa-nome{font-size:.88rem;font-weight:500}
 .despesa-cat{font-size:.75rem;color:var(--text3)}
 .despesa-valor{font-weight:600;font-size:.9rem}
-.confirmada-badge{font-size:.68rem;padding:.1rem .35rem;border-radius:20px;margin-left:.35rem}
-.confirmada-sim{background:rgba(63,185,80,.1);color:var(--green);border:1px solid rgba(63,185,80,.2)}
-.confirmada-nao{background:rgba(210,153,34,.1);color:var(--orange);border:1px solid rgba(210,153,34,.2)}
-/* Bagagem */
-.mala-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);margin-bottom:1rem;overflow:hidden}
-.mala-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);font-weight:600;font-size:.9rem}
-.mala-item{display:flex;align-items:center;gap:.75rem;padding:.6rem 1.1rem;border-bottom:1px solid var(--border);font-size:.88rem}
-.mala-item:last-child{border-bottom:none}
-.mala-check{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
-.mala-nome{flex:1}.mala-nome.checked{text-decoration:line-through;color:var(--text3)}
-.produto-onde{font-size:.75rem;color:var(--accent)}
-.produto-preco{font-size:.75rem;color:var(--green);font-weight:600}
-/* Form */
+
+/* ─── FORM ───────────────────────────────────────── */
 .form-group{margin-bottom:1rem}
 .form-label{display:block;font-size:.82rem;color:var(--text2);margin-bottom:.4rem;font-weight:500}
-.form-input,.form-select,.form-textarea{width:100%;padding:.6rem .85rem;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:.88rem;font-family:var(--font);transition:border .2s}
-.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.12)}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:.6rem .85rem;background:var(--bg3);
+  border:1px solid var(--border);border-radius:var(--radius);
+  color:var(--text);font-size:.88rem;font-family:var(--font);transition:border .2s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.12);
+}
 .form-textarea{resize:vertical;min-height:80px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.btn-primary{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;background:var(--accent2);border:1px solid var(--accent);border-radius:var(--radius);color:#fff;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;
+  background:var(--accent2);border:1px solid var(--accent);border-radius:var(--radius);
+  color:#fff;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s;
+}
 .btn-primary:hover{background:var(--accent);transform:translateY(-1px)}
-.btn-secondary{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);
+  color:var(--text);font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s;
+}
 .btn-secondary:hover{background:var(--bg4)}
-.btn-danger{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;background:rgba(248,81,73,.15);border:1px solid var(--red2);border-radius:var(--radius);color:var(--red);font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-danger{
+  display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;
+  background:rgba(248,81,73,.15);border:1px solid var(--red2);border-radius:var(--radius);
+  color:var(--red);font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s;
+}
 .btn-danger:hover{background:rgba(248,81,73,.25)}
 .form-actions{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.25rem}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)}
+
+/* ─── MODAL ──────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:1000;align-items:center;justify-content:center;padding:1rem;
+  backdrop-filter:blur(4px);
+}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius2);padding:1.5rem;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius2);
+  padding:1.5rem;max-width:560px;width:100%;
+  max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);
+}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
 .modal-title{font-size:1.05rem;font-weight:700}
 .modal-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.2rem;padding:.25rem}
 .modal-close:hover{color:var(--text)}
+
+/* ─── GASTRONOMIA ────────────────────────────────── */
+.gastro-section{margin-top:1rem}
 .gastro-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.gastro-table th{text-align:left;padding:.6rem .75rem;border-bottom:2px solid var(--border2);color:var(--text2);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.gastro-table th{text-align:left;padding:.6rem .75rem;border-bottom:2px solid var(--border2);
+  color:var(--text2);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
 .gastro-table td{padding:.65rem .75rem;border-bottom:1px solid var(--border);vertical-align:top}
 .gastro-table tr:hover td{background:rgba(88,166,255,.04)}
 .stars-gold{color:var(--gold)}
-.countdown-widget{background:linear-gradient(135deg,rgba(88,166,255,.1),rgba(188,140,255,.08));border:1px solid rgba(88,166,255,.3);border-radius:var(--radius2);padding:1.25rem;text-align:center;margin-bottom:1.5rem}
+
+/* ─── COUNTDOWN ──────────────────────────────────── */
+.countdown-widget{
+  background:linear-gradient(135deg,rgba(88,166,255,.1),rgba(188,140,255,.08));
+  border:1px solid rgba(88,166,255,.3);border-radius:var(--radius2);
+  padding:1.25rem;text-align:center;margin-bottom:1.5rem;
+}
 .countdown-dias{font-size:3rem;font-weight:800;line-height:1;color:var(--accent)}
 .countdown-texto{font-size:.88rem;color:var(--text2)}
 .countdown-viagem{font-weight:600;color:var(--text);margin:.25rem 0}
-.diario-entry{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1.25rem;margin-bottom:1rem}
+
+/* ─── PESQUISA ───────────────────────────────────── */
+.search-result{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1rem;margin-bottom:.75rem;font-size:.88rem;line-height:1.7;color:var(--text);
+}
+
+/* ─── DIÁRIO ─────────────────────────────────────── */
+.diario-entry{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+  padding:1.25rem;margin-bottom:1rem;
+}
 .diario-date{font-size:.78rem;color:var(--text3);margin-bottom:.4rem}
 .diario-text{font-size:.88rem;line-height:1.7;color:var(--text)}
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin-top:.75rem}
 .photo-thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius);cursor:pointer;transition:opacity .2s}
 .photo-thumb:hover{opacity:.8}
-.memoria-local-tag{display:inline-block;font-size:.72rem;padding:.15rem .5rem;border-radius:20px;background:rgba(88,166,255,.12);color:var(--accent);border:1px solid rgba(88,166,255,.2);margin-bottom:.4rem}
-.tag{display:inline-block;font-size:.72rem;padding:.15rem .5rem;border-radius:20px;font-weight:500;margin:.1rem}
+
+/* ─── MISC ───────────────────────────────────────── */
+.tag{display:inline-block;font-size:.72rem;padding:.15rem .5rem;border-radius:20px;
+  font-weight:500;margin:.1rem}
 .tag-blue{background:rgba(88,166,255,.15);color:var(--accent);border:1px solid rgba(88,166,255,.25)}
-.empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text3)}
+.tag-green{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.25)}
+.tag-orange{background:rgba(210,153,34,.15);color:var(--orange);border:1px solid rgba(210,153,34,.25)}
+.tag-red{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.25)}
+.empty-state{
+  text-align:center;padding:3rem 1.5rem;color:var(--text3);
+}
 .empty-icon{font-size:2.5rem;margin-bottom:.75rem}
 .divider{height:1px;background:var(--border);margin:1.25rem 0}
 .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
 .section-title{font-size:1rem;font-weight:600}
-.produto-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem;margin-bottom:.5rem}
-.produto-nome{font-weight:600;font-size:.88rem;margin-bottom:.2rem}
-/* Leaflet override */
-.leaflet-container{background:#1a2332!important}
-@media(max-width:768px){.sidebar{display:none}.form-row{grid-template-columns:1fr}.refeicoes-grid{grid-template-columns:1fr}.roteiro-selector{flex-direction:column}.paragem{grid-template-columns:70px 1fr}.p-custo{display:none}}
+.collapsible-content{overflow:hidden;transition:max-height .3s ease}
+
+/* ─── RESPONSIVE ─────────────────────────────────── */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .form-row{grid-template-columns:1fr}
+  .refeicoes-grid{grid-template-columns:1fr}
+  .roteiro-selector{flex-direction:column}
+  .paragem{grid-template-columns:70px 1fr}
+  .p-custo{display:none}
+}
 </style>
 </head>
 <body>
+
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">🗺️</div>
     <div class="login-title">Fora do Retângulo</div>
     <div class="login-subtitle">Acervo partilhado de destinos, memórias, itinerários e reservas.<br>Entre com a sua conta Google para aceder.</div>
-    <button class="btn-google" onclick="signInWithGoogle()"><img src="https://www.google.com/favicon.ico" alt="Google">Entrar com Google</button>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <img src="https://www.google.com/favicon.ico" alt="Google">
+      Entrar com Google
+    </button>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
+  <!-- HEADER -->
   <header class="header">
-    <div class="header-logo"><span>🗺️ Fora do <em>Retângulo</em></span></div>
+    <div class="header-logo">
+      <span>🗺️ Fora do <em>Retângulo</em></span>
+    </div>
     <div class="header-meta">
       <div class="sync-badge">☁ Sincronizado</div>
       <button class="btn-new" onclick="openModal('modal-nova-viagem')">+ Nova viagem</button>
@@ -242,143 +432,191 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <span class="user-name" id="user-name"></span>
         <span style="font-size:.8rem;color:var(--text3)">↗</span>
       </div>
-      <button class="btn-icon" onclick="toggleDark()">🌙</button>
+      <button class="btn-icon" onclick="toggleDark()" title="Modo claro/escuro">🌙</button>
     </div>
   </header>
+
   <div class="app-body">
+    <!-- SIDEBAR -->
     <nav class="sidebar">
       <div class="nav-section">Visão Geral</div>
       <div class="nav-item active" onclick="showTab('tab-painel')"><span class="icon">🏠</span> Painel</div>
       <div class="nav-item" onclick="showTab('tab-destinos')"><span class="icon">📍</span> Destinos</div>
       <div class="nav-item" onclick="showTab('tab-mapa')"><span class="icon">🌍</span> Mapa</div>
+
       <div class="nav-section">Viagem Actual</div>
       <div class="nav-item" onclick="showTab('tab-roteiro')"><span class="icon">🗺️</span> Roteiros</div>
       <div class="nav-item" onclick="showTab('tab-reservas')"><span class="icon">🎫</span> Reservas</div>
       <div class="nav-item" onclick="showTab('tab-orcamento')"><span class="icon">💰</span> Orçamento</div>
-      <div class="nav-item" onclick="showTab('tab-bagagem')"><span class="icon">🧳</span> Bagagem & Produtos</div>
+
       <div class="nav-section">Memórias</div>
       <div class="nav-item" onclick="showTab('tab-memorias')"><span class="icon">📷</span> Fotos & Diário</div>
       <div class="nav-item" onclick="showTab('tab-gastronomia')"><span class="icon">🍷</span> Gastronomia</div>
       <div class="nav-item" onclick="showTab('tab-pesquisa')"><span class="icon">🔍</span> Pesquisa</div>
     </nav>
+
+    <!-- CONTENT -->
     <main class="content">
 
-      <!-- PAINEL -->
+      <!-- ── PAINEL ── -->
       <div id="tab-painel" class="tab active">
         <div id="countdown-container"></div>
         <div class="stats-row" id="stats-row"></div>
         <div class="grid-2">
-          <div class="card"><div class="card-header"><div class="card-title">⏰ Viagens</div></div><div class="card-body" id="proximas-viagens"></div></div>
-          <div class="card"><div class="card-header"><div class="card-title">💰 Resumo orçamento</div></div><div class="card-body" id="orcamento-resumo-painel"></div></div>
+          <!-- Próximas viagens -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⏰ Próximas viagens</div>
+            </div>
+            <div class="card-body" id="proximas-viagens"></div>
+          </div>
+          <!-- Resumo orçamento -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">💰 Orçamento · Luxemburgo, Suíça & Itália</div>
+            </div>
+            <div class="card-body" id="orcamento-resumo-painel"></div>
+          </div>
         </div>
       </div>
 
-      <!-- DESTINOS -->
+      <!-- ── DESTINOS ── -->
       <div id="tab-destinos" class="tab">
         <div class="page-header">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><div class="page-title">📍 Destinos</div><div class="page-sub">Viagens realizadas e a realizar</div></div>
+            <div>
+              <div class="page-title">📍 Destinos</div>
+              <div class="page-sub">Organizado por viagem e classificação</div>
+            </div>
             <button class="btn-new" onclick="openModal('modal-nova-viagem')">+ Nova viagem</button>
           </div>
-        </div>
-        <div class="dest-tabs">
-          <button class="dest-tab-btn active" onclick="filterDestinos('todos',this)">🌍 Todas (<span id="cnt-todos">0</span>)</button>
-          <button class="dest-tab-btn" onclick="filterDestinos('planned',this)">✈ A realizar (<span id="cnt-planned">0</span>)</button>
-          <button class="dest-tab-btn" onclick="filterDestinos('visited',this)">✅ Realizadas (<span id="cnt-visited">0</span>)</button>
         </div>
         <div class="grid-3" id="destinos-grid"></div>
       </div>
 
-      <!-- MAPA -->
+      <!-- ── MAPA ── -->
       <div id="tab-mapa" class="tab">
         <div class="page-header">
-          <div class="page-title">🌍 Mapa político de viagens</div>
-          <div class="page-sub">Marcadores interactivos · Verde = visitado · Azul = a visitar · Clique para detalhes</div>
+          <div class="page-title">🌍 Mapa de viagens</div>
+          <div class="page-sub">Clique sobre um país para ver detalhes</div>
         </div>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden">
-          <div id="leaflet-map"></div>
+        <div id="map-container">
+          <svg id="world-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+            <!-- Fundo oceano -->
+            <rect width="1000" height="500" fill="#1a2332"/>
+            <!-- Continentes simplificados -->
+            <!-- América do Norte -->
+            <path d="M60,60 L80,50 L120,55 L160,70 L180,90 L200,110 L210,140 L220,170 L200,200 L180,220 L160,240 L140,230 L120,220 L100,210 L80,190 L70,170 L60,150 L55,120 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5" id="north-america"/>
+            <!-- América Central/México -->
+            <path d="M160,240 L180,220 L200,200 L220,210 L225,240 L210,260 L190,270 L170,265 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
+            <!-- América do Sul -->
+            <path d="M190,270 L210,260 L240,250 L270,255 L290,280 L300,320 L290,360 L270,390 L240,400 L210,380 L195,350 L185,310 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5" id="south-america"/>
+            <!-- Europa -->
+            <path d="M430,60 L460,55 L490,60 L510,75 L520,95 L510,115 L490,120 L470,125 L450,120 L430,110 L420,90 Z" fill="#21262d" stroke="#30363d" stroke-width="0.8" id="europe" class="map-country"/>
+            <!-- Portugal -->
+            <ellipse cx="428" cy="100" rx="8" ry="12" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="portugal" class="map-country" data-name="Portugal"/>
+            <!-- Suíça -->
+            <ellipse cx="472" cy="85" rx="7" ry="5" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="switzerland" class="map-country" data-name="Suíça"/>
+            <!-- Itália -->
+            <path d="M468,100 L480,98 L490,105 L488,120 L478,130 L468,125 L462,110 Z" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="italy" class="map-country" data-name="Itália"/>
+            <!-- Luxemburgo -->
+            <circle cx="457" cy="78" r="4" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="luxembourg" class="map-country" data-name="Luxemburgo"/>
+            <!-- França -->
+            <path d="M435,80 L455,75 L465,85 L460,100 L445,105 L433,98 Z" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="france" class="map-country" data-name="França"/>
+            <!-- África -->
+            <path d="M450,140 L480,135 L510,140 L530,165 L540,200 L535,240 L520,270 L495,290 L465,285 L445,265 L435,230 L430,195 L435,165 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
+            <!-- Ásia -->
+            <path d="M520,40 L600,35 L680,45 L740,60 L780,80 L800,110 L790,140 L760,155 L720,155 L680,145 L640,140 L600,135 L560,130 L530,115 L515,95 L515,65 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
+            <!-- Oceânia -->
+            <path d="M720,300 L760,290 L800,300 L820,330 L810,360 L780,370 L750,360 L730,340 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
+          </svg>
           <div style="padding:.75rem 1rem;border-top:1px solid var(--border)">
             <div class="map-legend">
               <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div> Visitado</div>
               <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div> A visitar</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#d29922"></div> Em destaque</div>
             </div>
           </div>
         </div>
+        <div id="map-pins" style="margin-top:1.25rem"></div>
       </div>
 
-      <!-- ROTEIROS -->
+      <!-- ── ROTEIROS ── -->
       <div id="tab-roteiro" class="tab">
         <div class="page-header">
           <div class="page-title">🗺️ Roteiros Diários</div>
-          <div class="page-sub" id="roteiro-page-sub">Luxemburgo, Suíça & Itália · 26–30 Maio 2026 · 5 dias</div>
+          <div class="page-sub">Luxemburgo, Suíça & Itália · 26–30 Maio 2026 · 5 dias</div>
         </div>
+
+        <!-- Selector de dia -->
         <div class="roteiro-selector" id="roteiro-selector"></div>
+
+        <!-- Conteúdo roteiro -->
         <div id="roteiro-content"></div>
-        <div style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap">
-          <button class="btn-primary" onclick="openModal('modal-add-paragem')">📍 Adicionar local de visita</button>
-          <button class="btn-secondary" onclick="abrirRoteiroCursoMaps()">🗺️ Itinerário completo no Maps</button>
+
+        <!-- Botão adicionar paragem manual -->
+        <div style="margin-top:1rem;display:flex;gap:.75rem">
+          <button class="btn-primary" onclick="openModal('modal-add-paragem')">+ Adicionar paragem</button>
           <button class="btn-secondary" onclick="exportRoteiro()">⬇ Exportar PDF</button>
         </div>
       </div>
 
-      <!-- RESERVAS -->
+      <!-- ── RESERVAS ── -->
       <div id="tab-reservas" class="tab">
         <div class="page-header">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><div class="page-title">🎫 Reservas</div><div class="page-sub">Voos, hotéis, veículos e entradas · estado de pagamento e documentos</div></div>
+            <div>
+              <div class="page-title">🎫 Reservas</div>
+              <div class="page-sub">Voos, hotéis, veículos e entradas</div>
+            </div>
             <button class="btn-new" onclick="openModal('modal-nova-reserva')">+ Nova reserva</button>
           </div>
         </div>
         <div id="reservas-list"></div>
       </div>
 
-      <!-- ORÇAMENTO -->
+      <!-- ── ORÇAMENTO ── -->
       <div id="tab-orcamento" class="tab">
         <div class="page-header">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><div class="page-title">💰 Orçamento</div><div class="page-sub">Apenas despesas confirmadas entram no total · pendentes mostradas em separado</div></div>
+            <div>
+              <div class="page-title">💰 Orçamento</div>
+              <div class="page-sub">Controlo de despesas por viagem</div>
+            </div>
             <button class="btn-new" onclick="openModal('modal-nova-despesa')">+ Registar despesa</button>
           </div>
         </div>
         <div id="orcamento-content"></div>
       </div>
 
-      <!-- BAGAGEM -->
-      <div id="tab-bagagem" class="tab">
-        <div class="page-header">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><div class="page-title">🧳 Bagagem & Produtos</div><div class="page-sub">O que levar · produtos regionais e vinhos com onde comprar e preços</div></div>
-            <button class="btn-new" onclick="openModal('modal-add-item-mala')">+ Adicionar item</button>
-          </div>
-        </div>
-        <div id="bagagem-content"></div>
-      </div>
-
-      <!-- MEMÓRIAS -->
+      <!-- ── MEMÓRIAS ── -->
       <div id="tab-memorias" class="tab">
         <div class="page-header">
-          <div class="page-title">📷 Fotos, Vídeos & Diário</div>
-          <div class="page-sub">Cada memória associada ao local visitado e ao dia do itinerário</div>
+          <div class="page-title">📷 Fotos & Diário</div>
+          <div class="page-sub">Memórias de viagem</div>
         </div>
-        <div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap">
-          <button class="btn-primary" onclick="openModal('modal-add-media')">📎 Adicionar foto/vídeo</button>
+        <div style="display:flex;gap:.75rem;margin-bottom:1.25rem">
+          <button class="btn-primary" onclick="document.getElementById('photo-input').click()">📎 Adicionar foto/vídeo</button>
           <button class="btn-secondary" onclick="openModal('modal-diario')">📓 Nova entrada diário</button>
         </div>
+        <input type="file" id="photo-input" accept="image/*,video/*" multiple style="display:none" onchange="handlePhotoUpload(event)">
         <div id="memorias-content"></div>
       </div>
 
-      <!-- GASTRONOMIA -->
+      <!-- ── GASTRONOMIA ── -->
       <div id="tab-gastronomia" class="tab">
         <div class="page-header">
-          <div class="page-title">🍷 Gastronomia, Vinhos & Produtos Regionais</div>
-          <div class="page-sub">Ligado a cada dia do itinerário · onde comprar e estimativa de preços</div>
+          <div class="page-title">🍷 Gastronomia & Vinhos</div>
+          <div class="page-sub">Guias gastronómicos por região · Luxemburgo, Suíça & Itália 2026</div>
         </div>
         <div id="gastronomia-content"></div>
       </div>
 
-      <!-- PESQUISA -->
+      <!-- ── PESQUISA ── -->
       <div id="tab-pesquisa" class="tab">
-        <div class="page-header"><div class="page-title">🔍 Pesquisa de destinos</div></div>
+        <div class="page-header">
+          <div class="page-title">🔍 Pesquisa de destinos</div>
+        </div>
         <div style="display:flex;gap:.75rem;margin-bottom:1.25rem">
           <input class="form-input" id="pesquisa-input" placeholder="Pesquisar destino, actividade, gastronomia..." style="flex:1" onkeydown="if(event.key==='Enter')pesquisar()">
           <button class="btn-primary" onclick="pesquisar()">Pesquisar ↗</button>
@@ -386,44 +624,80 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
           <button class="btn-secondary" style="font-size:.8rem;padding:.35rem .75rem" onclick="pesquisarRapido('Oberland Bernês')">Oberland Bernês</button>
           <button class="btn-secondary" style="font-size:.8rem;padding:.35rem .75rem" onclick="pesquisarRapido('Zermatt Matterhorn')">Zermatt</button>
-          <button class="btn-secondary" style="font-size:.8rem;padding:.35rem .75rem" onclick="pesquisarRapido('Lago Como Italia')">Lago de Como</button>
+          <button class="btn-secondary" style="font-size:.8rem;padding:.35rem .75rem" onclick="pesquisarRapido('Lago Como')">Lago de Como</button>
           <button class="btn-secondary" style="font-size:.8rem;padding:.35rem .75rem" onclick="pesquisarRapido('Pilatus cremalheira')">Pilatus</button>
-          <button class="btn-secondary" style="font-size:.8rem;padding:.35rem .75rem" onclick="pesquisarRapido('Colmar Alsácia vinhos')">Colmar</button>
+          <button class="btn-secondary" style="font-size:.8rem;padding:.35rem .75rem" onclick="pesquisarRapido('Colmar Alsácia')">Colmar</button>
         </div>
         <div id="pesquisa-results"></div>
+        <div class="divider"></div>
+        <div class="section-header">
+          <div class="section-title">🔖 Notas de pesquisa guardadas</div>
+        </div>
+        <div id="pesquisa-notas"></div>
       </div>
 
     </main>
   </div>
 </div>
 
-<!-- ══════════ MODAIS ══════════ -->
+<!-- ───────── MODAIS ───────── -->
 
 <!-- Nova viagem -->
 <div class="modal-overlay" id="modal-nova-viagem">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">✈ Registar nova viagem</div><button class="modal-close" onclick="closeModal('modal-nova-viagem')">✕</button></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Nome da viagem *</label><input class="form-input" id="nv-nome" placeholder="Ex: Oberland Bernês 2026"></div>
-      <div class="form-group"><label class="form-label">País / Destino principal</label><input class="form-input" id="nv-pais" placeholder="Ex: Suíça"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Cidades / Locais</label><input class="form-input" id="nv-cidades" placeholder="Ex: Berna, Interlaken, Grindelwald"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Data de início</label><input class="form-input" type="date" id="nv-inicio"></div>
-      <div class="form-group"><label class="form-label">Data de fim</label><input class="form-input" type="date" id="nv-fim"></div>
+    <div class="modal-header">
+      <div class="modal-title">✈ Registar nova viagem</div>
+      <button class="modal-close" onclick="closeModal('modal-nova-viagem')">✕</button>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Orçamento total (€)</label><input class="form-input" type="number" id="nv-orcamento" placeholder="0"></div>
-      <div class="form-group"><label class="form-label">Classificação</label>
+      <div class="form-group">
+        <label class="form-label">Nome da viagem *</label>
+        <input class="form-input" id="nv-nome" placeholder="Ex: Oberland Bernês 2026">
+      </div>
+      <div class="form-group">
+        <label class="form-label">País / Destino principal</label>
+        <input class="form-input" id="nv-pais" placeholder="Ex: Suíça">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cidades / Locais</label>
+      <input class="form-input" id="nv-cidades" placeholder="Ex: Berna, Interlaken, Grindelwald">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data de início</label>
+        <input class="form-input" type="date" id="nv-inicio">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data de fim</label>
+        <input class="form-input" type="date" id="nv-fim">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Orçamento total (€)</label>
+        <input class="form-input" type="number" id="nv-orcamento" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Classificação</label>
         <select class="form-select" id="nv-stars">
-          <option value="3">⭐⭐⭐ Boa</option><option value="4">⭐⭐⭐⭐ Muito boa</option><option value="5" selected>⭐⭐⭐⭐⭐ Excelente</option>
+          <option value="3">⭐⭐⭐ Boa</option>
+          <option value="4">⭐⭐⭐⭐ Muito boa</option>
+          <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
         </select>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">Estado</label>
-      <select class="form-select" id="nv-estado"><option value="planned">✈ A realizar</option><option value="visited">✅ Realizada</option></select>
+    <div class="form-group">
+      <label class="form-label">Notas iniciais</label>
+      <textarea class="form-textarea" id="nv-notas" placeholder="Observações, motivação, planos..."></textarea>
     </div>
-    <div class="form-group"><label class="form-label">Notas</label><textarea class="form-textarea" id="nv-notas" placeholder="Observações, motivação, planos..."></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Estado</label>
+      <select class="form-select" id="nv-estado">
+        <option value="planned">A visitar</option>
+        <option value="visited">Visitado</option>
+      </select>
+    </div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal('modal-nova-viagem')">Cancelar</button>
       <button class="btn-primary" onclick="criarViagem()">✓ Criar viagem</button>
@@ -434,37 +708,56 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 <!-- Nova reserva -->
 <div class="modal-overlay" id="modal-nova-reserva">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">🎫 Nova reserva</div><button class="modal-close" onclick="closeModal('modal-nova-reserva')">✕</button></div>
+    <div class="modal-header">
+      <div class="modal-title">🎫 Nova reserva</div>
+      <button class="modal-close" onclick="closeModal('modal-nova-reserva')">✕</button>
+    </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Tipo</label>
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
         <select class="form-select" id="nr-tipo">
-          <option value="✈">✈ Voo / Avião</option><option value="🏨">🏨 Hotel / Alojamento</option>
-          <option value="🚗">🚗 Veículo / Transfer</option><option value="🎟">🎟 Bilhete / Entrada</option>
-          <option value="⛴">⛴ Ferry / Barco</option><option value="🚂">🚂 Comboio / Autocarro</option><option value="📄">📄 Outro</option>
+          <option value="✈">✈ Voo / Avião</option>
+          <option value="🏨">🏨 Hotel / Alojamento</option>
+          <option value="🚗">🚗 Veículo / Transfer</option>
+          <option value="🎟">🎟 Bilhete / Entrada</option>
+          <option value="⛴">⛴ Ferry / Barco</option>
+          <option value="🚂">🚂 Comboio / Autocarro</option>
+          <option value="📄">📄 Outro</option>
         </select>
       </div>
-      <div class="form-group"><label class="form-label">Valor (€)</label><input class="form-input" type="number" id="nr-valor" placeholder="0.00"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Descrição *</label><input class="form-input" id="nr-desc" placeholder="Ex: TAP Lisboa → Genebra"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="nr-data"></div>
-      <div class="form-group"><label class="form-label">Hora</label><input class="form-input" type="time" id="nr-hora"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Nº Reserva / Referência</label><input class="form-input" id="nr-ref" placeholder="Ex: TP1234"></div>
-      <div class="form-group"><label class="form-label">Fornecedor / Empresa</label><input class="form-input" id="nr-fornecedor" placeholder="Ex: TAP Air Portugal"></div>
-    </div>
-    <div class="form-group"><label class="form-label">🔗 Link da reserva (URL)</label><input class="form-input" id="nr-link" placeholder="https://..."></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Estado do pagamento</label>
-        <select class="form-select" id="nr-pago"><option value="pago">✅ Pago</option><option value="pendente">⏳ Por pagar</option></select>
-      </div>
-      <div class="form-group"><label class="form-label">Adicionar ao orçamento?</label>
-        <select class="form-select" id="nr-add-orc"><option value="nao">Não</option><option value="sim">Sim</option></select>
+      <div class="form-group">
+        <label class="form-label">Valor pago (€)</label>
+        <input class="form-input" type="number" id="nr-valor" placeholder="0.00">
       </div>
     </div>
-    <div class="form-group"><label class="form-label">📎 Upload de documento (bilhete, voucher, PDF...)</label><input class="form-input" type="file" id="nr-doc" accept=".pdf,.jpg,.jpeg,.png,.webp" style="padding:.4rem"></div>
-    <div class="form-group"><label class="form-label">Notas</label><textarea class="form-textarea" id="nr-notas" placeholder="Informações adicionais..."></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Descrição *</label>
+      <input class="form-input" id="nr-desc" placeholder="Ex: TAP Lisboa → Genebra">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input class="form-input" type="date" id="nr-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hora</label>
+        <input class="form-input" type="time" id="nr-hora">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nº Reserva / Referência</label>
+        <input class="form-input" id="nr-ref" placeholder="Ex: TP1234">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fornecedor / Empresa</label>
+        <input class="form-input" id="nr-fornecedor" placeholder="Ex: TAP Air Portugal">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notas</label>
+      <textarea class="form-textarea" id="nr-notas" placeholder="Informações adicionais..."></textarea>
+    </div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal('modal-nova-reserva')">Cancelar</button>
       <button class="btn-primary" onclick="guardarReserva()">✓ Guardar reserva</button>
@@ -475,23 +768,40 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 <!-- Nova despesa -->
 <div class="modal-overlay" id="modal-nova-despesa">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">💰 Registar despesa</div><button class="modal-close" onclick="closeModal('modal-nova-despesa')">✕</button></div>
-    <div class="form-group"><label class="form-label">Descrição *</label><input class="form-input" id="nd-desc" placeholder="Ex: Almoço em Lauterbrunnen"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Categoria</label>
-        <select class="form-select" id="nd-cat">
-          <option value="Alojamento">🏨 Alojamento</option><option value="Transporte">✈ Transporte</option>
-          <option value="Alimentação">🍽️ Alimentação</option><option value="Actividades">🎟 Actividades</option>
-          <option value="Compras">🛍️ Compras</option><option value="Outro">📦 Outro</option>
-        </select>
-      </div>
-      <div class="form-group"><label class="form-label">Valor (€)</label><input class="form-input" type="number" id="nd-valor" placeholder="0.00" step="0.01"></div>
+    <div class="modal-header">
+      <div class="modal-title">💰 Registar despesa</div>
+      <button class="modal-close" onclick="closeModal('modal-nova-despesa')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição *</label>
+      <input class="form-input" id="nd-desc" placeholder="Ex: Almoço em Lauterbrunnen">
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="nd-data"></div>
-      <div class="form-group"><label class="form-label">Estado</label>
-        <select class="form-select" id="nd-confirmada">
-          <option value="confirmada">✅ Confirmada / Paga</option><option value="pendente">⏳ Pendente / A confirmar</option>
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="form-select" id="nd-cat">
+          <option value="Alojamento">🏨 Alojamento</option>
+          <option value="Transporte">✈ Transporte</option>
+          <option value="Alimentação">🍽️ Alimentação</option>
+          <option value="Actividades">🎟 Actividades</option>
+          <option value="Compras">🛍️ Compras</option>
+          <option value="Outro">📦 Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor (€)</label>
+        <input class="form-input" type="number" id="nd-valor" placeholder="0.00" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input class="form-input" type="date" id="nd-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Viagem</label>
+        <select class="form-select" id="nd-viagem">
+          <option value="Luxemburgo, Suíça & Itália 2026">Luxemburgo, Suíça & Itália 2026</option>
         </select>
       </div>
     </div>
@@ -505,21 +815,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 <!-- Diário -->
 <div class="modal-overlay" id="modal-diario">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">📓 Nova entrada de diário</div><button class="modal-close" onclick="closeModal('modal-diario')">✕</button></div>
+    <div class="modal-header">
+      <div class="modal-title">📓 Nova entrada de diário</div>
+      <button class="modal-close" onclick="closeModal('modal-diario')">✕</button>
+    </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="md-data"></div>
-      <div class="form-group"><label class="form-label">Dia do itinerário</label>
-        <select class="form-select" id="md-dia">
-          <option value="">— Sem ligação —</option>
-          <option value="dia2">Dia 2 — Oberland Bernês</option>
-          <option value="dia3">Dia 3 — Zermatt · Ticino</option>
-          <option value="dia4">Dia 4 — Lago de Como</option>
-          <option value="dia5">Dia 5 — Pilatus · Lucerna · Colmar</option>
-        </select>
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input class="form-input" type="date" id="md-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Local / Título</label>
+        <input class="form-input" id="md-local" placeholder="Ex: Dia em Lauterbrunnen">
       </div>
     </div>
-    <div class="form-group"><label class="form-label">Local visitado</label><input class="form-input" id="md-local" placeholder="Ex: Lauterbrunnen — Trümmelbach Falls"></div>
-    <div class="form-group"><label class="form-label">Texto</label><textarea class="form-textarea" id="md-texto" style="min-height:120px" placeholder="Escreva as memórias do dia..."></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Texto</label>
+      <textarea class="form-textarea" id="md-texto" style="min-height:120px" placeholder="Escreva as memórias do dia..."></textarea>
+    </div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal('modal-diario')">Cancelar</button>
       <button class="btn-primary" onclick="guardarDiario()">✓ Guardar</button>
@@ -527,1063 +840,885 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   </div>
 </div>
 
-<!-- Add Media -->
-<div class="modal-overlay" id="modal-add-media">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">📷 Adicionar foto / vídeo</div><button class="modal-close" onclick="closeModal('modal-add-media')">✕</button></div>
-    <div class="form-group"><label class="form-label">Ficheiro(s) *</label><input class="form-input" type="file" id="media-input" accept="image/*,video/*" multiple style="padding:.4rem"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Local visitado</label><input class="form-input" id="media-local" placeholder="Ex: Bachalpsee, Grindelwald"></div>
-      <div class="form-group"><label class="form-label">Dia do itinerário</label>
-        <select class="form-select" id="media-dia">
-          <option value="">— Sem ligação —</option>
-          <option value="dia2">Dia 2 — Oberland Bernês</option>
-          <option value="dia3">Dia 3 — Zermatt · Ticino</option>
-          <option value="dia4">Dia 4 — Lago de Como</option>
-          <option value="dia5">Dia 5 — Pilatus · Lucerna · Colmar</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">Legenda / Descrição</label><input class="form-input" id="media-legenda" placeholder="Opcional"></div>
-    <div class="form-actions">
-      <button class="btn-secondary" onclick="closeModal('modal-add-media')">Cancelar</button>
-      <button class="btn-primary" onclick="handleMediaUpload()">✓ Adicionar</button>
-    </div>
-  </div>
-</div>
-
 <!-- Adicionar paragem -->
 <div class="modal-overlay" id="modal-add-paragem">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">📍 Adicionar local de visita ao itinerário</div><button class="modal-close" onclick="closeModal('modal-add-paragem')">✕</button></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Nome do local *</label><input class="form-input" id="ap-nome" placeholder="Ex: Cascata de Staubbach"></div>
-      <div class="form-group"><label class="form-label">Hora prevista</label><input class="form-input" type="time" id="ap-hora"></div>
+    <div class="modal-header">
+      <div class="modal-title">🗺️ Adicionar paragem ao percurso</div>
+      <button class="modal-close" onclick="closeModal('modal-add-paragem')">✕</button>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Tipo</label>
+      <div class="form-group">
+        <label class="form-label">Nome do local *</label>
+        <input class="form-input" id="ap-nome" placeholder="Ex: Cascata de Staubbach">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hora prevista</label>
+        <input class="form-input" type="time" id="ap-hora">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
         <select class="form-select" id="ap-tipo">
           <option>Visita cultural</option><option>Refeição</option><option>Transporte</option>
           <option>Alojamento</option><option>Paragem / Descanso</option><option>Compras</option><option>Outro</option>
         </select>
       </div>
-      <div class="form-group"><label class="form-label">Duração estimada</label><input class="form-input" id="ap-dur" placeholder="Ex: 45 min"></div>
-    </div>
-    <div class="form-group"><label class="form-label">📍 Endereço para Google Maps *</label><input class="form-input" id="ap-address" placeholder="Ex: Staubbachfall, Lauterbrunnen, Switzerland"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Transporte até aqui</label>
-        <select class="form-select" id="ap-transporte">
-          <option value="🚗">🚗 Carro</option><option value="🚶">🚶 A pé</option><option value="🚲">🚲 Bicicleta</option>
-          <option value="🚂">🚂 Comboio</option><option value="🚌">🚌 Autocarro</option><option value="✈">✈ Avião</option><option value="⛴">⛴ Barco / Ferry</option>
-        </select>
+      <div class="form-group">
+        <label class="form-label">Duração estimada</label>
+        <input class="form-input" id="ap-dur" placeholder="Ex: 45 min">
       </div>
-      <div class="form-group"><label class="form-label">Distância do local anterior (km)</label><input class="form-input" type="number" id="ap-dist" placeholder="Ex: 12"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Tempo de deslocação</label><input class="form-input" id="ap-tempo-desl" placeholder="Ex: 20 min de carro"></div>
-      <div class="form-group"><label class="form-label">Custo estimado</label><input class="form-input" id="ap-custo" placeholder="Ex: €12"></div>
+    <div class="form-group">
+      <label class="form-label">Endereço para Google Maps</label>
+      <input class="form-input" id="ap-address" placeholder="Ex: Staubbachfall, Lauterbrunnen">
     </div>
-    <div class="form-group"><label class="form-label">Notas / Dicas</label><textarea class="form-textarea" id="ap-notas" placeholder="Dicas, avisos, custos..."></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Notas / Dicas</label>
+      <textarea class="form-textarea" id="ap-notas" placeholder="Dicas, avisos, custos..."></textarea>
+    </div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal('modal-add-paragem')">Cancelar</button>
-      <button class="btn-primary" onclick="addParagem()">✓ Adicionar ao itinerário</button>
-    </div>
-  </div>
-</div>
-
-<!-- Adicionar item bagagem -->
-<div class="modal-overlay" id="modal-add-item-mala">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">🧳 Adicionar item à bagagem / lista de compras</div><button class="modal-close" onclick="closeModal('modal-add-item-mala')">✕</button></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Nome do item *</label><input class="form-input" id="mi-nome" placeholder="Ex: Casaco impermeável"></div>
-      <div class="form-group"><label class="form-label">Categoria</label>
-        <select class="form-select" id="mi-cat">
-          <option value="Vestuário">👕 Vestuário</option><option value="Higiene">🧴 Higiene</option>
-          <option value="Documentos">📄 Documentos</option><option value="Electrónica">📱 Electrónica</option>
-          <option value="Saúde">💊 Saúde</option><option value="Produto Regional">🛍️ Produto Regional</option>
-          <option value="Vinho">🍷 Vinho</option><option value="Outro">📦 Outro</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Viagem</label><select class="form-select" id="mi-viagem"></select></div>
-      <div class="form-group"><label class="form-label">Quantidade</label><input class="form-input" id="mi-qtd" placeholder="Ex: 1 ou 2x"></div>
-    </div>
-    <div class="form-group"><label class="form-label">📍 Onde comprar (produto regional / vinho)</label><input class="form-input" id="mi-onde" placeholder="Ex: Caves du Château, Sion · Mercado de Colmar"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Preço estimado (€)</label><input class="form-input" type="number" id="mi-preco" placeholder="0.00" step="0.01"></div>
-      <div class="form-group"><label class="form-label">Notas</label><input class="form-input" id="mi-notas" placeholder="Opcional"></div>
-    </div>
-    <div class="form-actions">
-      <button class="btn-secondary" onclick="closeModal('modal-add-item-mala')">Cancelar</button>
-      <button class="btn-primary" onclick="addItemMala()">✓ Adicionar</button>
+      <button class="btn-primary" onclick="addParagem()">✓ Adicionar</button>
     </div>
   </div>
 </div>
 
 <script>
-// ─── FIREBASE CONFIG ───────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════
+   FIREBASE CONFIG
+═══════════════════════════════════════════════════ */
 const firebaseConfig = {
-  apiKey: "AIzaSyDemo_ReplaceWithYourKey",
-  authDomain: "fora-do-retangulo.firebaseapp.com",
-  projectId: "fora-do-retangulo",
-  storageBucket: "fora-do-retangulo.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000"
+  apiKey:"AIzaSyBJmth1gb1m3ou0XCM6q_wsG-kQjowPeRo",
+  authDomain:"fora-do-retangulo.firebaseapp.com",
+  projectId:"fora-do-retangulo",
+  storageBucket:"fora-do-retangulo.firebasestorage.app",
+  messagingSenderId:"78445229416",
+  appId:"1:78445229416:web:5c246c0f226a88db40d2dd"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-let currentUser = null;
 
-// ─── APP STATE ─────────────────────────────────────────────────────────────
+let db, auth, currentUser;
 let appData = {
-  viagens: [],
-  reservas: [],
-  despesas: [],
-  memorias: [],
-  diario: [],
-  gastronomia: [],
-  mala: []
+  viagens:[],
+  reservas:[],
+  despesas:[],
+  diario:[],
+  fotos:[],
+  notas:[],
+  paragens_extra:{}
 };
+let roteiroAtivo = 'dia2';
 
-// ─── STATIC ROTEIROS ───────────────────────────────────────────────────────
-const ROTEIROS = {
-  dia2: {
-    titulo: "Dia 2 — Oberland Bernês",
-    data: "22 Jun 2026",
-    paragens: [
-      { nome:"Aeroporto de Lisboa (LIS)", hora:"06:30", tipo:"Transporte", dur:"—", address:"Aeroporto Humberto Delgado, Lisboa", transporte:"✈", dist:null, tempoDesl:null, notas:"Check-in 2h antes · Voo TAP TP1023 06:30→09:55 Genebra", custo:"" },
-      { nome:"Aeroporto de Genebra (GVA)", hora:"09:55", tipo:"Transporte", dur:"20 min", address:"Geneva Airport, Geneva, Switzerland", transporte:"🚗", dist:0, tempoDesl:"—", notas:"Levantamento Hertz · Saída para Interlaken pela A1/A9", custo:"" },
-      { nome:"Gruyères", hora:"11:30", tipo:"Visita cultural", dur:"1h30", address:"Gruyères, Fribourg, Switzerland", transporte:"🚗", dist:84, tempoDesl:"1h10", notas:"Castelo medieval · Museu HR Giger · Queijaria La Maison du Gruyère", custo:"~€10 pp" },
-      { nome:"Interlaken — Chegada & Almoço", hora:"14:00", tipo:"Refeição", dur:"1h", address:"Interlaken, Bern, Switzerland", transporte:"🚗", dist:62, tempoDesl:"50 min", notas:"Almoço no centro · Check-in no alojamento a partir das 15h", custo:"~€20 pp" },
-      { nome:"Lauterbrunnen", hora:"16:00", tipo:"Visita cultural", dur:"2h", address:"Lauterbrunnen, Bern, Switzerland", transporte:"🚗", dist:18, tempoDesl:"25 min", notas:"72 cascatas · Cascata de Staubbach · Trilho do vale", custo:"Gratuito" },
-      { nome:"Grindelwald (vista Eiger)", hora:"18:30", tipo:"Paragem / Descanso", dur:"45 min", address:"Grindelwald, Bern, Switzerland", transporte:"🚗", dist:22, tempoDesl:"30 min", notas:"Vista panorâmica sobre o Eiger · Fotografia ao entardecer", custo:"Gratuito" },
-      { nome:"Hotel Interlaken — Jantar", hora:"20:00", tipo:"Alojamento", dur:"—", address:"Interlaken, Bern, Switzerland", transporte:"🚗", dist:20, tempoDesl:"25 min", notas:"Regresso ao alojamento · Jantar no hotel ou restaurante local", custo:"~€25 pp" }
-    ],
-    gastroRef: ["fondue","raclette","meringue_doublee","fendant"]
-  },
-  dia3: {
-    titulo: "Dia 3 — Zermatt · Ticino",
-    data: "23 Jun 2026",
-    paragens: [
-      { nome:"Interlaken — Saída", hora:"08:00", tipo:"Transporte", dur:"—", address:"Interlaken, Bern, Switzerland", transporte:"🚗", dist:0, tempoDesl:"—", notas:"Saída cedo para evitar tráfego nas montanhas", custo:"" },
-      { nome:"Tasch (Estacionamento P+R)", hora:"10:30", tipo:"Transporte", dur:"15 min", address:"Täsch, Valais, Switzerland", transporte:"🚗", dist:98, tempoDesl:"1h30", notas:"Carro fica em Täsch · Comboio para Zermatt (10 min, ~€12 pp)", custo:"€12 pp" },
-      { nome:"Zermatt — Matterhorn", hora:"11:00", tipo:"Visita cultural", dur:"3h", address:"Zermatt, Valais, Switzerland", transporte:"🚂", dist:8, tempoDesl:"10 min comboio", notas:"Vista Matterhorn · Passeio pela vila sem carros · Glaciar de Gorner opcional", custo:"Gorner €40 pp opcional" },
-      { nome:"Almoço em Zermatt", hora:"13:30", tipo:"Refeição", dur:"1h", address:"Bahnhofstrasse, Zermatt, Switzerland", transporte:"🚶", dist:0.5, tempoDesl:"5 min", notas:"Raclette ou fondue num restaurante local", custo:"~€30 pp" },
-      { nome:"Lugano — Lago Ceresio", hora:"17:00", tipo:"Visita cultural", dur:"2h", address:"Lugano, Ticino, Switzerland", transporte:"🚗", dist:155, tempoDesl:"2h", notas:"Passeio pelo lago · Monte San Salvatore · Atmosfera italiana em solo suíço", custo:"Gratuito" },
-      { nome:"Locarno — Lago Maggiore", hora:"19:30", tipo:"Paragem / Descanso", dur:"1h", address:"Locarno, Ticino, Switzerland", transporte:"🚗", dist:28, tempoDesl:"30 min", notas:"Pôr do sol sobre o Lago Maggiore · Piazza Grande", custo:"Gratuito" },
-      { nome:"Bellinzona — Alojamento", hora:"21:00", tipo:"Alojamento", dur:"—", address:"Bellinzona, Ticino, Switzerland", transporte:"🚗", dist:25, tempoDesl:"25 min", notas:"Castelos UNESCO · Check-in · Jantar italiano", custo:"~€20 pp" }
-    ],
-    gastroRef: ["raclette","merlot_ticino","risotto_ticino"]
-  },
-  dia4: {
-    titulo: "Dia 4 — Lago de Como",
-    data: "24 Jun 2026",
-    paragens: [
-      { nome:"Bellinzona — Saída", hora:"09:00", tipo:"Transporte", dur:"—", address:"Bellinzona, Ticino, Switzerland", transporte:"🚗", dist:0, tempoDesl:"—", notas:"Saída para Itália · Fronteira em Chiasso", custo:"" },
-      { nome:"Como — Centro Histórico", hora:"10:30", tipo:"Visita cultural", dur:"1h30", address:"Como, Lombardy, Italy", transporte:"🚗", dist:58, tempoDesl:"55 min", notas:"Catedral · Lago Como · Volta de barco opcional", custo:"Barco €15 pp" },
-      { nome:"Bellagio", hora:"13:00", tipo:"Visita cultural", dur:"2h30", address:"Bellagio, Lake Como, Italy", transporte:"⛴", dist:32, tempoDesl:"1h ferry", notas:"A pérola do Lago de Como · Jardins de Villa Melzi · Almoço com vista para o lago", custo:"Ferry €5 pp + almoço €25 pp" },
-      { nome:"Varenna", hora:"16:00", tipo:"Visita cultural", dur:"1h30", address:"Varenna, Lake Como, Italy", transporte:"⛴", dist:4, tempoDesl:"15 min ferry", notas:"Aldeia romântica · Castello di Vezio · Escadas da Via dell'Amore", custo:"Castelo €5 pp" },
-      { nome:"Menaggio — Pôr do Sol", hora:"18:00", tipo:"Paragem / Descanso", dur:"1h", address:"Menaggio, Lake Como, Italy", transporte:"⛴", dist:8, tempoDesl:"20 min ferry", notas:"Vista do pôr do sol · Gelataria local", custo:"~€5 pp" },
-      { nome:"Lecco — Alojamento", hora:"20:00", tipo:"Alojamento", dur:"—", address:"Lecco, Lombardy, Italy", transporte:"🚗", dist:45, tempoDesl:"50 min", notas:"Jantar italiano · Pasta fresca e Barolo local", custo:"~€30 pp" }
-    ],
-    gastroRef: ["barolo","pasta_como","gelato"]
-  },
-  dia5: {
-    titulo: "Dia 5 — Pilatus · Lucerna · Colmar",
-    data: "25 Jun 2026",
-    paragens: [
-      { nome:"Lecco — Saída", hora:"08:00", tipo:"Transporte", dur:"—", address:"Lecco, Lombardy, Italy", transporte:"🚗", dist:0, tempoDesl:"—", notas:"Regresso à Suíça pela A9 · Fronteira Chiasso", custo:"" },
-      { nome:"Monte Pilatus", hora:"10:30", tipo:"Visita cultural", dur:"3h", address:"Pilatus Kulm, Alpnach, Switzerland", transporte:"🚗", dist:138, tempoDesl:"1h45", notas:"Funicular mais íngreme do mundo · Vista sobre Lucerna e Alpes · Restaurante no cume", custo:"€40 pp ida/volta" },
-      { nome:"Lucerna — Almoço & Passeio", hora:"14:30", tipo:"Visita cultural", dur:"2h", address:"Lucerne, Switzerland", transporte:"🚗", dist:14, tempoDesl:"20 min", notas:"Ponte de Kapellbrücke · Lago dos 4 Cantões · Almoço na cidade velha", custo:"~€25 pp" },
-      { nome:"Colmar — Chegada", hora:"18:00", tipo:"Visita cultural", dur:"2h", address:"Colmar, Alsace, France", transporte:"🚗", dist:148, tempoDesl:"1h45", notas:"Petite Venise · Mercado de vinhos · Arquitetura medieval alsaciana", custo:"Gratuito" },
-      { nome:"Colmar — Alojamento & Jantar", hora:"20:30", tipo:"Alojamento", dur:"—", address:"Colmar, Alsace, France", transporte:"🚶", dist:0.5, tempoDesl:"5 min", notas:"Jantar com Choucroute Garnie e Riesling de Alsácia", custo:"~€30 pp" }
-    ],
-    gastroRef: ["riesling_alsace","choucroute","baeckeoffe"]
-  }
-};
-
-// ─── GASTRONOMIA ───────────────────────────────────────────────────────────
-const GASTRONOMIA_STATIC = {
-  suica: [
-    { id:"fondue", nome:"Fondue de Queijo", regiao:"Oberland Bernês / Friburgo", tipo:"prato", diasRoteiro:["dia2","dia3"], emoji:"🧀", descricao:"O prato mais emblemático da Suíça. Queijo Gruyère e Vacherin fundidos em vinho branco. Imprescindível em Gruyères.", onde:"Restaurant Chalet du Gruyère, Gruyères · Le Chalet (Interlaken)", preco:"€22–30 pp" },
-    { id:"raclette", nome:"Raclette", regiao:"Valais", tipo:"prato", diasRoteiro:["dia2","dia3"], emoji:"🧀", descricao:"Queijo Valais derretido sobre batatas, pickles e cebola. Especialidade da região de Zermatt e Valais.", onde:"Walliserkanne, Zermatt · La Couronne, Zermatt", preco:"€18–25 pp" },
-    { id:"meringue_doublee", nome:"Meringue Doublée", regiao:"Oberland Bernês", tipo:"sobremesa", diasRoteiro:["dia2"], emoji:"🍮", descricao:"Merengue com creme de leite batido duplo. Especialidade de Grindelwald e Interlaken. Comprar embalado para levar.", onde:"Confiserie Schuh, Interlaken · Bäckerei Grindelwald", preco:"€8–12 | embalado €15–20" },
-    { id:"fendant", nome:"Fendant du Valais AOC", regiao:"Valais", tipo:"vinho", diasRoteiro:["dia2","dia3"], emoji:"🍷", descricao:"Vinho branco da casta Chasselas, mineralidade alpina. O vinho branco suíço por excelência, perfeito com fondue.", onde:"Caves Orsat, Martigny · Provins, Sion · Cave du Rhodan, Sierre", preco:"€15–22/garrafa | €40–60 caixa 6" },
-    { id:"merlot_ticino", nome:"Merlot del Ticino DOC", regiao:"Ticino", tipo:"vinho", diasRoteiro:["dia3"], emoji:"🍷", descricao:"Merlot de altitude, elegante e frutado. Surpreendente para quem não conhece a produção vinícola suíça italiana.", onde:"Tamborini Carlo SA, Lamone · Cantine Kopp, Lugano", preco:"€18–28/garrafa" },
-    { id:"risotto_ticino", nome:"Risotto al Merlot", regiao:"Ticino", tipo:"prato", diasRoteiro:["dia3"], emoji:"🍚", descricao:"Risotto cozinhado com vinho Merlot do Ticino, queijo Luganese. Fusão perfeita entre tradição italiana e ingredientes suíços.", onde:"Grotto della Salute, Bellinzona · Osteria Sott'Riva, Locarno", preco:"€18–24 pp" }
-  ],
-  italia: [
-    { id:"pasta_como", nome:"Pasta Fresca do Lago de Como", regiao:"Lombardia", tipo:"prato", diasRoteiro:["dia4"], emoji:"🍝", descricao:"Missoltino (peixes do lago secos e curados) com polenta. Especialidade ribeirinha única da região do Como.", onde:"Ristorante Barchetta, Bellagio · La Grotta, Varenna", preco:"€20–28 pp" },
-    { id:"gelato", nome:"Gelato Artesanal", regiao:"Lago de Como", tipo:"sobremesa", diasRoteiro:["dia4"], emoji:"🍦", descricao:"Gelato artesanal com sabores locais: limoncello, pistácio, amarena. Não confundir com gelado industrial.", onde:"Gelateria del Centro, Bellagio · Gelateria Pavesi, Varenna", preco:"€3–5 pp" },
-    { id:"barolo", nome:"Barolo DOCG", regiao:"Piemonte", tipo:"vinho", diasRoteiro:["dia4"], emoji:"🍷", descricao:"O Rei dos vinhos italianos. Nebbiolo de Barolo, estrutura taninos. Comprar directamente em enoteca.", onde:"Enoteca Cotti, Como · La Bottega del Vino, Lecco · Enologia Bellagio", preco:"€25–50/garrafa · €15–20 casa" }
-  ],
-  alsacia: [
-    { id:"riesling_alsace", nome:"Riesling d'Alsace AOC", regiao:"Alsácia", tipo:"vinho", diasRoteiro:["dia5"], emoji:"🍷", descricao:"Riesling alsaciano, seco e mineral, completamente diferente do alemão. Acompanha a gastronomia local à perfeição.", onde:"Maison Trimbach, Ribeauvillé · Cave de Ribeauvillé (cooperativa) · Marché Couvert Colmar", preco:"€12–20/garrafa | caixa 6: €70–110" },
-    { id:"choucroute", nome:"Choucroute Garnie", regiao:"Alsácia", tipo:"prato", diasRoteiro:["dia5"], emoji:"🥩", descricao:"Chucrute com enchidos, bacon fumado e joelho de porco. O prato mais representativo da Alsácia, abundante e reconfortante.", onde:"Winstub Brenner, Colmar · Chez Hansi, Colmar · Winstub du Chambard, Kaysersberg", preco:"€18–25 pp" },
-    { id:"baeckeoffe", nome:"Baeckeoffe", regiao:"Alsácia", tipo:"prato", diasRoteiro:["dia5"], emoji:"🍲", descricao:"Cassoulet alsaciano cozinhado lentamente em terrina de barro com três carnes e vegetais em vinho Riesling.", onde:"Au Crocodile, Estrasburgo · Winstub du Sommelier, Bergheim", preco:"€22–30 pp" }
-  ]
-};
-
-// ─── DEFAULT DATA ──────────────────────────────────────────────────────────
-function initDefaultData() {
-  appData = {
-    viagens: [{
-      id: "v1", nome: "Luxemburgo, Suíça & Itália 2026",
-      pais: "Suíça / Itália / França", lat: 46.8, lng: 8.2,
-      dataInicio: "2026-06-21", dataFim: "2026-06-27",
-      estado: "planned", rating: 5,
-      notas: "Road trip pelas montanhas suíças, lagos italianos e vinhos da Alsácia."
-    }],
-    reservas: [
-      { id:"r1", tipo:"Voo", titulo:"TAP TP1023 · LIS→GVA", fornecedor:"TAP Air Portugal", dataHora:"2026-06-21 06:30", ref:"TPLIS26A", valor:380, pago:"pago", link:"https://www.flytap.com", doc:null, notas:"Saída 06:30 · Chegada Genebra 09:55" },
-      { id:"r2", tipo:"Voo", titulo:"TAP TP1024 · GVA→LIS (Regresso)", fornecedor:"TAP Air Portugal", dataHora:"2026-06-27 14:20", ref:"TPLIS26B", valor:380, pago:"pago", link:"https://www.flytap.com", doc:null, notas:"Saída 14:20 · Chegada Lisboa 16:45" },
-      { id:"r3", tipo:"Carro", titulo:"Hertz · Hyundai Tucson ou similar", fornecedor:"Hertz Genebra Aeroporto", dataHora:"2026-06-21 10:00", ref:"HZ982311", valor:320, pago:"pago", link:"https://www.hertz.com", doc:null, notas:"7 dias · GPS incluído · Devolução GVA 27 Jun 14:00" },
-      { id:"r4", tipo:"Hotel", titulo:"Hotel Interlaken · 2 noites", fornecedor:"Hotel du Nord, Interlaken", dataHora:"2026-06-21 15:00", ref:"HDN2026", valor:280, pago:"pendente", link:"", doc:null, notas:"Check-in 15h · Check-out 23 Jun 11h · Pequeno almoço incluído" },
-      { id:"r5", tipo:"Hotel", titulo:"B&B Bellinzona · 1 noite", fornecedor:"BB Tre Castelli, Bellinzona", dataHora:"2026-06-23 21:00", ref:"BTC001", valor:120, pago:"pendente", link:"", doc:null, notas:"Perto dos castelos UNESCO · Estacionamento gratuito" },
-      { id:"r6", tipo:"Hotel", titulo:"Agriturismo Lago de Como · 1 noite", fornecedor:"Agriturismo La Rondine, Lecco", dataHora:"2026-06-24 20:00", ref:"LR2026", valor:150, pago:"pendente", link:"", doc:null, notas:"Vista lago · Jantar incluído · Produção própria de vinho" },
-      { id:"r7", tipo:"Hotel", titulo:"Hôtel Colmar Centre · 2 noites", fornecedor:"Hôtel Le Colombier, Colmar", dataHora:"2026-06-25 18:00", ref:"HLC25J", valor:260, pago:"pendente", link:"", doc:null, notas:"No coração da Petite Venise · Parking pago €15/noite" }
-    ],
-    despesas: [
-      { id:"d1", viagem:"v1", cat:"Transporte", desc:"Voos TAP (2 passageiros)", valor:760, confirmada:"confirmada" },
-      { id:"d2", viagem:"v1", cat:"Alojamento", desc:"Alojamentos 6 noites", valor:810, confirmada:"confirmada" },
-      { id:"d3", viagem:"v1", cat:"Carro", desc:"Aluguer Hertz 7 dias", valor:320, confirmada:"confirmada" },
-      { id:"d4", viagem:"v1", cat:"Gastronomia", desc:"Restaurantes e degustações (estimativa)", valor:600, confirmada:"pendente" },
-      { id:"d5", viagem:"v1", cat:"Atrações", desc:"Pilatus, Gornergratt, ferries lago Como", valor:200, confirmada:"pendente" },
-      { id:"d6", viagem:"v1", cat:"Compras", desc:"Vinhos, produtos regionais, chocolates", valor:300, confirmada:"pendente" }
-    ],
-    memorias: [],
-    diario: [],
-    gastronomia: [],
-    mala: [
-      { id:"m1", viagem:"v1", nome:"Passaporte", cat:"Documentos", qtd:"1", onde:"", preco:0, notas:"Validade +6 meses", feito:false },
-      { id:"m2", viagem:"v1", nome:"Casaco impermeável", cat:"Vestuário", qtd:"1", onde:"", preco:0, notas:"Imprescindível nas montanhas", feito:false },
-      { id:"m3", viagem:"v1", nome:"Calçado trekking", cat:"Vestuário", qtd:"1 par", onde:"", preco:0, notas:"Para Monte Pilatus e trilhos", feito:false },
-      { id:"m4", viagem:"v1", nome:"Adaptador Tipo J (Suíça)", cat:"Electrónica", qtd:"2", onde:"Worten / Amazon", preco:8, notas:"Tomada suíça diferente da UE!", feito:false },
-      { id:"m5", viagem:"v1", nome:"Fendant du Valais", cat:"Vinho", qtd:"3 garrafas", onde:"Caves Orsat, Martigny · Provins, Sion", preco:55, notas:"AOC · Casta Chasselas · Mineral", feito:false },
-      { id:"m6", viagem:"v1", nome:"Riesling d'Alsace", cat:"Vinho", qtd:"3 garrafas", onde:"Maison Trimbach, Ribeauvillé · Cave Ribeauvillé, Colmar", preco:50, notas:"AOC · Seco e mineral · Ideal com marisco", feito:false },
-      { id:"m7", viagem:"v1", nome:"Meringue Doublée embalado", cat:"Produto Regional", qtd:"2 cx", onde:"Confiserie Schuh, Interlaken", preco:30, notas:"Especialidade Oberland Bernês", feito:false },
-      { id:"m8", viagem:"v1", nome:"Chocolates Läderach", cat:"Produto Regional", qtd:"3 cx", onde:"Läderach, qualquer cidade suíça", preco:60, notas:"Premium artesanal · Fraîchoc", feito:false }
-    ]
-  };
-}
-
-// ─── FIREBASE AUTH ─────────────────────────────────────────────────────────
-auth.onAuthStateChanged(async user => {
-  if (user) {
-    currentUser = user;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-    document.getElementById('user-name').textContent = user.displayName || user.email;
-    document.getElementById('user-avatar').textContent = (user.displayName||user.email||'U')[0].toUpperCase();
-    await loadData();
-    renderAll();
-  } else {
-    currentUser = null;
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('app').style.display = 'none';
-  }
-});
-
-function loginGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(e => alert('Erro login: ' + e.message));
-}
-function logout() {
-  if (confirm('Terminar sessão?')) auth.signOut();
-}
-
-// ─── FIRESTORE ─────────────────────────────────────────────────────────────
-async function loadData() {
-  try {
-    const doc = await db.collection('users').doc(currentUser.uid).get();
-    if (doc.exists) {
-      const d = doc.data();
-      appData.viagens = d.viagens || [];
-      appData.reservas = d.reservas || [];
-      appData.despesas = d.despesas || [];
-      appData.diario = d.diario || [];
-      appData.gastronomia = d.gastronomia || [];
-      appData.mala = d.mala || [];
-      // photos from localStorage
-      const photos = localStorage.getItem('fdr_memorias_' + currentUser.uid);
-      appData.memorias = photos ? JSON.parse(photos) : [];
-      if (!appData.viagens.length) initDefaultData();
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  auth = firebase.auth();
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      currentUser = user;
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').classList.add('visible');
+      document.getElementById('user-name').textContent = user.displayName?.split(' ')[0] || 'Utilizador';
+      document.getElementById('user-avatar').src = user.photoURL || '';
+      loadFirestoreData();
     } else {
-      initDefaultData();
-      await saveData();
+      document.getElementById('login-screen').style.display='flex';
+      document.getElementById('app').classList.remove('visible');
     }
-  } catch(e) { console.error(e); initDefaultData(); }
-}
-
-async function saveData() {
-  if (!currentUser) return;
-  try {
-    await db.collection('users').doc(currentUser.uid).set({
-      viagens: appData.viagens,
-      reservas: appData.reservas,
-      despesas: appData.despesas,
-      diario: appData.diario,
-      gastronomia: appData.gastronomia,
-      mala: appData.mala
-    }, { merge: true });
-    localStorage.setItem('fdr_memorias_' + currentUser.uid, JSON.stringify(appData.memorias));
-  } catch(e) { console.error('Erro Firestore:', e); }
-}
-
-// ─── UTILS ─────────────────────────────────────────────────────────────────
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-function fmtVal(v) { return '€' + Number(v||0).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function getViagem(id) { return appData.viagens.find(v=>v.id===id) || appData.viagens[0]; }
-
-// ─── SHOW TAB ───────────────────────────────────────────────────────────────
-let activeViagemId = null;
-let activeTab = 0;
-let leafletMap = null;
-
-function showTab(arg) {
-  const tabs = ['tab-painel','tab-destinos','tab-mapa','tab-roteiro','tab-reservas',
-                'tab-orcamento','tab-bagagem','tab-memorias','tab-gastronomia','tab-pesquisa'];
-  let n = typeof arg === 'number' ? arg : tabs.indexOf(arg);
-  if (n < 0) n = 0;
-  activeTab = n;
-  // highlight nav items
-  document.querySelectorAll('.nav-item').forEach((b,i)=>b.classList.toggle('active',i===n));
-  // show/hide tab panels
-  tabs.forEach((t,i)=>{
-    const el = document.getElementById(t);
-    if (el) el.style.display = i===n ? 'block' : 'none';
   });
-  if (n === 2) setTimeout(()=>{ if (leafletMap) leafletMap.invalidateSize(); else renderMapa(); }, 100);
-  if (n === 3) renderRoteiros();
-  if (n === 6) renderBagagem();
-  if (n === 7) { renderMemorias(); renderDiario(); }
-  if (n === 8) renderGastronomia();
+} catch(e){
+  console.warn('Firebase not configured, running in demo mode');
+  setTimeout(()=>{
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').classList.add('visible');
+    document.getElementById('user-name').textContent = 'Demo';
+    initDemo();
+  },500);
 }
 
-// ─── RENDER ALL ─────────────────────────────────────────────────────────────
-function renderAll() {
-  if (!activeViagemId && appData.viagens.length) activeViagemId = appData.viagens[0].id;
-  populateViagemSelects();
+function signInWithGoogle(){
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(e=>{ alert('Erro: '+e.message); });
+}
+function signOut(){ if(auth) auth.signOut(); }
+
+async function loadFirestoreData(){
+  try{
+    const uid = currentUser.uid;
+    const snap = await db.collection('users').doc(uid).get();
+    if(snap.exists){ Object.assign(appData, snap.data()); }
+    // Defaults se vazio
+    if(!appData.viagens.length) initDefaultData();
+    renderAll();
+  } catch(e){ initDemo(); }
+}
+
+async function saveFirestoreData(){
+  if(!currentUser) return;
+  try{
+    await db.collection('users').doc(currentUser.uid).set(appData, {merge:true});
+  } catch(e){ console.warn('Save failed',e); }
+}
+
+function initDemo(){
+  initDefaultData();
+  renderAll();
+}
+
+/* ═══════════════════════════════════════════════════
+   DADOS DEFAULT
+═══════════════════════════════════════════════════ */
+function initDefaultData(){
+  appData.viagens = [
+    {
+      id:'v1',nome:'Luxemburgo, Suíça & Itália 2026',
+      pais:'Luxemburgo · Suíça · Itália · França',
+      cidades:'Luxemburgo, Berna, Thun, Zermatt, Como, Lugano, Colmar',
+      inicio:'2026-05-26',fim:'2026-05-30',
+      orcamento:3000, stars:5, estado:'planned',
+      notas:'Viagem épica pelos Alpes — 5 dias, 4 países'
+    }
+  ];
+  appData.reservas = [
+    {id:'r1',tipo:'✈',desc:'TAP Lisboa → Genebra (TP531)',data:'2026-05-26',hora:'06:15',ref:'TP531LIS',fornecedor:'TAP Air Portugal',valor:420,notas:'Check-in online 24h antes'},
+    {id:'r2',tipo:'✈',desc:'Luxemburgo → Lisboa (TP538)',data:'2026-05-30',hora:'21:40',ref:'TP538LUX',fornecedor:'TAP Air Portugal',valor:380,notas:''},
+    {id:'r3',tipo:'🚗',desc:'Hertz · Geneva Airport',data:'2026-05-26',hora:'09:00',ref:'HERTZ2026',fornecedor:'Hertz',valor:285,notas:'Classe C ou superior · Devolver Luxemburgo'},
+    {id:'r4',tipo:'🏨',desc:'Mooshof Buchsi Apartments · Münchenbuchsee (2 noites)',data:'2026-05-26',hora:'14:00',ref:'BUCHSI26',fornecedor:'Mooshof',valor:210,notas:'Moosgasse 39 · Check-in 14h'},
+    {id:'r5',tipo:'🏨',desc:'Krattigstrasse 35 · Spiez (1 noite)',data:'2026-05-27',hora:'22:00',ref:'SPIEZ26',fornecedor:'Airbnb',valor:145,notas:'Vista para Lago de Thun'},
+    {id:'r6',tipo:'🏨',desc:'Hotel Blue Relais Maggiore · Castelletto (1 noite)',data:'2026-05-28',hora:'20:30',ref:'BLUERELAIS26',fornecedor:'Hotel',valor:185,notas:'Via Sempione 182 · Junto a Malpensa'},
+    {id:'r7',tipo:'🏨',desc:'Hotel Alpenrose beim Ballenberg · Brienz (1 noite)',data:'2026-05-29',hora:'21:45',ref:'ALPENROSE26',fornecedor:'Hotel Alpenrose',valor:165,notas:'Dorfstrasse 60 · Hofstetten b. Brienz'}
+  ];
+  appData.despesas = [
+    {id:'d1',desc:'Combustível A6 Berna→Thun',cat:'Transporte',valor:28,data:'2026-05-27'},
+    {id:'d2',desc:'Bilhetes Trümmelbach Falls (x2)',cat:'Actividades',valor:44,data:'2026-05-27'},
+    {id:'d3',desc:'Almoço Lauterbrunnen',cat:'Alimentação',valor:62,data:'2026-05-27'},
+    {id:'d4',desc:'Parking Thun (2h)',cat:'Transporte',valor:8,data:'2026-05-27'}
+  ];
+  appData.diario = [];
+  appData.fotos = [];
+  appData.notas = [];
+  appData.paragens_extra = {};
+}
+
+/* ═══════════════════════════════════════════════════
+   ROTEIROS DATA
+═══════════════════════════════════════════════════ */
+const ROTEIROS = {
+  dia2:{
+    date:"2026-05-27", titulo:"Oberland Bernês Completo",
+    subtitulo:"Dia 2 · Terça-feira, 27 de Maio de 2026",
+    rota:"Münchenbuchsee → Berna → Thun → Lauterbrunnen → Mürren → Grindelwald → Brienz → Interlaken → Spiez",
+    km:180, conducao:"4h", pais:"Suíça (Cantão de Berna)",
+    custoMin:159, custoMax:335,
+    seccoes:[
+      { nome:"🌹 Berna & Thun", periodo:"Manhã · 07h00 → 11h30", paragens:[
+        {hora:"07h00",local:"Moosgasse 39 — Münchenbuchsee",desc:"Partida. Seguir para sul via Berna até Rosengarten."},
+        {hora:"07h45",local:"Rosengarten Bern",desc:"Jardim de rosas — 220+ variedades a plena floração. Vista sobre Cidade Velha UNESCO. Entrada gratuita.",custo:"€0",maps:"Rosengarten+Bern"},
+        {hora:"09h00",local:"Rathausplatz + Mühleplatz — Thun",desc:"Arcadas elevadas únicas na Europa. 20 min a pé entre as duas praças.",maps:"Rathausplatz+Thun"},
+        {hora:"09h30",local:"Castelo de Thun",desc:"Castelo medieval séc. XII. Vista panorâmica sobre Thun, lago e Alpes. 10h-17h.",custo:"€12",maps:"Schloss+Thun"},
+        {hora:"11h00",local:"Schloss Oberhofen am Thunersee",desc:"Castelo no lago com reflexo na água — estilos neo-gótico, árabe e romântico. Jardins livres.",custo:"€12",maps:"Schloss+Oberhofen"}
+      ]},
+      { nome:"💧 Lauterbrunnen — Vale das 72 Cataratas", periodo:"Tarde · 12h00 → 17h00", paragens:[
+        {hora:"12h45",local:"Staubbachfall",desc:"Catarata de 297m de queda livre — a mais alta acessível a pé. Inspirou Goethe e Byron. Impermeável recomendado.",custo:"€0",maps:"Staubbachfall+Lauterbrunnen"},
+        {hora:"13h30",local:"Almoço — Lauterbrunnen",desc:"Restaurant Silberhorn ou Café Oberland. Rösti, Cordon Bleu. ~CHF 55-80 para 2.",custo:"€17–44",maps:"Restaurant+Silberhorn+Lauterbrunnen"},
+        {hora:"14h30",local:"Trümmelbach Falls",desc:"Únicas cataratas glaciares da Europa dentro de uma montanha. 10 cascatas em túneis. UNESCO. Calçado impermeável obrigatório.",custo:"€22",maps:"Trümmelbach+Falls"},
+        {hora:"16h00",local:"Mürren Viewpoint (1638m)",desc:"Aldeia alpina sem carros. Vista do Eiger, Mönch e Jungfrau. Teleférico desde Stechelberg.",custo:"€31",maps:"Mürren+Switzerland"}
+      ]},
+      { nome:"🏔️ Grindelwald & Brienz", periodo:"Tarde/Noite · 17h30 → 20h45", paragens:[
+        {hora:"18h00",local:"Lago Bachalpsee — First (2265m)",desc:"Lago alpino com reflexo perfeito do Wetterhorn. Teleférico + 45 min caminhada. ⚠️ Verificar horário.",custo:"€53",maps:"Bachalpsee+Grindelwald"},
+        {hora:"19h00",local:"Giessbach Falls",desc:"14 níveis de cascatas no lago. Funicular de madeira mais antigo da Suíça (1879). Gratuito.",custo:"€0",maps:"Giessbach+Falls"}
+      ]},
+      { nome:"🏙️ Interlaken & Spiez", periodo:"Noite · 20h00 → 22h00", paragens:[
+        {hora:"20h00",local:"Brienz — Aldeia + Lago",desc:"Capital da talha em madeira suíça. Lago de um azul-turquesa irreal.",maps:"Brienz+Switzerland"},
+        {hora:"20h45",local:"Interlaken — Harder Kulm",desc:"Miradouro 1322m. Vista sobre lagos Thun e Brienz + Eiger, Mönch, Jungfrau. Último funicular ~21h00.",custo:"€0–60",maps:"Harder+Kulm+Interlaken"},
+        {hora:"22h00",local:"Krattigstrasse, Spiez — Chegada",desc:"Vista nocturna para o Castelo de Spiez iluminado.",maps:"Krattigstrasse+Spiez"}
+      ]}
+    ],
+    refeicoes:{almoco:"Restaurant Silberhorn — €17-44/p | Café Oberland (estação) — €16/p | Restaurant zum Schützen (Thun) — €20-25/p",jantar:"Harder Kulm Restaurant — €60/p | Restaurant Schuh (Hoheweg 56) — €31-44/p | Rügenbrau Brauerei (económico) — €27-35/p"},
+    alertas:["Trümmelbach Falls — confirmar abertura em truemmelbachfaelle.ch","⚠️ Teleférico First — verificar último horário em firstflyer.ch","Teleférico Stechelberg→Mürren — schilthornbahn.ch","Harder Kulm — último funicular ~21h00; reservar mesa em hardergipfel.ch","ThunerseeSCHLÖSSER-Card — acesso combinado 3 castelos com desconto"],
+    tempo:[
+      {local:"Münchenbuchsee/Berna (07h)",min:"~10°C",max:"~20°C",cond:"Sol com nuvens matinal",equip:"Casaco leve"},
+      {local:"Thun (09h)",min:"~11°C",max:"~21°C",cond:"Ensolarado, ameno",equip:"Roupa leve"},
+      {local:"Lauterbrunnen (12h-16h)",min:"~7°C",max:"~13°C",cond:"Variável — névoa nas cataratas",equip:"Casaco + impermeável"},
+      {local:"Trümmelbach (14h30)",min:"~5°C",max:"~10°C",cond:"Frio húmido interior",equip:"Impermeável + calçado impermeável"},
+      {local:"Mürren (16h)",min:"~3°C",max:"~8°C",cond:"Fresco, possível vento",equip:"Casaco quente"},
+      {local:"Bachalpsee/First (18h)",min:"~0°C",max:"~5°C",cond:"Frio, névoa ao anoitecer",equip:"Casaco quente + gorro"},
+      {local:"Brienz + Interlaken (20h)",min:"~10°C",max:"~16°C",cond:"Ameno, noite fresca",equip:"Casaco para o jantar"}
+    ]
+  },
+  dia3:{
+    date:"2026-05-28", titulo:"Oberland · Zermatt · Ticino",
+    subtitulo:"Dia 3 · Quinta-feira, 28 de Maio de 2026",
+    rota:"Spiez → Kandersteg → Zermatt → Locarno → Ascona → Hotel Blue Relais Maggiore",
+    km:350, conducao:"6h", pais:"Suíça · Itália (chegada)",
+    custoMin:145, custoMax:288,
+    seccoes:[
+      { nome:"🇨🇭 Oberland Bernês", periodo:"Manhã · 07h00 → 09h30", paragens:[
+        {hora:"07h30",local:"Lago Oeschinen — Kandersteg (1578m)",desc:"Um dos lagos glaciares mais belos dos Alpes. Teleférico + 20 min caminhada. Paredes rochosas de 1000m.",custo:"€21–28",maps:"Oeschinensee+Kandersteg"},
+        {hora:"09h15",local:"Kandersteg — Village",desc:"Aldeia alpina pitoresca. Hinterdorfstrasse séc. XVII. Café antes da viagem.",maps:"Kandersteg+Village"}
+      ]},
+      { nome:"⛰️ Zermatt & Gornergrat", periodo:"Manhã/Tarde · 10h00 → 15h00", paragens:[
+        {hora:"10h00",local:"Täsch — Estacionamento",desc:"⚠️ Zermatt = zona livre de carros. Estacionar OBRIGATORIAMENTE em Täsch (~CHF 15/dia). Comboio a cada 20 min.",custo:"€13",maps:"Täsch+Parking"},
+        {hora:"11h30",local:"Lago Riffelsee — Rotenboden",desc:"O lago mais famoso dos Alpes — reflexo perfeito do Matterhorn. 10 min desde a estação. Marmotões frequentes.",maps:"Riffelsee+Zermatt"},
+        {hora:"12h00",local:"Gornergrat — 3089m",desc:"29 cumes com +4000m. Glaciar Gorner. Monte Rosa (4634m). Temperatura 10-15°C abaixo do vale.",custo:"€50",maps:"Gornergrat+Zermatt"},
+        {hora:"13h30",local:"Matterhorn Glacier Paradise (opcional)",desc:"Ponto mais alto por teleférico na Suíça (3883m). Gruta de gelo. ⚠️ Só se houver tempo e energia.",custo:"€109 (opt)",maps:"Klein+Matterhorn+Zermatt"}
+      ]},
+      { nome:"🌴 Ticino & Lago Maggiore", periodo:"Tarde/Noite · 15h30 → 20h30", paragens:[
+        {hora:"18h00",local:"Piazza Grande — Locarno",desc:"Praça icónica do Ticino. Casas coloridas, arcadas. Palco do Festival de Cinema de Locarno.",maps:"Piazza+Grande+Locarno"},
+        {hora:"18h45",local:"Lungolago + Piazza Motta — Ascona",desc:"Passeio à beira do Lago Maggiore. Pôr do sol sobre o lago. Aperitivo: Spritz ou Merlot ticinês.",maps:"Piazza+Motta+Ascona"},
+        {hora:"20h30",local:"Hotel Blue Relais Maggiore — Chegada",desc:"Castelletto sopra Ticino, Via Sempione 182. Junto ao aeroporto de Milão-Malpensa.",maps:"Via+Sempione+182+Castelletto"}
+      ]}
+    ],
+    refeicoes:{almoco:"Grampi's Bar (Bahnhofstrasse, Zermatt) — €27-38/p | Coop Supermarket Zermatt — €16/p | Brown Cow Pub — €20/p",jantar:"Grottino Ticinese (Locarno) — €29-38/p | Grotto Broggini (Losone) — €38-46/p | Ristorante Fiorentina — €24-29/p"},
+    alertas:["⚠️ Teleférico Oeschinen — chegar antes das 08h00 ao sábado. oeschinensee.ch","Gornergrat Railway — reservar em gornergrat.ch","Matterhorn Glacier Paradise fecha às 15h30","⚠️ Locarno/Ascona: 64% prob. precipitação — verificar meteoswiss.admin.ch","Zermatt ZONA LIVRE DE CARROS — estacionar em Täsch (multa elevada se entrar de carro)"],
+    tempo:[
+      {local:"Spiez/Kandersteg (07h)",min:"~-1°C",max:"~9°C",cond:"Variável — nuvens, possível chuva",equip:"Casaco + botas impermeáveis"},
+      {local:"Lago Oeschinen (07h30)",min:"~-3°C",max:"~6°C",cond:"Fresco, bruma matinal",equip:"Casaco quente + calçado impermeável"},
+      {local:"Täsch/Zermatt (10h)",min:"~-2°C",max:"~7°C",cond:"Variável; possível neve leve",equip:"Casaco + impermeável"},
+      {local:"Gornergrat (11h-13h)",min:"~-5°C",max:"~0°C",cond:"⚠️ Frio intenso; neve e vento prováveis",equip:"Casaco, luvas e gorro OBRIGATÓRIOS"},
+      {local:"Locarno/Ascona (18h)",min:"~10°C",max:"~16°C",cond:"⚠️ 64% prob. precipitação",equip:"Impermeável; esplanada pode não estar disponível"}
+    ]
+  },
+  dia4:{
+    date:"2026-05-29", titulo:"Lago de Como · Lugano · Locarno",
+    subtitulo:"Dia 4 · Sexta-feira, 29 de Maio de 2026",
+    rota:"Hotel Blue Relais Maggiore → Como → Balbianello → Bellagio → Varenna → Lugano → Locarno → Ascona → Hotel Alpenrose",
+    km:320, conducao:"6h", pais:"Itália → Suíça",
+    custoMin:75, custoMax:130,
+    seccoes:[
+      { nome:"🇮🇹 Como", periodo:"Manhã · 07h30 → 10h00", paragens:[
+        {hora:"08h00",local:"Villa Olmo + Passeggiata Lino Gelpi",desc:"Villa neoclássica séc. XVIII. Passeio pedonal à beira do lago. Jardins gratuitos (encerrado à 2ª).",custo:"€0–5",maps:"Villa+Olmo+Como"},
+        {hora:"08h50",local:"Funicolare Como-Brunate",desc:"Funicular histórico de 1894. Sobe de 207m a 715m em 7 min. Vista panorâmica sobre o lago e os Alpes suíços.",custo:"€6",maps:"Funicolare+Como+Brunate"},
+        {hora:"09h45",local:"Estátua de Alessandro Volta — Como",desc:"Monumento ao inventor da pilha. En passant — 10 min.",maps:"Monumento+Volta+Como"}
+      ]},
+      { nome:"🏛️ Lago de Como", periodo:"Manhã/Tarde · 10h15 → 15h15", paragens:[
+        {hora:"10h15",local:"Villa del Balbianello — Tremezzina",desc:"A villa mais fotografada de Itália. Casino Royale + Star Wars II. ⚠️ Encerrada Seg e Qua. Reserva obrigatória.",custo:"€10–20",maps:"Villa+Balbianello+Tremezzina"},
+        {hora:"11h45",local:"Bellagio",desc:"'Pérola do Lago de Como'. Escadarias de pedra, buganvílias, vielas medievais. Excelente para almoço.",maps:"Bellagio+Lake+Como"},
+        {hora:"13h30",local:"Varenna",desc:"Aldeia mais romântica do braço oriental. Casas cor-de-rosa debruçadas na água. Balsa desde Bellagio (15 min, ~€5).",maps:"Varenna+Lake+Como"},
+        {hora:"14h30",local:"Orrido di Bellano",desc:"Gorge escavada pelo rio Pioverna — passarelas suspensas sobre cascatas turquesa. 20-30 min.",custo:"€8",maps:"Orrido+di+Bellano"}
+      ]},
+      { nome:"🇨🇭 Lugano + Locarno + Ascona", periodo:"Tarde/Noite · 15h30 → 21h45", paragens:[
+        {hora:"16h30",local:"Lugano — Piazza Riforma + Via Pessina",desc:"Coração de Lugano. Atmosfera italiana em território suíço. 30-40 min passeio.",maps:"Piazza+della+Riforma+Lugano"},
+        {hora:"17h30",local:"Piazza Grande — Locarno",desc:"Praça icónica do Ticino rodeada de casas coloridas. Aperitivo antes de Ascona.",maps:"Piazza+Grande+Locarno"},
+        {hora:"18h15",local:"Lungolago + Piazza Motta — Ascona",desc:"Passeio à beira do Lago Maggiore com palmeiras. Pôr do sol sobre o lago.",maps:"Piazza+Giuseppe+Motta+Ascona"},
+        {hora:"~21h45",local:"Hotel Alpenrose beim Ballenberg — Chegada",desc:"Hofstetten bei Brienz. Junto ao Museu ao Ar Livre de Ballenberg.",maps:"Hotel+Alpenrose+Hofstetten+Brienz"}
+      ]}
+    ],
+    refeicoes:{almoco:"Ristorante Bilacus (Bellagio) — €17-22/p | Osteria Quatro Pass (Varenna) — €20-25/p | Salumeria/piquenique — €12/p",jantar:"Grottino Ticinese (Locarno) — €29-38/p | Grotto Broggini (Losone) — €38-46/p | La Tinera (Lugano) — €27-33/p"},
+    alertas:["⚠️ Villa del Balbianello — encerrada Seg e Qua! Reservar bilhetes online.","Villa Olmo — jardins encerrados à segunda-feira","Balsa Bellagio→Varenna — verificar em navigazionelaghi.it","⚠️ SS340/SP583 Lago de Como — estrada estreita e sinuosa, atenção nos túneis","Grotto no Ticino — confirmar abertura e reservar com antecedência"],
+    tempo:[
+      {local:"Castelletto→Como (08h)",min:"~13°C",max:"~23°C",cond:"Sol com nuvens, ameno",equip:"Roupa leve, óculos de sol"},
+      {local:"Lago de Como — Bellagio (11h)",min:"~14°C",max:"~24°C",cond:"Ensolarado, quente",equip:"Roupa leve, protetor solar"},
+      {local:"Lugano (16h30)",min:"~14°C",max:"~24°C",cond:"Sol com nuvens",equip:"Camada intermédia à tarde"},
+      {local:"Locarno/Ascona (18h)",min:"~15°C",max:"~25°C",cond:"Ensolarado, mediterrâneo",equip:"Roupa leve — esplanada ideal"},
+      {local:"Ascona→Ballenberg (20h45)",min:"~10°C",max:"~18°C",cond:"Pode arrefecer na subida",equip:"Casaco para a chegada"}
+    ]
+  },
+  dia5:{
+    date:"2026-05-30", titulo:"Pilatus · Rigi · Lucerna · Colmar · Luxemburgo",
+    subtitulo:"Dia 5 · Sábado, 30 de Maio de 2026",
+    rota:"Hotel Alpenrose → Alpnachstad/Pilatus → Monte Rigi → Lucerna → Colmar → Luxemburgo (Gasperich)",
+    km:560, conducao:"5h30", pais:"Suíça → França → Luxemburgo",
+    custoMin:108, custoMax:211,
+    seccoes:[
+      { nome:"⛰️ Monte Pilatus (2132m)", periodo:"Manhã · 07h00 → 10h30", paragens:[
+        {hora:"07h30",local:"Alpnachstad — Cremalheira do Pilatus",desc:"Cremalheira mais íngreme do mundo (1889). Inclinação máxima 48%. Sobe a 2132m em 30 min.",custo:"€52–78",maps:"Pilatus+Kulm+Alpnachstad"},
+        {hora:"08h10",local:"Monte Pilatus — Pilatus Kulm (2132m)",desc:"Vista 360° sobre o Lago dos Quatro Cantões e os Alpes. Lenda da montanha dos dragões. Reservar ~1h30.",maps:"Pilatus+Kulm"},
+        {hora:"10h00",local:"Descida — Dragon Ride Teleférico → Kriens",desc:"Novo Dragon Ride (2023) — 3,5 min com janelas cockpit. Depois gondola até Kriens. Percurso clássico.",maps:"Kriens+Pilatus"}
+      ]},
+      { nome:"👑 Monte Rigi (1797m)", periodo:"Manhã · 11h00 → 13h00", paragens:[
+        {hora:"11h00",local:"Monte Rigi — Rigi Kulm (1797m)",desc:"'Rainha das Montanhas' — primeiro cume alpino do turismo (séc. XIX). Vista sobre 3 lagos. Horizonte 360°.",custo:"€41 (opt)",maps:"Rigi+Kulm"},
+        {hora:"12h15",local:"Descida Rigi → Vitznau",desc:"Opcional: barco Vitznau→Lucerna (40 min, ~€20) — chegada cinematográfica à cidade.",maps:"Vitznau+ferry"}
+      ]},
+      { nome:"🏙️ Lucerna", periodo:"Almoço/Tarde · 13h00 → 14h15", paragens:[
+        {hora:"13h00",local:"Kapellbrücke — Lucerna",desc:"Ponte de madeira coberta mais antiga da Europa (1333). Pinturas séc. XVII no interior. Símbolo de Lucerna.",maps:"Kapellbrücke+Luzern"},
+        {hora:"13h45",local:"Löwendenkmal (Monumento do Leão)",desc:"Leão moribundo esculpido na rocha (1820). Mark Twain: 'o mais triste e tocante pedaço de pedra do mundo'.",maps:"Löwendenkmal+Luzern"}
+      ]},
+      { nome:"🇫🇷 Colmar", periodo:"Tarde · 16h30 → 18h30", paragens:[
+        {hora:"16h30",local:"Colmar — La Petite Venise",desc:"Casas de enxaimel alsacianas multicolores à beira do Rio Lauch. Inspirou 'Bela e o Monstro' da Disney. Passeio de barco ~€8.",maps:"Petite+Venise+Colmar"},
+        {hora:"17h15",local:"Colmar — Cidade Velha (Rue des Tanneurs + Koifhus)",desc:"Rue des Tanneurs com fachadas de enxaimel restauradas. Koifhus (Antiga Alfândega, 1480). Tarte flambée + Riesling.",maps:"Rue+des+Tanneurs+Colmar"}
+      ]},
+      { nome:"🇱🇺 Luxemburgo", periodo:"Noite · 18h30 → 20h45", paragens:[
+        {hora:"~20h45",local:"Rue Jean-Gaspard de Cicignon — Gasperich",desc:"Chegada a Luxemburgo. Bairro de Gasperich. Centro histórico UNESCO a ~10 min de carro.",maps:"Gasperich+Luxembourg"}
+      ]}
+    ],
+    refeicoes:{almoco:"Da Ernesto (Rathausquai 11, Lucerna) — €46/p | Wirtshaus Taube — €33-38/p | Tibits Estação (vegetariano) — €22/p",jantar:"La Soi (Colmar, tarte flambée) — €12/p | La Stub (Petite Venise) — €15-22/p | Bistrot Gourmand — €20/p"},
+    alertas:["Pilatus cremalheira — reservar online em pilatus.ch (esgota em época alta)","Rigi vs Pilatus no mesmo dia — se tempo limitado, escolher só Pilatus","Barco Vitznau→Lucerna — verificar horários em lakelucerne.ch","La Soi (Colmar) — reservar com antecedência para sábado à noite","⚠️ Brünigstrasse (07h) — piso húmido ao amanhecer; reduzir velocidade"],
+    tempo:[
+      {local:"Brienz/Brünig (07h)",min:"~8°C",max:"~16°C",cond:"Nuvens com aberturas de sol",equip:"Casaco leve"},
+      {local:"Pilatus Kulm (08h-10h)",min:"~2°C",max:"~7°C",cond:"Temperado, possível vento",equip:"Casaco quente, luvas"},
+      {local:"Rigi Kulm (11h)",min:"~5°C",max:"~10°C",cond:"Semelhante ao Pilatus",equip:"Casaco + protetor solar"},
+      {local:"Lucerna (13h)",min:"~12°C",max:"~20°C",cond:"Sol com nuvens",equip:"Camada intermédia"},
+      {local:"Colmar (16h30)",min:"~13°C",max:"~22°C",cond:"Ensolarado, ameno",equip:"Roupa leve"}
+    ]
+  }
+};
+
+const GASTRONOMIA = {
+  suica:{
+    titulo:"🇨🇭 Suíça — Valais, Berna & Oberland Bernês",
+    vinhos:[
+      {nome:"Fendant (Chasselas) ★★★",estilo:"Branco leve, fresco, pétillant natural",aromas:"Flores brancas, mineral, cítrico, efervescência fina",harmonia:"Fondue, raclette, peixes de água doce, rösti, aperitivo",stars:3},
+      {nome:"Petite Arvine (Valais) ★★★",estilo:"Branco nervoso e mineral — exclusivo Valais",aromas:"Toranja, glicinea, ruibarbo, toque salgado único",harmonia:"Aspargos, peixe de rio, queijo de alpe, risotto",stars:3},
+      {nome:"Merlot del Ticino ★★★",estilo:"Tinto encorpado, elegante — 80% dos vinhedos do Ticino",aromas:"Ameixas, mirtilo, tabaco, chocolate negro, terroso",harmonia:"Polenta com brasato, risotto de cogumelos, queijos curados",stars:3},
+      {nome:"Pinot Noir Suíço",estilo:"Tinto leve a médio, fresco",aromas:"Cereja, framboesa, floral, taninos sedosos",harmonia:"Rösti com carne, Cordon Bleu, queijos maduros",stars:2},
+      {nome:"Dôle (Pinot Noir + Gamay)",estilo:"Tinto leve, fácil e bebível",aromas:"Frutos vermelhos, especiarias leves, boa acidez",harmonia:"Salsichas suíças, Bratwurst, pratos de inverno",stars:2}
+    ],
+    pratos:[
+      {nome:"Rösti (Berna)",desc:"Batata ralada frita em manteiga até crocante — prato nacional bernês. Com ovo frito, queijo, bacon ou Lonza.",vinho:"Fendant (Chasselas) ou Pinot Noir leve",epoca:"Todo o ano. Incontornável."},
+      {nome:"Fondue / Raclette",desc:"Queijo suíço fundido com Riesling e kirsch. Raclette: queijo derretido sobre batatas e pickles.",vinho:"Fendant do Valais — par perfeito histórico",epoca:"Presente nos menus de montanha em maio."},
+      {nome:"Cordon Bleu",desc:"Escalope de vitela recheada com fiambre e Emmental, panada e frita em manteiga. Clássico suíço com rösti e salada.",vinho:"Pinot Noir suíço leve ou Fendant",epoca:"Todo o ano."},
+      {nome:"Polenta con Brasato (Ticino)",desc:"Polenta de milho em paiolo de cobre com carne bovina estufada em Merlot. Coração da cozinha ticinesa.",vinho:"Merlot del Ticino",epoca:"Todo o ano nos grottos."},
+      {nome:"Meringue com Natas Duplas",desc:"Merengue crocante de Gruyères com natas duplas DOP batidas. Sobremesa icónica bernesa.",vinho:"Crémant d'Alsace ou Muscat",epoca:"Em qualquer café do Oberland. Obrigatória!"}
+    ]
+  },
+  italia:{
+    titulo:"🇮🇹 Lago de Como & Valtellina",
+    vinhos:[
+      {nome:"Valtellina Superiore DOCG ★★★",estilo:"Tinto elegante de Nebbiolo",aromas:"Cereja, violeta, alcatrão, terroso, taninos firmes",harmonia:"Missoltini, peixes de lago gordos, brasato, caça",stars:3},
+      {nome:"Sforzato di Valtellina DOCG ★★★",estilo:"Tinto passito de uvas secas — intenso e potente",aromas:"Ameixa passas, chocolate, tabaco, especiarias quentes",harmonia:"Queijos curados, carnes estufadas, pratos de outono",stars:3},
+      {nome:"Lugana DOC ★★★",estilo:"Branco elegante de Turbiana/Trebbiano (Lago Garda)",aromas:"Flores brancas, pêra, mineral, frescor herbáceo",harmonia:"Pesce persico, lavarello in bianco, frutos do mar",stars:3},
+      {nome:"Nostranel del Lario",estilo:"Tinto local rústico e bebível",aromas:"Frutos vermelhos, terra, levemente rústico",harmonia:"Missoltini com polenta, peixes grelhados",stars:2}
+    ],
+    pratos:[
+      {nome:"Missoltini (Misultin) ★",desc:"Agoni do lago secos ao sol, conservados com louro. Grelhados com polenta, azeite e vinagre. Slow Food Presidium.",vinho:"Nostranel del Lario ou Valtellina jovem",epoca:"MAIO é a época de pesca dos agoni — os mais frescos!"},
+      {nome:"Risotto al Pesce Persico ★",desc:"Risotto cremoso com filetes de peixe-persico. Especialidade do Lario. Mantecato com burro e parmigiano.",vinho:"Lugana DOC ou Merlot Bianco",epoca:"Todo o ano. Prato de eleição em Bellagio e Varenna."},
+      {nome:"Lavarello in Carpione",desc:"Peixe branco do lago frito e marinado em agridoce de vinagre, cebola, cenoura e louro. Servido frio.",vinho:"Lugana DOC fresco ou Pinot Grigio",epoca:"Primavera — ideal em maio."},
+      {nome:"Fritto Misto di Lago",desc:"Mistura de peixes fritos — alborelle, agoni, persico, lavarello. O 'fish and chips' lariano.",vinho:"Vino bianco locale ou Prosecco",epoca:"Primavera/verão."}
+    ]
+  },
+  alsacia:{
+    titulo:"🇫🇷 Alsácia — Os Grandes Vinhos Brancos",
+    vinhos:[
+      {nome:"Riesling d'Alsace ★★★",estilo:"Branco seco",aromas:"Limão, maçã verde, mineral, jasmim, cera de abelha",harmonia:"Choucroute, peixe, mariscos, queijo de cabra, carnes brancas",stars:3},
+      {nome:"Gewurztraminer ★★★",estilo:"Branco aromático",aromas:"Lichia, rosa, tangerina, goiaba, canela, especiarias",harmonia:"Queijo Munster, foie gras, pratos condimentados, culinária asiática",stars:3},
+      {nome:"Pinot Gris d'Alsace",estilo:"Branco encorpado",aromas:"Pêssego, pera madura, mel, fumado, especiarias",harmonia:"Caça, vitela, porco, aves assadas, foie gras",stars:3},
+      {nome:"Crémant d'Alsace",estilo:"Espumante método tradicional",aromas:"Frutos brancos, floral, brioche, pérola fina",harmonia:"Aperitivo, foie gras, salmão fumado, frutos do mar",stars:3}
+    ],
+    pratos:[
+      {nome:"Choucroute Garnie",desc:"Repolho fermentado com salsichas, bacon fumado e batata cozinhado em Riesling. Prato nacional alsaciano.",vinho:"Riesling d'Alsace",epoca:"Todo o ano. Melhor outono/inverno nas winstubs."},
+      {nome:"Tarte Flambée (Flammekueche)",desc:"Massa fina de forno a lenha com crème fraîche, cebola e lardons. O equivalente alsaciano da pizza.",vinho:"Pinot Blanc ou Sylvaner",epoca:"Todo o ano. ~2 por pessoa ao jantar."},
+      {nome:"Foie Gras d'Alsace",desc:"O foie gras moderno nasceu aqui. Terrina ou salteado com gengibre e frutos. Produto de luxo com denominação regional.",vinho:"Gewurztraminer VT ou Pinot Gris",epoca:"Entrada de jantar especial."},
+      {nome:"Kugelhopf",desc:"Bolo de fermentação lenta com amêndoas, passas e kirsch em molde de coroa. Doce icónico da pastelaria local.",vinho:"Crémant d'Alsace ou Muscat",epoca:"Pequeno-almoço ou sobremesa."}
+    ]
+  }
+};
+
+/* ═══════════════════════════════════════════════════
+   RENDER FUNCTIONS
+═══════════════════════════════════════════════════ */
+function renderAll(){
   renderPainel();
   renderDestinos();
+  renderRoteiros();
   renderReservas();
   renderOrcamento();
   renderMemorias();
-  renderDiario();
-  showTab(activeTab);
+  renderGastronomia();
 }
 
-function populateViagemSelects() {
-  ['mi-viagem'].forEach(id=>{
-    const el = document.getElementById(id);
-    if (!el) return;
-    const cur = el.value;
-    el.innerHTML = appData.viagens.map(v=>`<option value="${v.id}">${v.nome}</option>`).join('');
-    if (cur) el.value = cur;
-  });
-}
-
-// ─── PAINEL ─────────────────────────────────────────────────────────────────
-function renderPainel() {
-  const v = appData.viagens.find(x=>x.id===activeViagemId) || appData.viagens[0];
-  if (!v) return;
-
+function renderPainel(){
+  // Countdown
   const hoje = new Date();
-  const inicio = new Date(v.dataInicio);
-  const fim = new Date(v.dataFim);
-  const diasParaIr = Math.ceil((inicio - hoje) / 86400000);
-  const duracao = Math.ceil((fim - inicio) / 86400000);
-
-  const despConf = appData.despesas.filter(d=>d.viagem===v.id && d.confirmada==='confirmada');
-  const totalConf = despConf.reduce((s,d)=>s+Number(d.valor||0),0);
-
-  // countdown
-  const cd = document.getElementById('countdown-container');
-  if (cd) {
-    cd.innerHTML = `<div style="background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--border);border-radius:var(--radius2);padding:1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
-      <div style="text-align:center"><div style="font-size:3rem;font-weight:800;color:var(--accent);line-height:1">${diasParaIr > 0 ? diasParaIr : '🎉'}</div><div style="color:var(--text2);font-size:.85rem">${diasParaIr > 0 ? 'dias para partir' : 'Boa viagem!'}</div></div>
-      <div><div style="font-size:1.1rem;font-weight:600">${v.nome}</div><div style="color:var(--text2);font-size:.85rem">📅 ${v.dataInicio||''} → ${v.dataFim||''} · ${duracao} dias</div></div>
+  const viagem = new Date('2026-05-26');
+  const diff = Math.ceil((viagem - hoje)/(1000*60*60*24));
+  const cc = document.getElementById('countdown-container');
+  if(diff > 0){
+    cc.innerHTML=`<div class="countdown-widget">
+      <div class="countdown-dias">${diff}</div>
+      <div class="countdown-viagem">dias para</div>
+      <div class="countdown-viagem" style="font-size:1.1rem;color:var(--accent)">Luxemburgo, Suíça & Itália</div>
+      <div class="countdown-texto">26 — 30 de Maio de 2026 · 5 dias · 4 países</div>
+    </div>`;
+  } else {
+    cc.innerHTML=`<div class="countdown-widget" style="border-color:rgba(63,185,80,.3)">
+      <div style="font-size:2rem">🎒</div>
+      <div class="countdown-viagem" style="color:var(--green)">Viagem a decorrer ou concluída!</div>
     </div>`;
   }
-
-  // stats row
-  const sr = document.getElementById('stats-row');
-  if (sr) {
-    sr.innerHTML = `
-      <div class="stat-card"><div class="stat-val" style="color:var(--green)">${fmtVal(totalConf)}</div><div class="stat-label">✔ Confirmado</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--purple)">${appData.reservas.length}</div><div class="stat-label">Reservas</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--gold)">${appData.mala.filter(i=>!i.feito).length}</div><div class="stat-label">Itens por fazer</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--accent)">${appData.memorias.length}</div><div class="stat-label">Memórias</div></div>`;
-  }
-
-  // itinerary in painel
-  const pv = document.getElementById('proximas-viagens');
-  if (pv) {
-    pv.innerHTML = Object.values(ROTEIROS).map(r=>`
-      <div style="display:flex;gap:.75rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--accent);font-weight:600;min-width:90px;font-size:.82rem">${r.data}</span>
-        <span style="font-size:.85rem">${r.titulo}</span>
-        <span style="margin-left:auto;color:var(--text3);font-size:.78rem">${r.paragens.length} locais</span>
-      </div>`).join('');
-  }
-
-  // budget in painel
-  const op = document.getElementById('orcamento-resumo-painel');
-  if (op) {
-    const totalAll = appData.despesas.reduce((s,d)=>s+Number(d.valor||0),0);
-    op.innerHTML = `
-      <div style="font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:.3rem">${fmtVal(totalAll)}</div>
-      <div style="color:var(--text2);font-size:.82rem">Total previsto (conf. + est.)</div>
-      <div style="color:var(--green);font-size:.82rem;margin-top:.3rem">${fmtVal(totalConf)} confirmado</div>`;
-  }
+  // Stats
+  const totalGasto = appData.despesas.reduce((a,b)=>a+(b.valor||0),0);
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${appData.viagens.length}</div><div class="stat-label">Viagens</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${appData.reservas.length}</div><div class="stat-label">Reservas</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--orange)">${appData.despesas.length}</div><div class="stat-label">Despesas</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--purple)">4</div><div class="stat-label">Países</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red)">€${totalGasto.toFixed(0)}</div><div class="stat-label">Gasto total</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--teal)">5</div><div class="stat-label">Dias de viagem</div></div>
+  `;
+  // Próximas
+  document.getElementById('proximas-viagens').innerHTML = appData.viagens.map(v=>`
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:1.5rem">✈</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:.9rem">${v.nome}</div>
+        <div style="font-size:.78rem;color:var(--text2)">${v.inicio||'?'} → ${v.fim||'?'} · ${v.pais||''}</div>
+      </div>
+      <span class="status-badge ${v.estado==='visited'?'status-visited':'status-planned'}">${v.estado==='visited'?'Visitado':'Planeado'}</span>
+    </div>
+  `).join('')||'<div class="empty-state"><div class="empty-icon">✈</div><div>Sem viagens registadas</div></div>';
+  // Orçamento resumo
+  const orcTotal = appData.viagens.reduce((a,b)=>a+(b.orcamento||0),0);
+  const catMap = {};
+  appData.despesas.forEach(d=>{ catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0); });
+  const cats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  const catColors = {Alojamento:'#58a6ff',Transporte:'#3fb950',Alimentação:'#d29922',Actividades:'#bc8cff',Compras:'#f85149',Outro:'#8b949e'};
+  document.getElementById('orcamento-resumo-painel').innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:.75rem">
+      <span style="color:var(--text2);font-size:.85rem">Orçamento total</span>
+      <span style="font-weight:600">€${orcTotal.toLocaleString()}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
+      <span style="color:var(--text2);font-size:.85rem">Gasto registado</span>
+      <span style="font-weight:600;color:var(--orange)">€${totalGasto.toFixed(2)}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,(totalGasto/orcTotal)*100||0)}%;background:var(--accent)"></div></div>
+    ${cats.map(([cat,val])=>`
+      <div style="display:flex;justify-content:space-between;font-size:.82rem;margin:.35rem 0">
+        <span style="color:var(--text2);display:flex;align-items:center;gap:.4rem"><span style="width:8px;height:8px;border-radius:50%;background:${catColors[cat]||'#888'};display:inline-block"></span>${cat}</span>
+        <span>€${val.toFixed(2)}</span>
+      </div>
+    `).join('')||'<div style="font-size:.82rem;color:var(--text3);text-align:center;padding:.5rem">Sem despesas registadas</div>'}
+    <div class="divider"></div>
+    <div style="font-size:.8rem;color:var(--text3)">
+      💡 Custo estimado Dia 2: €159–335/p · Dia 3: €145–288/p · Dia 4: €75–130/p · Dia 5: €108–211/p
+    </div>
+  `;
 }
 
-// ─── DESTINOS ───────────────────────────────────────────────────────────────
-let destinoFiltro = 'todos';
-function renderDestinos() {
-  const el = document.getElementById('destinos-grid');
-  if (!el) return;
-  let list = appData.viagens;
-  if (destinoFiltro === 'visited') list = list.filter(v=>v.estado==='done');
-  else if (destinoFiltro === 'planned') list = list.filter(v=>v.estado==='planned');
-
-  // update counts
-  ['todos','planned','visited'].forEach(f=>{
-    const cnt = document.getElementById('cnt-'+f);
-    if (cnt) cnt.textContent = f==='todos' ? appData.viagens.length : appData.viagens.filter(v=>v.estado===(f==='visited'?'done':f)).length;
-  });
-
-  if (!list.length) { el.innerHTML = '<p style="color:var(--text3);text-align:center;padding:2rem;grid-column:1/-1">Nenhuma viagem encontrada.</p>'; return; }
-
-  el.innerHTML = list.map(v => {
-    const badge = v.estado === 'done'
-      ? `<span style="background:var(--green2);color:#fff;padding:.2rem .6rem;border-radius:99px;font-size:.75rem">✔ Realizada</span>`
-      : `<span style="background:var(--accent2);color:#fff;padding:.2rem .6rem;border-radius:99px;font-size:.75rem">🗓 A realizar</span>`;
-    const stars = '★'.repeat(v.rating||0) + '☆'.repeat(5-(v.rating||0));
-    return `
-      <div class="dest-card" onclick="selectViagem('${v.id}')">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">
-          <h3 style="font-size:1rem;font-weight:600">${v.nome}</h3>
-          ${badge}
-        </div>
-        <div style="color:var(--text2);font-size:.85rem;margin-bottom:.4rem">📍 ${v.pais||''}</div>
-        <div style="color:var(--gold);font-size:.9rem">${stars}</div>
-        ${v.notas ? `<div style="color:var(--text3);font-size:.8rem;margin-top:.5rem">${v.notas}</div>` : ''}
-      </div>`;
-  }).join('');
+function renderDestinos(){
+  document.getElementById('destinos-grid').innerHTML = appData.viagens.map(v=>`
+    <div class="dest-card">
+      <span class="status-badge ${v.estado==='visited'?'status-visited':'status-planned'}">${v.estado==='visited'?'Visitado':'Planeado'}</span>
+      <div class="dest-flag">✈</div>
+      <div class="dest-name">${v.nome}</div>
+      <div class="dest-country">${v.pais||''}</div>
+      <div class="dest-dates" style="margin-bottom:.5rem">${v.inicio||''} → ${v.fim||''}</div>
+      <div class="stars">${'⭐'.repeat(v.stars||0)}</div>
+      ${v.notas?`<div style="font-size:.78rem;color:var(--text3);margin-top:.5rem">${v.notas}</div>`:''}
+      ${v.orcamento?`<div style="font-size:.8rem;color:var(--green);margin-top:.4rem">Orçamento: €${v.orcamento.toLocaleString()}</div>`:''}
+      <div style="margin-top:.75rem;display:flex;gap:.4rem;flex-wrap:wrap">
+        ${(v.cidades||'').split(',').map(c=>`<span class="tag tag-blue">${c.trim()}</span>`).join('')}
+      </div>
+    </div>
+  `).join('')||`<div class="empty-state"><div class="empty-icon">📍</div><div>Sem destinos. Adicione uma nova viagem!</div></div>`;
 }
 
-function filterDestinos(f, btn) {
-  destinoFiltro = f;
-  document.querySelectorAll('.dest-tab-btn').forEach(b=>b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderDestinos();
-}
-
-function selectViagem(id) {
-  activeViagemId = id;
-  renderAll();
-  showTab(0);
-}
-
-// ─── NOVA VIAGEM ─────────────────────────────────────────────────────────────
-function criarViagem() {
-  const nome = document.getElementById('nv-nome').value.trim();
-  if (!nome) { alert('Nome da viagem obrigatório'); return; }
-  const v = {
-    id: uid(), nome,
-    pais: document.getElementById('nv-pais').value,
-    lat: 0, lng: 0,
-    dataInicio: document.getElementById('nv-inicio').value,
-    dataFim: document.getElementById('nv-fim').value,
-    estado: document.getElementById('nv-estado').value,
-    rating: parseInt(document.getElementById('nv-stars').value) || 5,
-    notas: document.getElementById('nv-notas').value
-  };
-  appData.viagens.push(v);
-  closeModal('modal-nova-viagem');
-  saveData(); renderAll();
-}
-
-// ─── ROTEIRO MAPS & EXPORT ──────────────────────────────────────────────────
-function abrirRoteiroCursoMaps() {
-  const r = ROTEIROS[activeRoteiro];
-  if (!r) return;
-  const url = 'https://www.google.com/maps/dir/' + r.paragens.map(p=>encodeURIComponent(p.address)).join('/');
-  window.open(url, '_blank');
-}
-
-function exportRoteiro() {
-  const r = ROTEIROS[activeRoteiro];
-  if (!r) return;
-  let txt = `${r.titulo} — ${r.data}\n${'─'.repeat(50)}\n\n`;
-  r.paragens.forEach((p,i)=>{
-    txt += `${i+1}. ${p.nome}`;
-    if (p.hora) txt += ` (${p.hora})`;
-    txt += '\n';
-    if (p.notas) txt += `   ${p.notas}\n`;
-    if (p.custo) txt += `   Custo: ${p.custo}\n`;
-    txt += '\n';
-  });
-  const blob = new Blob([txt], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `roteiro-${activeRoteiro}.txt`;
-  a.click();
-}
-
-// ─── PESQUISA ────────────────────────────────────────────────────────────────
-function pesquisar() {
-  const q = document.getElementById('pesquisa-input').value.trim();
-  if (!q) return;
-  const url = `https://www.google.com/search?q=${encodeURIComponent(q + ' viagem turismo')}`;
-  window.open(url, '_blank');
-}
-
-function pesquisarRapido(q) {
-  document.getElementById('pesquisa-input').value = q;
-  pesquisar();
-}
-
-// ─── MAPA (LEAFLET) ─────────────────────────────────────────────────────────
-function renderMapa() {
-  if (!document.getElementById('leaflet-map')) return;
-  if (leafletMap) { leafletMap.invalidateSize(); addMapMarkers(); return; }
-  leafletMap = L.map('leaflet-map').setView([30, 15], 2);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors', maxZoom: 18
-  }).addTo(leafletMap);
-  addMapMarkers();
-}
-
-function addMapMarkers() {
-  if (!leafletMap) return;
-  leafletMap.eachLayer(l => { if (l instanceof L.Marker) leafletMap.removeLayer(l); });
-  appData.viagens.forEach(v => {
-    if (!v.lat || !v.lng) return;
-    const color = v.estado === 'done' ? '#3fb950' : '#58a6ff';
-    const icon = L.divIcon({
-      className: '',
-      html: `<div style="width:14px;height:14px;background:${color};border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.5)"></div>`,
-      iconSize: [14,14], iconAnchor: [7,7]
-    });
-    L.marker([v.lat, v.lng], {icon}).addTo(leafletMap)
-      .bindPopup(`<b>${v.nome}</b><br>${v.pais||''}<br>${v.estado==='done'?'✔ Realizada':'🗓 A realizar'}`);
-  });
-}
-
-// ─── ROTEIROS ───────────────────────────────────────────────────────────────
-let activeRoteiro = 'dia2';
-function renderRoteiros() {
-  const btns = document.getElementById('roteiro-selector');
-  if (!btns) return;
-  btns.innerHTML = Object.entries(ROTEIROS).map(([k,r])=>`
-    <button class="tab-btn ${k===activeRoteiro?'active':''}" onclick="selectRoteiro('${k}')" style="font-size:.8rem;padding:.4rem .8rem">${r.titulo.split('—')[0]}</button>
+function renderRoteiros(){
+  // Selector
+  document.getElementById('roteiro-selector').innerHTML = Object.entries(ROTEIROS).map(([k,r])=>`
+    <button class="roteiro-btn ${k===roteiroAtivo?'active':''}" onclick="setRoteiro('${k}')">
+      <span class="dia">${r.date}</span>
+      <span class="titulo">${r.titulo}</span>
+    </button>
   `).join('');
   renderRoteiroContent();
 }
 
-function selectRoteiro(key) {
-  activeRoteiro = key;
+function setRoteiro(k){
+  roteiroAtivo=k;
   renderRoteiros();
 }
 
-function renderRoteiroContent() {
-  const el = document.getElementById('roteiro-content');
-  if (!el) return;
-  const r = ROTEIROS[activeRoteiro];
-  if (!r) return;
-
-  const mapsUrl = 'https://www.google.com/maps/dir/' +
-    r.paragens.map(p=>encodeURIComponent(p.address)).join('/');
-
-  const tipoIcon = { 'Visita cultural':'🏛', 'Refeição':'🍽', 'Transporte':'🚀',
-    'Alojamento':'🏨', 'Paragem / Descanso':'🌅', 'Compras':'🛍', 'Outro':'📌' };
-
-  let html = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
-      <div>
-        <h2 style="font-size:1.1rem;font-weight:600">${r.titulo}</h2>
-        <div style="color:var(--text3);font-size:.85rem">📅 ${r.data} · ${r.paragens.length} locais</div>
+function renderRoteiroContent(){
+  const r = ROTEIROS[roteiroAtivo];
+  const extra = appData.paragens_extra[roteiroAtivo]||[];
+  let html=`
+    <div class="roteiro-header">
+      <div style="font-size:1.15rem;font-weight:700">${r.titulo}</div>
+      <div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">${r.subtitulo}</div>
+      <div class="rota-text">📍 ${r.rota}</div>
+      <div class="roteiro-meta">
+        <span class="meta-badge">🚗 ${r.km} km · ${r.conducao} condução</span>
+        <span class="meta-badge">🌍 ${r.pais}</span>
+        <span class="meta-badge">💶 €${r.custoMin}–€${r.custoMax}/pessoa</span>
+        <a href="https://www.google.com/maps/dir/${encodeURIComponent(r.rota.replace(/→/g,'to'))}" target="_blank" class="meta-badge" style="color:var(--accent);text-decoration:none;cursor:pointer">🗺️ Abrir percurso no Maps</a>
       </div>
-      <div style="display:flex;gap:.5rem">
-        <a href="${mapsUrl}" target="_blank" class="btn-primary" style="text-decoration:none;font-size:.8rem;padding:.4rem .8rem">🗺️ Itinerário no Maps</a>
-        <button class="btn-secondary" onclick="openModal('modal-add-paragem')" style="font-size:.8rem;padding:.4rem .8rem">+ Local</button>
+    </div>
+  `;
+  r.seccoes.forEach(s=>{
+    html+=`<div class="seccao">
+      <div class="seccao-titulo" onclick="toggleSeccao(this)">
+        <span>${s.nome}</span>
+        <span class="periodo">${s.periodo} ▾</span>
       </div>
-    </div>`;
-
-  r.paragens.forEach((p, i) => {
-    const isLast = i === r.paragens.length - 1;
-    html += `
-      <div class="roteiro-item" style="position:relative;padding-left:2.5rem;margin-bottom:.5rem">
-        <div class="roteiro-num" style="position:absolute;left:0;top:.3rem;width:1.6rem;height:1.6rem;background:var(--accent2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff">${i+1}</div>
-        <div style="background:var(--bg3);border-radius:var(--radius);padding:.8rem 1rem;border:1px solid var(--border)">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.3rem">
-            <div style="font-weight:600">${tipoIcon[p.tipo]||'📌'} ${p.nome}</div>
-            <div style="display:flex;gap:.5rem;align-items:center">
-              ${p.hora ? `<span style="color:var(--text3);font-size:.8rem">🕐 ${p.hora}</span>` : ''}
-              ${p.dur && p.dur!=='—' ? `<span style="color:var(--text3);font-size:.8rem">⏱ ${p.dur}</span>` : ''}
-            </div>
-          </div>
-          ${p.notas ? `<div style="color:var(--text2);font-size:.8rem;margin-top:.3rem">${p.notas}</div>` : ''}
-          ${p.custo ? `<div style="color:var(--gold);font-size:.8rem;margin-top:.2rem">💰 ${p.custo}</div>` : ''}
-          ${p.address ? `<a href="https://maps.google.com/?q=${encodeURIComponent(p.address)}" target="_blank" style="color:var(--accent);font-size:.75rem;text-decoration:none">📍 Ver no Maps</a>` : ''}
+      <div class="seccao-content">`;
+    s.paragens.forEach(p=>{
+      html+=`<div class="paragem">
+        <div class="p-hora">${p.hora}</div>
+        <div>
+          <div class="p-local">${p.local}</div>
+          <div class="p-desc">${p.desc}</div>
+          ${p.maps?`<a class="p-maps" href="https://www.google.com/maps/search/${encodeURIComponent(p.maps)}" target="_blank">📍 Google Maps</a>`:''}
         </div>
+        <div class="p-custo">${p.custo||''}</div>
       </div>`;
-
-    if (!isLast && r.paragens[i+1].dist !== null) {
-      const next = r.paragens[i+1];
-      html += `
-        <div style="padding-left:2.5rem;margin:.2rem 0">
-          <div style="background:var(--bg2);border-left:2px solid var(--border2);margin-left:.8rem;padding:.4rem .8rem;border-radius:0 var(--radius) var(--radius) 0;font-size:.78rem;color:var(--text3);display:flex;gap:1rem">
-            <span>${next.transporte||'🚗'}</span>
-            ${next.dist ? `<span>📏 ${next.dist} km</span>` : ''}
-            ${next.tempoDesl ? `<span>⏱ ${next.tempoDesl}</span>` : ''}
-          </div>
-        </div>`;
-    }
+    });
+    // Paragens extra do utilizador
+    extra.filter(e=>e.seccao===s.nome).forEach(p=>{
+      html+=`<div class="paragem" style="background:rgba(88,166,255,.04)">
+        <div class="p-hora">${p.hora||'—'}</div>
+        <div>
+          <div class="p-local">⭐ ${p.nome}</div>
+          <div class="p-desc">${p.notas||''}</div>
+          ${p.address?`<a class="p-maps" href="https://www.google.com/maps/search/${encodeURIComponent(p.address)}" target="_blank">📍 Maps</a>`:''}
+        </div>
+        <div></div>
+      </div>`;
+    });
+    html+=`</div></div>`;
   });
 
-  // Gastronomia do dia
-  if (r.gastroRef && r.gastroRef.length) {
-    const todasGastro = [...GASTRONOMIA_STATIC.suica, ...GASTRONOMIA_STATIC.italia, ...GASTRONOMIA_STATIC.alsacia];
-    const gastroHoje = todasGastro.filter(g => r.gastroRef.includes(g.id));
-    if (gastroHoje.length) {
-      html += `<div style="margin-top:1.2rem;background:var(--bg3);border-radius:var(--radius2);padding:1rem;border:1px solid var(--border)">
-        <h4 style="color:var(--text2);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">🍽️ Gastronomia & Vinhos deste dia</h4>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem">`;
-      gastroHoje.forEach(g => {
-        html += `<div style="background:var(--bg2);border-radius:var(--radius);padding:.7rem;border:1px solid var(--border)">
-          <div style="font-weight:600;font-size:.9rem">${g.emoji} ${g.nome}</div>
-          <div style="color:var(--text3);font-size:.78rem;margin:.2rem 0">${g.regiao}</div>
-          ${g.onde ? `<div style="color:var(--accent);font-size:.75rem">📍 ${g.onde}</div>` : ''}
-          ${g.preco ? `<div style="color:var(--gold);font-size:.75rem">💰 ${g.preco}</div>` : ''}
-        </div>`;
-      });
-      html += `</div></div>`;
-    }
+  // Previsão tempo
+  html+=`<div class="card" style="margin-top:1.25rem">
+    <div class="card-header"><div class="card-title">🌡️ Previsão do tempo — ${r.date}</div><div class="card-sub">Verificar em meteoswiss.admin.ch 2-3 dias antes</div></div>
+    <div class="card-body">
+      <div class="tempo-grid">
+        ${r.tempo.map(t=>`<div class="tempo-card">
+          <div class="tempo-local">${t.local}</div>
+          <div class="tempo-range">${t.min} → ${t.max}</div>
+          <div class="tempo-cond">${t.cond}</div>
+          <div class="tempo-equip">🧥 ${t.equip}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+
+  // Refeições
+  html+=`<div class="card" style="margin-top:1rem">
+    <div class="card-header"><div class="card-title">🍽️ Sugestões de refeições</div></div>
+    <div class="card-body">
+      <div class="refeicoes-grid">
+        <div class="refeicao-card"><h5>🥗 Almoço</h5><p>${r.refeicoes.almoco}</p></div>
+        <div class="refeicao-card"><h5>🥂 Jantar</h5><p>${r.refeicoes.jantar}</p></div>
+      </div>
+    </div>
+  </div>`;
+
+  // Alertas
+  html+=`<div class="alertas-box">
+    <h4>⚠️ Confirmar antes da partida</h4>
+    <ul>${r.alertas.map(a=>`<li>${a}</li>`).join('')}</ul>
+  </div>`;
+
+  document.getElementById('roteiro-content').innerHTML=html;
+}
+
+function toggleSeccao(el){
+  const content = el.nextElementSibling;
+  if(content.style.display==='none'){
+    content.style.display='block';
+    el.querySelector('.periodo').textContent = el.querySelector('.periodo').textContent.replace('▸','▾');
+  } else {
+    content.style.display='none';
+    el.querySelector('.periodo').textContent = el.querySelector('.periodo').textContent.replace('▾','▸');
   }
-
-  el.innerHTML = html;
 }
 
-function addParagem() {
-  const nome = document.getElementById('ap-nome').value.trim();
-  const address = document.getElementById('ap-address').value.trim();
-  if (!nome || !address) { alert('Nome e endereço são obrigatórios'); return; }
-  const p = {
-    nome, address,
-    hora: document.getElementById('ap-hora').value,
-    tipo: document.getElementById('ap-tipo').value,
-    dur: document.getElementById('ap-dur').value,
-    transporte: document.getElementById('ap-transporte').value,
-    dist: parseFloat(document.getElementById('ap-dist').value) || null,
-    tempoDesl: document.getElementById('ap-tempo-desl').value,
-    custo: document.getElementById('ap-custo').value,
-    notas: document.getElementById('ap-notas').value
-  };
-  ROTEIROS[activeRoteiro].paragens.push(p);
-  closeModal('modal-add-paragem');
-  ['ap-nome','ap-address','ap-hora','ap-dur','ap-dist','ap-tempo-desl','ap-custo','ap-notas'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  renderRoteiroContent();
-}
+function renderReservas(){
+  const tipos = ['✈','🏨','🚗','🎟','⛴','🚂','📄'];
+  const grupos = {};
+  tipos.forEach(t=>{ grupos[t]=[]; });
+  grupos['📄']=[];
+  appData.reservas.forEach(r=>{ (grupos[r.tipo]||(grupos['📄'])).push(r); });
 
-// ─── RESERVAS ───────────────────────────────────────────────────────────────
-function renderReservas() {
-  const el = document.getElementById('reservas-list');
-  if (!el) return;
-  const tipoIcon = { Voo:'✈️', Hotel:'🏨', Carro:'🚗', Ferry:'⛴️', Comboio:'🚂', Bilhete:'🎫', Outro:'📋' };
-
-  el.innerHTML = appData.reservas.length ? appData.reservas.map(r => `
-    <div class="reserva-card" style="background:var(--bg3);border-radius:var(--radius2);padding:1rem;border:1px solid var(--border);margin-bottom:.6rem">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
-        <div style="display:flex;gap:.75rem;align-items:flex-start">
-          <span style="font-size:1.5rem">${tipoIcon[r.tipo]||'📋'}</span>
-          <div>
-            <div style="font-weight:600">${r.titulo}</div>
-            <div style="color:var(--text3);font-size:.8rem">${r.fornecedor||''} · ${r.dataHora||''}</div>
-            ${r.ref ? `<div style="color:var(--text3);font-size:.78rem">Ref: ${r.ref}</div>` : ''}
-            ${r.notas ? `<div style="color:var(--text2);font-size:.8rem;margin-top:.3rem">${r.notas}</div>` : ''}
-            <div style="display:flex;gap:.6rem;margin-top:.4rem;flex-wrap:wrap">
-              ${r.link ? `<a href="${r.link}" target="_blank" style="color:var(--accent);font-size:.75rem;text-decoration:none">🔗 Abrir reserva</a>` : ''}
-              ${r.doc ? `<a href="${r.doc}" download style="color:var(--accent);font-size:.75rem;text-decoration:none">📎 Documento</a>` : ''}
-            </div>
+  let html='';
+  Object.entries(grupos).forEach(([tipo,lista])=>{
+    if(!lista.length) return;
+    const titulos = {'✈':'Voos','🏨':'Alojamento','🚗':'Veículos & Transfer','🎟':'Bilhetes & Entradas','⛴':'Ferry & Barco','🚂':'Comboios','📄':'Outros'};
+    html+=`<div class="card" style="margin-bottom:1rem">
+      <div class="card-header"><div class="card-title">${tipo} ${titulos[tipo]||'Outros'}</div></div>
+      <div style="padding:0">
+        ${lista.map(r=>`<div class="reserva-item">
+          <div class="reserva-icon">${r.tipo}</div>
+          <div class="reserva-info">
+            <div class="reserva-nome">${r.desc}</div>
+            <div class="reserva-det">${r.data||''} ${r.hora||''} · ${r.fornecedor||''}</div>
+            ${r.ref?`<div class="reserva-ref">Ref: ${r.ref}</div>`:''}
+            ${r.notas?`<div style="font-size:.75rem;color:var(--text3);margin-top:.2rem">${r.notas}</div>`:''}
           </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
-          <div style="font-weight:700;color:var(--gold)">${fmtVal(r.valor)}</div>
-          <span onclick="togglePagamento('${r.id}')" style="cursor:pointer;padding:.2rem .6rem;border-radius:99px;font-size:.75rem;font-weight:600;${r.pago==='pago'?'background:var(--green2);color:#fff':'background:var(--orange2);color:#fff'}">${r.pago==='pago'?'✔ Pago':'⏳ Pendente'}</span>
-          <button class="btn-icon" onclick="deleteReserva('${r.id}')" style="font-size:.8rem;background:none;border:none;color:var(--red);cursor:pointer">🗑</button>
-        </div>
-      </div>
-    </div>`).join('') : '<p style="color:var(--text3);text-align:center;padding:2rem">Sem reservas. Adiciona a primeira!</p>';
-}
-
-function guardarReserva() {
-  const docFile = document.getElementById('nr-doc').files[0];
-  const saveReserva = (docData) => {
-    const dataVal = document.getElementById('nr-data').value;
-    const horaVal = document.getElementById('nr-hora').value;
-    const r = {
-      id: uid(),
-      tipo: document.getElementById('nr-tipo').value,
-      titulo: document.getElementById('nr-desc').value.trim(),
-      fornecedor: document.getElementById('nr-fornecedor').value.trim(),
-      dataHora: dataVal + (horaVal ? ' ' + horaVal : ''),
-      ref: document.getElementById('nr-ref').value.trim(),
-      valor: parseFloat(document.getElementById('nr-valor').value) || 0,
-      notas: document.getElementById('nr-notas').value.trim(),
-      pago: document.getElementById('nr-pago').value,
-      link: document.getElementById('nr-link').value.trim(),
-      doc: docData || null
-    };
-    if (!r.titulo) { alert('Descrição obrigatória'); return; }
-    appData.reservas.push(r);
-    closeModal('modal-nova-reserva');
-    // add to budget if opted
-    if (document.getElementById('nr-add-orc').value === 'sim' && r.valor > 0) {
-      appData.despesas.push({ id:uid(), cat:'Reservas', desc:r.titulo, valor:r.valor, confirmada:r.pago==='pago'?'confirmada':'pendente' });
-    }
-    ['nr-desc','nr-ref','nr-fornecedor','nr-link','nr-notas'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-    document.getElementById('nr-valor').value = '';
-    saveData(); renderReservas(); renderOrcamento();
-  };
-  if (docFile) {
-    const reader = new FileReader();
-    reader.onload = e => saveReserva(e.target.result);
-    reader.readAsDataURL(docFile);
-  } else { saveReserva(null); }
-}
-
-function togglePagamento(id) {
-  const r = appData.reservas.find(x=>x.id===id);
-  if (!r) return;
-  r.pago = r.pago === 'pago' ? 'pendente' : 'pago';
-  saveData(); renderReservas();
-}
-
-function deleteReserva(id) {
-  if (!confirm('Remover esta reserva?')) return;
-  appData.reservas = appData.reservas.filter(r=>r.id!==id);
-  saveData(); renderReservas(); renderOrcamento();
-}
-
-// ─── ORÇAMENTO ──────────────────────────────────────────────────────────────
-function renderOrcamento() {
-  const el = document.getElementById('orcamento-content');
-  if (!el) return;
-  const conf = appData.despesas.filter(d=>d.confirmada==='confirmada');
-  const pend = appData.despesas.filter(d=>d.confirmada!=='confirmada');
-  const totalConf = conf.reduce((s,d)=>s+Number(d.valor||0),0);
-  const totalPend = pend.reduce((s,d)=>s+Number(d.valor||0),0);
-  const total = totalConf + totalPend;
-
-  const cats = {};
-  appData.despesas.forEach(d=>{ cats[d.cat]=(cats[d.cat]||0)+Number(d.valor||0); });
-
-  el.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem">
-      <div style="background:var(--bg3);border-radius:var(--radius2);padding:1.2rem;text-align:center">
-        <div style="font-size:1.5rem;font-weight:700;color:var(--green)">${fmtVal(totalConf)}</div>
-        <div style="color:var(--text2);font-size:.85rem">✔ Confirmado</div>
-      </div>
-      <div style="background:var(--bg3);border-radius:var(--radius2);padding:1.2rem;text-align:center">
-        <div style="font-size:1.5rem;font-weight:700;color:var(--orange)">${fmtVal(totalPend)}</div>
-        <div style="color:var(--text2);font-size:.85rem">⏳ Estimado</div>
-      </div>
-      <div style="background:var(--bg3);border-radius:var(--radius2);padding:1.2rem;text-align:center">
-        <div style="font-size:1.5rem;font-weight:700;color:var(--gold)">${fmtVal(total)}</div>
-        <div style="color:var(--text2);font-size:.85rem">Total previsto</div>
-      </div>
-    </div>
-    <div style="background:var(--bg3);border-radius:var(--radius2);padding:1rem;margin-bottom:1rem">
-      <h3 style="font-size:.85rem;color:var(--text2);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em">Por categoria</h3>
-      ${Object.entries(cats).map(([cat,val])=>{
-        const pct = total ? Math.round(val/total*100) : 0;
-        return `<div style="margin-bottom:.6rem">
-          <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.25rem">
-            <span>${cat}</span><span style="color:var(--gold)">${fmtVal(val)} (${pct}%)</span>
-          </div>
-          <div style="height:6px;background:var(--bg4);border-radius:3px">
-            <div style="height:6px;background:var(--accent);border-radius:3px;width:${pct}%"></div>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div style="background:var(--bg3);border-radius:var(--radius2);padding:1rem">
-      <h3 style="font-size:.85rem;color:var(--text2);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em">Todas as despesas</h3>
-      ${appData.despesas.map(d=>`
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem">
-          <div>
-            <span style="color:var(--text)">${d.desc}</span>
-            <span style="margin-left:.5rem;font-size:.75rem;padding:.1rem .4rem;border-radius:99px;${d.confirmada==='confirmada'?'background:var(--green2);color:#fff':'background:var(--orange2);color:#fff'}">${d.confirmada==='confirmada'?'✔ Conf.':'⏳ Est.'}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:.5rem">
-            <span style="color:var(--gold);font-weight:600">${fmtVal(d.valor)}</span>
-            <button onclick="toggleConfirmada('${d.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem" title="Alternar estado">💱</button>
-            <button onclick="deleteDespesa('${d.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem">🗑</button>
+          <div style="text-align:right">
+            <div class="reserva-valor">${r.valor?'€'+r.valor.toFixed(2):''}</div>
+            <button onclick="eliminarReserva('${r.id}')" class="btn-danger" style="font-size:.72rem;padding:.15rem .4rem;margin-top:.3rem">🗑</button>
           </div>
         </div>`).join('')}
-    </div>`;
-}
-
-function guardarDespesa() {
-  const d = {
-    id: uid(),
-    cat: document.getElementById('nd-cat').value,
-    desc: document.getElementById('nd-desc').value.trim(),
-    valor: parseFloat(document.getElementById('nd-valor').value) || 0,
-    confirmada: document.getElementById('nd-confirmada').value
-  };
-  if (!d.desc) { alert('Descrição obrigatória'); return; }
-  appData.despesas.push(d);
-  closeModal('modal-nova-despesa');
-  ['nd-desc','nd-valor'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  saveData(); renderOrcamento(); renderPainel();
-}
-
-function toggleConfirmada(id) {
-  const d = appData.despesas.find(x=>x.id===id);
-  if (!d) return;
-  d.confirmada = d.confirmada === 'confirmada' ? 'pendente' : 'confirmada';
-  saveData(); renderOrcamento(); renderPainel();
-}
-
-function deleteDespesa(id) {
-  if (!confirm('Remover esta despesa?')) return;
-  appData.despesas = appData.despesas.filter(d=>d.id!==id);
-  saveData(); renderOrcamento(); renderPainel();
-}
-
-// ─── BAGAGEM ────────────────────────────────────────────────────────────────
-function renderBagagem() {
-  const el = document.getElementById('bagagem-content');
-  if (!el) return;
-  const catIcon = { 'Vestuário':'👕','Higiene':'🧴','Documentos':'📄','Electrónica':'📱','Saúde':'💊','Produto Regional':'🛍️','Vinho':'🍷','Outro':'📦' };
-  const cats = [...new Set(appData.mala.map(i=>i.cat))];
-  const total = appData.mala.length;
-  const feitos = appData.mala.filter(i=>i.feito).length;
-
-  let html = `
-    <div style="background:var(--bg3);border-radius:var(--radius2);padding:1rem;margin-bottom:1rem">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
-        <span style="font-size:.85rem;color:var(--text2)">Progresso da mala</span>
-        <span style="font-size:.85rem;color:var(--text2)">${feitos}/${total} itens</span>
-      </div>
-      <div style="height:8px;background:var(--bg4);border-radius:4px">
-        <div style="height:8px;background:var(--green);border-radius:4px;width:${total?Math.round(feitos/total*100):0}%;transition:width .3s"></div>
       </div>
     </div>`;
-
-  if (!appData.mala.length) { el.innerHTML = html + '<p style="color:var(--text3);text-align:center;padding:2rem">Mala vazia. Adiciona o primeiro item!</p>'; return; }
-
-  cats.forEach(cat => {
-    const items = appData.mala.filter(i=>i.cat===cat);
-    html += `
-      <div style="background:var(--bg3);border-radius:var(--radius2);padding:1rem;margin-bottom:.75rem;border:1px solid var(--border)">
-        <h3 style="font-size:.9rem;font-weight:600;margin-bottom:.6rem">${catIcon[cat]||'📦'} ${cat}</h3>
-        ${items.map(item=>`
-          <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border)">
-            <input type="checkbox" ${item.feito?'checked':''} onchange="toggleMalaItem('${item.id}')" style="margin-top:.2rem;accent-color:var(--green);width:16px;height:16px;flex-shrink:0">
-            <div style="flex:1;${item.feito?'opacity:.5;text-decoration:line-through':''}">
-              <div style="font-size:.9rem">${item.nome} ${item.qtd?`<span style="color:var(--text3);font-size:.8rem">(${item.qtd})</span>`:''}</div>
-              ${item.onde ? `<div style="color:var(--accent);font-size:.78rem">📍 ${item.onde}</div>` : ''}
-              ${item.preco ? `<div style="color:var(--gold);font-size:.78rem">💰 €${item.preco}</div>` : ''}
-              ${item.notas ? `<div style="color:var(--text3);font-size:.75rem">${item.notas}</div>` : ''}
-            </div>
-            <button onclick="deleteMalaItem('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem;flex-shrink:0">🗑</button>
-          </div>`).join('')}
-      </div>`;
   });
-  el.innerHTML = html;
+  document.getElementById('reservas-list').innerHTML=html||`<div class="empty-state"><div class="empty-icon">🎫</div><div>Sem reservas. Adicione a primeira!</div></div>`;
 }
 
-function addItemMala() {
-  const nome = document.getElementById('mi-nome').value.trim();
-  if (!nome) { alert('Nome do item obrigatório'); return; }
-  const item = {
-    id: uid(),
-    viagem: document.getElementById('mi-viagem').value,
-    nome,
-    cat: document.getElementById('mi-cat').value,
-    qtd: document.getElementById('mi-qtd').value.trim(),
-    onde: document.getElementById('mi-onde').value.trim(),
-    preco: parseFloat(document.getElementById('mi-preco').value) || 0,
-    notas: document.getElementById('mi-notas').value.trim(),
-    feito: false
-  };
-  appData.mala.push(item);
-  closeModal('modal-add-item-mala');
-  ['mi-nome','mi-qtd','mi-onde','mi-preco','mi-notas'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  saveData(); renderBagagem();
+function renderOrcamento(){
+  const totalOrc = appData.viagens.reduce((a,b)=>a+(b.orcamento||0),0);
+  const totalGasto = appData.despesas.reduce((a,b)=>a+(b.valor||0),0);
+  const catColors = {Alojamento:'#58a6ff',Transporte:'#3fb950',Alimentação:'#d29922',Actividades:'#bc8cff',Compras:'#f85149',Outro:'#8b949e'};
+  const catMap = {};
+  appData.despesas.forEach(d=>{ catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0); });
+
+  let html=`
+    <div class="stats-row" style="margin-bottom:1.5rem">
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent)">€${totalOrc.toLocaleString()}</div><div class="stat-label">Orçamento total</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--orange)">€${totalGasto.toFixed(0)}</div><div class="stat-label">Gasto registado</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">€${(totalOrc-totalGasto).toFixed(0)}</div><div class="stat-label">Disponível</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">📊 Por categoria</div></div>
+        <div class="card-body">
+          ${Object.entries(catMap).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>`
+            <div style="margin-bottom:.75rem">
+              <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.3rem">
+                <span style="display:flex;align-items:center;gap:.4rem"><span style="width:10px;height:10px;border-radius:50%;background:${catColors[cat]||'#888'};display:inline-block"></span>${cat}</span>
+                <span style="font-weight:600">€${val.toFixed(2)}</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:${totalGasto?Math.round((val/totalGasto)*100):0}%;background:${catColors[cat]||'#888'}"></div></div>
+            </div>
+          `).join('')||'<div style="color:var(--text3);font-size:.85rem">Sem despesas</div>'}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="card-title">📋 Despesas</div>
+            <button class="btn-new" style="font-size:.78rem;padding:.3rem .7rem" onclick="openModal('modal-nova-despesa')">+</button>
+          </div>
+        </div>
+        <div style="padding:0;max-height:340px;overflow-y:auto">
+          ${appData.despesas.length?appData.despesas.slice().reverse().map(d=>`
+            <div class="despesa-item" style="padding:.7rem 1rem">
+              <div class="cat-dot" style="background:${catColors[d.cat]||'#888'}"></div>
+              <div class="despesa-info">
+                <div class="despesa-nome">${d.desc}</div>
+                <div class="despesa-cat">${d.cat} · ${d.data||''}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:.4rem">
+                <div class="despesa-valor" style="color:var(--orange)">€${(d.valor||0).toFixed(2)}</div>
+                <button onclick="eliminarDespesa('${d.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem">✕</button>
+              </div>
+            </div>
+          `).join(''):
+          '<div style="padding:1.5rem;text-align:center;color:var(--text3);font-size:.85rem">Sem despesas registadas</div>'}
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <div class="card-header"><div class="card-title">💡 Estimativas por dia</div></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem">
+          ${Object.entries(ROTEIROS).map(([k,r])=>`
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem">
+              <div style="font-size:.75rem;color:var(--text3);margin-bottom:.2rem">${r.date}</div>
+              <div style="font-weight:600;font-size:.85rem;margin-bottom:.4rem">${r.titulo.split('·')[0].trim()}</div>
+              <div style="font-size:.88rem;color:var(--green)">€${r.custoMin} – €${r.custoMax}<span style="font-size:.72rem;color:var(--text3)">/pessoa</span></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('orcamento-content').innerHTML=html;
 }
 
-function toggleMalaItem(id) {
-  const item = appData.mala.find(i=>i.id===id);
-  if (item) { item.feito = !item.feito; saveData(); renderBagagem(); }
-}
-
-function deleteMalaItem(id) {
-  appData.mala = appData.mala.filter(i=>i.id!==id);
-  saveData(); renderBagagem();
-}
-
-// ─── MEMÓRIAS ───────────────────────────────────────────────────────────────
-function renderMemorias() {
-  const el = document.getElementById('memorias-content');
-  if (!el) return;
-  let html = '<h3 style="color:var(--text2);font-size:.85rem;font-weight:600;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em">📷 Fotos & Vídeos</h3>';
-  if (!appData.memorias.length) {
-    html += '<p style="color:var(--text3);padding:1rem 0">Sem fotos ainda. Adiciona a primeira!</p>';
-  } else {
-    const byLocal = {};
-    appData.memorias.forEach(m => { const k=m.local||'Sem local'; if(!byLocal[k]) byLocal[k]=[]; byLocal[k].push(m); });
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem">';
-    Object.entries(byLocal).forEach(([local, items]) => {
-      html += `<div style="grid-column:1/-1;margin:0.3rem 0 0.1rem"><span style="color:var(--text3);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em">📍 ${local}</span></div>`;
-      items.forEach(m => {
-        html += `<div style="border-radius:var(--radius);overflow:hidden;background:var(--bg3);border:1px solid var(--border)">
-          ${m.tipo==='video'?`<video src="${m.src}" controls style="width:100%;height:140px;object-fit:cover"></video>`:`<img src="${m.src}" alt="${m.legenda||''}" style="width:100%;height:140px;object-fit:cover">`}
-          <div style="padding:.5rem">
-            ${m.legenda?`<div style="font-size:.78rem;color:var(--text2)">${m.legenda}</div>`:''}
-            ${m.dia?`<div style="font-size:.73rem;color:var(--text3)">${ROTEIROS[m.dia]?.titulo||m.dia}</div>`:''}
-            <button onclick="deleteMedia('${m.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.73rem;margin-top:.3rem">🗑</button>
-          </div></div>`;
-      });
+function renderMemorias(){
+  const fotos = appData.fotos||[];
+  const diario = appData.diario||[];
+  let html='';
+  if(diario.length){
+    html+=`<div style="margin-bottom:1.25rem"><div class="section-title" style="margin-bottom:.75rem">📓 Diário</div>`;
+    diario.slice().reverse().forEach(e=>{
+      html+=`<div class="diario-entry">
+        <div class="diario-date">${e.data||''} ${e.local?'· '+e.local:''}</div>
+        <div class="diario-text">${e.texto||''}</div>
+        <button onclick="eliminarDiario('${e.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.75rem;margin-top:.5rem">✕ Eliminar</button>
+      </div>`;
     });
-    html += '</div>';
+    html+='</div>';
   }
-  el.innerHTML = html;
+  if(fotos.length){
+    html+=`<div class="section-title" style="margin-bottom:.75rem">📷 Galeria</div>
+    <div class="photo-grid">
+      ${fotos.map(f=>`<img class="photo-thumb" src="${f.src}" alt="${f.nome||''}" onclick="verFoto('${f.id}')">`).join('')}
+    </div>`;
+  }
+  if(!diario.length && !fotos.length){
+    html=`<div class="empty-state"><div class="empty-icon">📷</div><div>Sem memórias ainda. Adicione fotos ou escreva no diário!</div></div>`;
+  }
+  document.getElementById('memorias-content').innerHTML=html;
 }
 
-function handleMediaUpload() {
-  const files = document.getElementById('media-input').files;
-  if (!files.length) { alert('Seleciona pelo menos um ficheiro'); return; }
-  const local = document.getElementById('media-local').value.trim();
-  const dia = document.getElementById('media-dia').value;
-  const legenda = document.getElementById('media-legenda').value.trim();
-  let processed = 0;
-  Array.from(files).forEach(file => {
+function renderGastronomia(){
+  let html='';
+  Object.values(GASTRONOMIA).forEach(reg=>{
+    html+=`<div class="card" style="margin-bottom:1.25rem">
+      <div class="card-header"><div class="card-title">${reg.titulo}</div></div>
+      <div class="card-body">
+        <div style="font-size:.85rem;font-weight:600;color:var(--text2);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em">Vinhos recomendados</div>
+        <table class="gastro-table">
+          <thead><tr><th>Vinho</th><th>Estilo</th><th>Aromas</th><th>Harmonização</th><th>★</th></tr></thead>
+          <tbody>
+            ${reg.vinhos.map(v=>`<tr>
+              <td style="font-weight:600">${v.nome}</td>
+              <td style="color:var(--text2)">${v.estilo}</td>
+              <td style="color:var(--text3);font-style:italic">${v.aromas}</td>
+              <td style="color:var(--text2)">${v.harmonia}</td>
+              <td><span class="stars-gold">${'★'.repeat(v.stars||0)}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div style="margin-top:1.25rem;font-size:.85rem;font-weight:600;color:var(--text2);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em">Gastronomia típica</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem">
+          ${reg.pratos.map(p=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem">
+            <div style="font-weight:600;margin-bottom:.3rem">${p.nome}</div>
+            <div style="font-size:.8rem;color:var(--text2);margin-bottom:.4rem;line-height:1.5">${p.desc}</div>
+            <div style="font-size:.75rem;color:var(--accent)">🍷 ${p.vinho}</div>
+            <div style="font-size:.72rem;color:var(--text3);margin-top:.2rem">📅 ${p.epoca}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('gastronomia-content').innerHTML=html;
+}
+
+/* ═══════════════════════════════════════════════════
+   ACTIONS
+═══════════════════════════════════════════════════ */
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const map = {'tab-painel':0,'tab-destinos':1,'tab-mapa':2,'tab-roteiro':3,'tab-reservas':4,'tab-orcamento':5,'tab-memorias':6,'tab-gastronomia':7,'tab-pesquisa':8};
+  const items = document.querySelectorAll('.nav-item');
+  if(items[map[id]]) items[map[id]].classList.add('active');
+}
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click',e=>{ if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open'); });
+
+function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+function criarViagem(){
+  const nome = document.getElementById('nv-nome').value.trim();
+  if(!nome){ alert('Preencha o nome da viagem.'); return; }
+  const v = {
+    id:genId(), nome,
+    pais:document.getElementById('nv-pais').value,
+    cidades:document.getElementById('nv-cidades').value,
+    inicio:document.getElementById('nv-inicio').value,
+    fim:document.getElementById('nv-fim').value,
+    orcamento:parseFloat(document.getElementById('nv-orcamento').value)||0,
+    stars:parseInt(document.getElementById('nv-stars').value)||3,
+    estado:document.getElementById('nv-estado').value,
+    notas:document.getElementById('nv-notas').value
+  };
+  appData.viagens.push(v);
+  saveFirestoreData();
+  closeModal('modal-nova-viagem');
+  renderAll();
+}
+
+function guardarReserva(){
+  const desc = document.getElementById('nr-desc').value.trim();
+  if(!desc){ alert('Preencha a descrição.'); return; }
+  const r = {
+    id:genId(), tipo:document.getElementById('nr-tipo').value, desc,
+    data:document.getElementById('nr-data').value, hora:document.getElementById('nr-hora').value,
+    ref:document.getElementById('nr-ref').value, fornecedor:document.getElementById('nr-fornecedor').value,
+    valor:parseFloat(document.getElementById('nr-valor').value)||0,
+    notas:document.getElementById('nr-notas').value
+  };
+  appData.reservas.push(r);
+  saveFirestoreData();
+  closeModal('modal-nova-reserva');
+  renderReservas();
+}
+
+function eliminarReserva(id){
+  if(!confirm('Eliminar esta reserva?')) return;
+  appData.reservas = appData.reservas.filter(r=>r.id!==id);
+  saveFirestoreData(); renderReservas();
+}
+
+function guardarDespesa(){
+  const desc = document.getElementById('nd-desc').value.trim();
+  if(!desc){ alert('Preencha a descrição.'); return; }
+  const d = {
+    id:genId(), desc, cat:document.getElementById('nd-cat').value,
+    valor:parseFloat(document.getElementById('nd-valor').value)||0,
+    data:document.getElementById('nd-data').value
+  };
+  appData.despesas.push(d);
+  saveFirestoreData();
+  closeModal('modal-nova-despesa');
+  renderOrcamento();
+  renderPainel();
+}
+
+function eliminarDespesa(id){
+  appData.despesas = appData.despesas.filter(d=>d.id!==id);
+  saveFirestoreData(); renderOrcamento(); renderPainel();
+}
+
+function guardarDiario(){
+  const texto = document.getElementById('md-texto').value.trim();
+  if(!texto){ alert('Escreva algo no diário.'); return; }
+  appData.diario.push({
+    id:genId(), data:document.getElementById('md-data').value,
+    local:document.getElementById('md-local').value, texto
+  });
+  saveFirestoreData(); closeModal('modal-diario'); renderMemorias();
+}
+
+function eliminarDiario(id){
+  appData.diario = appData.diario.filter(d=>d.id!==id);
+  saveFirestoreData(); renderMemorias();
+}
+
+function handlePhotoUpload(e){
+  const files = Array.from(e.target.files);
+  files.forEach(file=>{
     const reader = new FileReader();
-    reader.onload = e => {
-      appData.memorias.push({
-        id: uid(), src: e.target.result,
-        tipo: file.type.startsWith('video') ? 'video' : 'foto',
-        local, dia, legenda, data: new Date().toISOString()
-      });
-      processed++;
-      if (processed === files.length) { saveData(); renderMemorias(); }
+    reader.onload = ev=>{
+      appData.fotos.push({ id:genId(), nome:file.name, src:ev.target.result, data:new Date().toISOString() });
+      renderMemorias();
     };
     reader.readAsDataURL(file);
   });
-  closeModal('modal-add-media');
-  document.getElementById('media-input').value = '';
-  document.getElementById('media-local').value = '';
-  document.getElementById('media-legenda').value = '';
 }
 
-function deleteMedia(id) {
-  appData.memorias = appData.memorias.filter(m=>m.id!==id);
-  saveData(); renderMemorias();
-}
-
-// ─── DIÁRIO ─────────────────────────────────────────────────────────────────
-function renderDiario() {
-  const el = document.getElementById('memorias-content');
-  if (!el) return;
-  // Remove existing diario section if present, then append
-  let diarioSection = document.getElementById('diario-section');
-  if (!diarioSection) {
-    diarioSection = document.createElement('div');
-    diarioSection.id = 'diario-section';
-    el.appendChild(diarioSection);
-  }
-  const entries = appData.diario;
-  diarioSection.innerHTML = `<h3 style="color:var(--text2);font-size:.85rem;font-weight:600;margin:1rem 0 .75rem;text-transform:uppercase;letter-spacing:.06em">📓 Diário de Viagem</h3>` +
-    (entries.length ? entries.map(d=>`
-      <div style="background:var(--bg3);border-radius:var(--radius);padding:1rem;margin-bottom:.6rem;border-left:3px solid var(--accent)">
-        <div style="display:flex;justify-content:space-between;margin-bottom:.3rem">
-          <span style="font-weight:600">${d.titulo||'Entrada sem título'}</span>
-          <span style="color:var(--text3);font-size:.8rem">${d.data||''}</span>
-        </div>
-        ${d.local?`<div style="color:var(--accent);font-size:.8rem;margin-bottom:.3rem">📍 ${d.local}</div>`:''}
-        ${d.dia?`<div style="color:var(--text3);font-size:.78rem;margin-bottom:.3rem">${ROTEIROS[d.dia]?.titulo||d.dia}</div>`:''}
-        <p style="color:var(--text2);font-size:.85rem;white-space:pre-wrap">${d.texto||''}</p>
-        <button onclick="deleteDiario('${d.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.75rem;margin-top:.5rem">🗑</button>
-      </div>`).join('')
-    : '<p style="color:var(--text3);font-size:.85rem">Sem entradas no diário.</p>');
-}
-
-function guardarDiario() {
-  const texto = document.getElementById('md-texto').value.trim();
-  if (!texto) { alert('Escreve algo no diário'); return; }
-  const entry = {
-    id: uid(),
-    data: document.getElementById('md-data').value,
-    dia: document.getElementById('md-dia').value,
-    local: document.getElementById('md-local').value.trim(),
-    texto
-  };
-  appData.diario.unshift(entry);
-  closeModal('modal-diario');
-  ['md-data','md-local','md-texto'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  saveData(); renderDiario();
-}
-
-function deleteDiario(id) {
-  appData.diario = appData.diario.filter(d=>d.id!==id);
-  saveData(); renderDiario();
-}
-
-// ─── GASTRONOMIA ────────────────────────────────────────────────────────────
-function renderGastronomia() {
-  const el = document.getElementById('gastronomia-content');
-  if (!el) return;
-  const todas = [...GASTRONOMIA_STATIC.suica, ...GASTRONOMIA_STATIC.italia, ...GASTRONOMIA_STATIC.alsacia];
-  const vinhos = todas.filter(g=>g.tipo==='vinho');
-  const pratos = todas.filter(g=>g.tipo!=='vinho');
-  const render = arr => arr.map(g=>`
-    <div style="background:var(--bg3);border-radius:var(--radius2);padding:1rem;border:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.4rem">
-        <div style="font-weight:600;font-size:.95rem">${g.emoji} ${g.nome}</div>
-        <span style="color:var(--text3);font-size:.75rem;background:var(--bg4);padding:.1rem .4rem;border-radius:99px">${g.regiao}</span>
-      </div>
-      <div style="color:var(--text2);font-size:.82rem;margin-bottom:.5rem">${g.descricao}</div>
-      ${g.onde ? `<div style="color:var(--accent);font-size:.8rem">📍 <strong>Onde:</strong> ${g.onde}</div>` : ''}
-      ${g.preco ? `<div style="color:var(--gold);font-size:.8rem;margin-top:.2rem">💰 ${g.preco}</div>` : ''}
-      ${g.diasRoteiro && g.diasRoteiro.length ? `<div style="margin-top:.4rem;display:flex;gap:.3rem;flex-wrap:wrap">${g.diasRoteiro.map(d=>`<span style="background:var(--bg4);color:var(--text3);font-size:.72rem;padding:.1rem .4rem;border-radius:99px">${ROTEIROS[d]?.titulo.split('—')[0]||d}</span>`).join('')}</div>` : ''}
-    </div>`).join('');
-
-  el.innerHTML = `
-    <div style="margin-bottom:1.5rem">
-      <h3 style="color:var(--text2);font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">🍷 Vinhos & Bebidas</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem">${render(vinhos)}</div>
-    </div>
-    <div>
-      <h3 style="color:var(--text2);font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">🍽️ Pratos & Sobremesas</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem">${render(pratos)}</div>
-    </div>`;
-}
-
-// ─── DARK MODE ───────────────────────────────────────────────────────────────
-function toggleDarkMode() {
-  document.body.classList.toggle('light-mode');
-  localStorage.setItem('fdr_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-}
-if (localStorage.getItem('fdr_theme') === 'light') document.body.classList.add('light-mode');
-
-// ─── INIT ────────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  showTab(0);
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.addEventListener('click', () => filterDestinos(b.dataset.f));
+function addParagem(){
+  const nome = document.getElementById('ap-nome').value.trim();
+  if(!nome){ alert('Preencha o nome do local.'); return; }
+  if(!appData.paragens_extra[roteiroAtivo]) appData.paragens_extra[roteiroAtivo]=[];
+  appData.paragens_extra[roteiroAtivo].push({
+    id:genId(), nome, hora:document.getElementById('ap-hora').value,
+    tipo:document.getElementById('ap-tipo').value, dur:document.getElementById('ap-dur').value,
+    address:document.getElementById('ap-address').value, notas:document.getElementById('ap-notas').value,
+    seccao:'Extra'
   });
-});
+  saveFirestoreData(); closeModal('modal-add-paragem'); renderRoteiroContent();
+}
+
+function pesquisar(){
+  const q = document.getElementById('pesquisa-input').value.trim();
+  if(!q) return;
+  const url = `https://www.google.com/search?q=${encodeURIComponent(q+' viagem')}`;
+  window.open(url,'_blank');
+}
+
+function pesquisarRapido(q){
+  document.getElementById('pesquisa-input').value=q;
+  pesquisar();
+}
+
+function exportRoteiro(){
+  window.print();
+}
+
+function toggleDark(){
+  document.body.classList.toggle('light-mode');
+}
 </script>
 </body>
 </html>
