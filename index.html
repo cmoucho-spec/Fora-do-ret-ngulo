@@ -359,6 +359,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .countdown-viagem{font-weight:600;color:var(--text);margin:.25rem 0}
 
 
+
+/* ── LEAFLET MAPS ── */
+#world-map-leaflet{ height:480px;border-radius:var(--radius2);overflow:hidden;border:1px solid var(--border) }
+#roteiro-map-container{ height:360px;border-radius:var(--radius2);overflow:hidden;border:1px solid var(--border);margin-bottom:1rem }
+.leaflet-tile-pane{ filter:brightness(.85) saturate(.7) }
+.numbered-marker{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:700;
+  border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.4);
+  color:#fff;
+}
+.num-start{background:#3fb950}
+.num-end{background:#f85149}
+.num-mid{background:#58a6ff}
+.num-custom{background:#d29922}
+.leaflet-popup-content-wrapper{background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.leaflet-popup-tip{background:var(--bg2)}
+.leaflet-popup-content{margin:.65rem .85rem;font-size:.82rem}
+.leaflet-popup-content strong{color:var(--accent)}
+.map-country-visited{fill:#3fb950;fill-opacity:.45;stroke:#3fb950;stroke-width:1}
+.map-country-tovisit{fill:#58a6ff;fill-opacity:.35;stroke:#58a6ff;stroke-width:1}
+
 /* ── TIMELINE ── */
 .timeline-bar{display:flex;align-items:flex-start;overflow-x:auto;padding:.5rem 0 1rem;margin-bottom:.5rem}
 .tl-step{flex:1;min-width:70px;display:flex;flex-direction:column;align-items:center;position:relative}
@@ -467,6 +490,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   .p-custo{display:none}
 }
 </style>
+  <!-- Leaflet.js -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -586,68 +612,47 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <!-- ── MAPA ── -->
       <div id="tab-mapa" class="tab">
         <div class="page-header">
-          <div class="page-title">🌍 Mapa de viagens</div>
-          <div class="page-sub">Clique sobre um país para ver detalhes</div>
-        </div>
-        <div id="map-container">
-          <svg id="world-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
-            <!-- Fundo oceano -->
-            <rect width="1000" height="500" fill="#1a2332"/>
-            <!-- Continentes simplificados -->
-            <!-- América do Norte -->
-            <path d="M60,60 L80,50 L120,55 L160,70 L180,90 L200,110 L210,140 L220,170 L200,200 L180,220 L160,240 L140,230 L120,220 L100,210 L80,190 L70,170 L60,150 L55,120 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5" id="north-america"/>
-            <!-- América Central/México -->
-            <path d="M160,240 L180,220 L200,200 L220,210 L225,240 L210,260 L190,270 L170,265 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
-            <!-- América do Sul -->
-            <path d="M190,270 L210,260 L240,250 L270,255 L290,280 L300,320 L290,360 L270,390 L240,400 L210,380 L195,350 L185,310 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5" id="south-america"/>
-            <!-- Europa -->
-            <path d="M430,60 L460,55 L490,60 L510,75 L520,95 L510,115 L490,120 L470,125 L450,120 L430,110 L420,90 Z" fill="#21262d" stroke="#30363d" stroke-width="0.8" id="europe" class="map-country"/>
-            <!-- Portugal -->
-            <ellipse cx="428" cy="100" rx="8" ry="12" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="portugal" class="map-country" data-name="Portugal"/>
-            <!-- Suíça -->
-            <ellipse cx="472" cy="85" rx="7" ry="5" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="switzerland" class="map-country" data-name="Suíça"/>
-            <!-- Itália -->
-            <path d="M468,100 L480,98 L490,105 L488,120 L478,130 L468,125 L462,110 Z" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="italy" class="map-country" data-name="Itália"/>
-            <!-- Luxemburgo -->
-            <circle cx="457" cy="78" r="4" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="luxembourg" class="map-country" data-name="Luxemburgo"/>
-            <!-- França -->
-            <path d="M435,80 L455,75 L465,85 L460,100 L445,105 L433,98 Z" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="france" class="map-country" data-name="França"/>
-            <!-- África -->
-            <path d="M450,140 L480,135 L510,140 L530,165 L540,200 L535,240 L520,270 L495,290 L465,285 L445,265 L435,230 L430,195 L435,165 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
-            <!-- Ásia -->
-            <path d="M520,40 L600,35 L680,45 L740,60 L780,80 L800,110 L790,140 L760,155 L720,155 L680,145 L640,140 L600,135 L560,130 L530,115 L515,95 L515,65 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
-            <!-- Oceânia -->
-            <path d="M720,300 L760,290 L800,300 L820,330 L810,360 L780,370 L750,360 L730,340 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
-          </svg>
-          <div style="padding:.75rem 1rem;border-top:1px solid var(--border)">
-            <div class="map-legend">
-              <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div> Visitado</div>
-              <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div> A visitar</div>
-              <div class="legend-item"><div class="legend-dot" style="background:#d29922"></div> Em destaque</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div class="page-title">🌍 Mapa de viagens</div>
+              <div class="page-sub">Fronteiras políticas · Países visitados e a visitar</div>
+            </div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <div class="map-legend" style="margin:0">
+                <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div> Visitado</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div> A visitar</div>
+              </div>
             </div>
           </div>
         </div>
+        <div id="world-map-leaflet"></div>
         <div id="map-pins" style="margin-top:1.25rem"></div>
       </div>
 
       <!-- ── ROTEIROS ── -->
       <div id="tab-roteiro" class="tab">
         <div class="page-header">
-          <div class="page-title">🗺️ Roteiros Diários</div>
-          <div class="page-sub">Luxemburgo, Suíça & Itália · 26–30 Maio 2026 · 5 dias</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
+            <div>
+              <div class="page-title">🗺️ Roteiros Diários</div>
+              <div class="page-sub">Luxemburgo, Suíça & Itália · 26–30 Maio 2026 · 5 dias</div>
+            </div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <button class="btn-secondary" onclick="openModal('modal-add-paragem')">+ Paragem</button>
+              <button class="btn-secondary" onclick="openModal('modal-novo-dia')">📅 + Novo dia</button>
+              <button class="btn-secondary" onclick="openEditarViagem()">✏️ Editar viagem</button>
+            </div>
+          </div>
         </div>
+
+        <!-- Mapa do itinerário do dia -->
+        <div id="roteiro-map-container"></div>
 
         <!-- Selector de dia -->
         <div class="roteiro-selector" id="roteiro-selector"></div>
 
         <!-- Conteúdo roteiro -->
         <div id="roteiro-content"></div>
-
-        <!-- Botão adicionar paragem manual -->
-        <div style="margin-top:1rem;display:flex;gap:.75rem">
-          <button class="btn-primary" onclick="openModal('modal-add-paragem')">+ Adicionar paragem</button>
-          <button class="btn-secondary" onclick="exportRoteiro()">⬇ Exportar PDF</button>
-        </div>
       </div>
 
       <!-- ── RESERVAS ── -->
@@ -1068,6 +1073,42 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal('modal-partilha')">Cancelar</button>
       <button class="btn-primary" onclick="guardarPartilha()">✓ Convidar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar viagem -->
+<div class="modal-overlay" id="modal-editar-viagem">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar viagem</div>
+      <button class="modal-close" onclick="closeModal('modal-editar-viagem')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome da viagem</label>
+      <input class="form-input" id="ev-nome" value="Luxemburgo, Suíça & Itália">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data início</label>
+        <input class="form-input" type="date" id="ev-inicio" value="2026-05-26">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data fim</label>
+        <input class="form-input" type="date" id="ev-fim" value="2026-05-30">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Países</label>
+      <input class="form-input" id="ev-paises" value="Luxemburgo, Suíça, Itália">
+    </div>
+    <hr style="border-color:var(--border);margin:1rem 0">
+    <div style="font-size:.85rem;font-weight:600;color:var(--text2);margin-bottom:.75rem">📅 Dias do roteiro</div>
+    <div id="ev-dias-lista" style="margin-bottom:.75rem"></div>
+    <button class="btn-secondary" style="width:100%;margin-bottom:.5rem" onclick="closeModal('modal-editar-viagem');openModal('modal-novo-dia')">+ Adicionar novo dia ao roteiro</button>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-editar-viagem')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEdicaoViagem()">✓ Guardar alterações</button>
     </div>
   </div>
 </div>
@@ -1505,6 +1546,193 @@ function initMochilaDefault(){
   ];
 }
 
+/* ═══════════ LEAFLET MAPS ═══════════ */
+let _worldMap = null;
+let _roteiroMap = null;
+let _worldMapLoaded = false;
+
+// Coordenadas das paragens por dia
+const ROTEIRO_COORDS = {
+  dia2:[
+    {nome:"Münchenbuchsee",lat:47.025,lon:7.430,num:1},
+    {nome:"Berna — Altstadt",lat:46.948,lon:7.448,num:2},
+    {nome:"Castelo de Thun",lat:46.758,lon:7.629,num:3},
+    {nome:"Lauterbrunnen",lat:46.593,lon:7.908,num:4},
+    {nome:"Staubbachfall",lat:46.595,lon:7.910,num:5},
+    {nome:"Trümmelbach Falls",lat:46.573,lon:7.922,num:6},
+    {nome:"Mürren",lat:46.558,lon:7.893,num:7},
+    {nome:"Grindelwald / Bachalpsee",lat:46.624,lon:8.041,num:8},
+    {nome:"Giessbach Falls",lat:46.718,lon:8.000,num:9},
+    {nome:"Interlaken",lat:46.686,lon:7.863,num:10},
+    {nome:"Spiez",lat:46.686,lon:7.672,num:11},
+  ],
+  dia3:[
+    {nome:"Spiez",lat:46.686,lon:7.672,num:1},
+    {nome:"Kandersteg",lat:46.498,lon:7.672,num:2},
+    {nome:"Lago Oeschinen",lat:46.515,lon:7.713,num:3},
+    {nome:"Zermatt",lat:46.020,lon:7.749,num:4},
+    {nome:"Gornergrat 3089m",lat:45.984,lon:7.785,num:5},
+    {nome:"Matterhorn Glacier",lat:45.979,lon:7.734,num:6},
+    {nome:"Locarno",lat:46.170,lon:8.799,num:7},
+    {nome:"Ascona",lat:46.158,lon:8.773,num:8},
+  ],
+  dia4:[
+    {nome:"Castelletto",lat:45.924,lon:8.560,num:1},
+    {nome:"Como",lat:45.801,lon:9.085,num:2},
+    {nome:"Villa Balbianello",lat:45.968,lon:9.139,num:3},
+    {nome:"Bellagio",lat:45.984,lon:9.259,num:4},
+    {nome:"Varenna",lat:46.014,lon:9.282,num:5},
+    {nome:"Orrido di Bellano",lat:46.052,lon:9.298,num:6},
+    {nome:"Lugano",lat:46.004,lon:8.951,num:7},
+    {nome:"Locarno",lat:46.170,lon:8.799,num:8},
+    {nome:"Ballenberg",lat:46.762,lon:8.093,num:9},
+  ],
+  dia5:[
+    {nome:"Ballenberg",lat:46.762,lon:8.093,num:1},
+    {nome:"Alpnachstad / Pilatus",lat:46.983,lon:8.255,num:2},
+    {nome:"Monte Pilatus — Kulm",lat:46.979,lon:8.252,num:3},
+    {nome:"Monte Rigi",lat:47.055,lon:8.484,num:4},
+    {nome:"Lucerna",lat:47.050,lon:8.309,num:5},
+    {nome:"Colmar",lat:48.078,lon:7.357,num:6},
+    {nome:"Luxembourg",lat:49.611,lon:6.130,num:7},
+  ],
+};
+
+// Países visitados e a visitar (ISO codes para GeoJSON)
+const PAISES_VISITADOS = ['Portugal','Spain','France','Germany','Netherlands','Belgium','United Kingdom','United States of America','Brazil','Morocco','Tunisia'];
+const PAISES_A_VISITAR = ['Luxembourg','Switzerland','Italy'];
+
+function initWorldMap(){
+  if(_worldMap){ _worldMap.invalidateSize(); return; }
+  const el = document.getElementById('world-map-leaflet');
+  if(!el) return;
+
+  _worldMap = L.map('world-map-leaflet', {
+    center:[20,10], zoom:2, zoomControl:true,
+    attributionControl:true
+  });
+
+  // Dark tile layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'© OpenStreetMap © CartoDB',
+    subdomains:'abcd', maxZoom:19
+  }).addTo(_worldMap);
+
+  // Load GeoJSON boundaries
+  fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+    .then(r=>r.json())
+    .then(data=>{
+      L.geoJSON(data, {
+        style: function(feature){
+          const name = feature.properties.ADMIN || feature.properties.name || '';
+          if(PAISES_A_VISITAR.some(p=>name.includes(p)||p.includes(name.split(' ')[0]))){
+            return {fillColor:'#58a6ff',fillOpacity:.4,color:'#58a6ff',weight:1.5};
+          }
+          if(PAISES_VISITADOS.some(p=>name.includes(p)||p.includes(name.split(' ')[0]))){
+            return {fillColor:'#3fb950',fillOpacity:.35,color:'#3fb950',weight:1};
+          }
+          return {fillColor:'#21262d',fillOpacity:.8,color:'#30363d',weight:.5};
+        },
+        onEachFeature: function(feature, layer){
+          const name = feature.properties.ADMIN || feature.properties.name || '';
+          const isVisit = PAISES_A_VISITAR.some(p=>name.includes(p)||p.includes(name.split(' ')[0]));
+          const isVisited = PAISES_VISITADOS.some(p=>name.includes(p)||p.includes(name.split(' ')[0]));
+          if(isVisit || isVisited){
+            layer.bindTooltip(name+(isVisit?' 🔵':' 🟢'),{className:'',sticky:true});
+          }
+        }
+      }).addTo(_worldMap);
+    })
+    .catch(()=>{
+      // fallback: add simple markers for key countries
+      const markers = [
+        {lat:46.8,lon:8.2,name:'Suíça 🔵'},{lat:41.9,lon:12.5,name:'Itália 🔵'},
+        {lat:49.8,lon:6.1,name:'Luxemburgo 🔵'},{lat:39.5,lon:-8.0,name:'Portugal 🟢'}
+      ];
+      markers.forEach(m=>L.circleMarker([m.lat,m.lon],{radius:8,color:'#58a6ff',fillColor:'#58a6ff',fillOpacity:.6}).bindTooltip(m.name).addTo(_worldMap));
+    });
+
+  // Add destination pins from appData
+  (appData.destinos||[]).forEach(d=>{
+    if(d.lat && d.lon){
+      const color = d.estado==='visitado'?'#3fb950':'#58a6ff';
+      L.circleMarker([d.lat,d.lon],{radius:7,color,fillColor:color,fillOpacity:.9,weight:2})
+        .bindPopup('<strong>'+d.nome+'</strong><br>'+( d.estado==='visitado'?'✅ Visitado':'🔵 A visitar'))
+        .addTo(_worldMap);
+    }
+  });
+}
+
+function initRoteiroMap(key){
+  // Destroy previous map
+  if(_roteiroMap){ _roteiroMap.remove(); _roteiroMap=null; }
+  const container = document.getElementById('roteiro-map-container');
+  if(!container) return;
+  const pts = ROTEIRO_COORDS[key];
+  // Custom days: no coords
+  if(!pts || !pts.length){ container.style.display='none'; return; }
+  container.style.display='block';
+
+  _roteiroMap = L.map('roteiro-map-container',{zoomControl:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'© OpenStreetMap © CartoDB', subdomains:'abcd', maxZoom:19
+  }).addTo(_roteiroMap);
+
+  const latlngs = pts.map(p=>[p.lat,p.lon]);
+
+  // Draw route polyline
+  L.polyline(latlngs,{color:'#58a6ff',weight:3,opacity:.8,dashArray:'6,4'}).addTo(_roteiroMap);
+
+  // Add numbered markers
+  pts.forEach(function(p,i){
+    const isFirst = i===0, isLast = i===pts.length-1;
+    const color = isFirst?'#3fb950':isLast?'#f85149':'#58a6ff';
+    const icon = L.divIcon({
+      className:'',
+      html:'<div class="numbered-marker" style="background:'+color+'">'+p.num+'</div>',
+      iconSize:[28,28], iconAnchor:[14,14], popupAnchor:[0,-16]
+    });
+    L.marker([p.lat,p.lon],{icon})
+      .bindPopup('<strong>#'+p.num+' '+p.nome+'</strong>')
+      .addTo(_roteiroMap);
+  });
+
+  // Fit bounds with padding
+  _roteiroMap.fitBounds(L.latLngBounds(latlngs),{padding:[30,30]});
+}
+
+/* ── EDITAR VIAGEM ── */
+function openEditarViagem(){
+  const lista = document.getElementById('ev-dias-lista');
+  if(!lista) return;
+  // Mostrar dias custom existentes
+  const custom = appData.roteiros_custom||[];
+  if(!custom.length){
+    lista.innerHTML='<div style="font-size:.82rem;color:var(--text3);padding:.5rem 0">Sem dias personalizados. Clique em "+ Adicionar novo dia" para criar.</div>';
+  } else {
+    lista.innerHTML = custom.map(d=>`<div style="display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:.83rem;flex:1"><strong>${d.data}</strong> — ${d.titulo}</span>
+      <button onclick="eliminarDiaCustom('${d.id}')" class="btn-danger" style="font-size:.72rem;padding:.12rem .35rem">🗑</button>
+    </div>`).join('');
+  }
+  openModal('modal-editar-viagem');
+}
+
+function guardarEdicaoViagem(){
+  // Guardar nome e datas da viagem principal (guarda em appData.viagens[0])
+  const v = appData.viagens[0];
+  if(v){
+    v.nome = document.getElementById('ev-nome').value || v.nome;
+    v.inicio = document.getElementById('ev-inicio').value || v.inicio;
+    v.fim = document.getElementById('ev-fim').value || v.fim;
+    v.paises = document.getElementById('ev-paises').value || v.paises;
+    saveFirestoreData();
+  }
+  closeModal('modal-editar-viagem');
+  renderPainel();
+  renderRoteiros();
+}
+
 function renderAll(){
   renderPainel();
   renderDestinos();
@@ -1622,6 +1850,7 @@ function renderRoteiros(){
 function setRoteiro(k){
   roteiroAtivo=k;
   renderRoteiros();
+  setTimeout(()=>initRoteiroMap(k),100);
 }
 
 function buildGoogleMapsUrl(r){
@@ -1927,6 +2156,9 @@ function showTab(id){
   const map = {'tab-painel':0,'tab-destinos':1,'tab-mapa':2,'tab-roteiro':3,'tab-reservas':4,'tab-orcamento':5,'tab-memorias':6,'tab-mochila':7,'tab-gastronomia':8,'tab-pesquisa':9,'tab-partilha':10};
   const items = document.querySelectorAll('.nav-item');
   if(items[map[id]]) items[map[id]].classList.add('active');
+  // Inicializar mapas Leaflet quando os tabs ficam visíveis
+  if(id==='tab-mapa') setTimeout(()=>initWorldMap(),50);
+  if(id==='tab-roteiro') setTimeout(()=>initRoteiroMap(roteiroAtivo),50);
 }
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
