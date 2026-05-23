@@ -494,6 +494,78 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .weather-refresh:hover{border-color:var(--accent);color:var(--accent)}
 .weather-refresh.loading{opacity:.5;pointer-events:none}
 
+/* ─── TIMELINE BAR ───────────────────────────────── */
+.timeline-bar{
+  position:relative;display:flex;align-items:flex-start;
+  gap:0;margin:1rem 0 1.5rem;overflow-x:auto;padding-bottom:.5rem;
+}
+.tl-step{
+  flex:1;min-width:80px;display:flex;flex-direction:column;align-items:center;
+  position:relative;cursor:default;
+}
+.tl-step::before{
+  content:'';position:absolute;top:14px;left:50%;right:-50%;
+  height:2px;background:var(--border);z-index:0;
+}
+.tl-step:last-child::before{display:none}
+.tl-dot{
+  width:28px;height:28px;border-radius:50%;background:var(--bg3);
+  border:2px solid var(--border);display:flex;align-items:center;
+  justify-content:center;font-size:.7rem;font-weight:700;z-index:1;
+  flex-shrink:0;color:var(--text2);transition:all .2s;
+}
+.tl-step.active .tl-dot{background:var(--accent);border-color:var(--accent);color:#fff}
+.tl-hora{font-size:.68rem;color:var(--text3);margin-top:.3rem;white-space:nowrap}
+.tl-nome{font-size:.7rem;color:var(--text2);text-align:center;max-width:80px;line-height:1.2;margin-top:.15rem}
+.tl-km{font-size:.65rem;color:var(--text3);margin-top:.1rem}
+
+/* ─── TICKET BADGE ───────────────────────────────── */
+.ticket-badge{
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-size:.73rem;padding:.2rem .55rem;border-radius:10px;margin-top:.35rem;
+  background:rgba(210,153,34,.1);color:var(--orange);
+  border:1px solid rgba(210,153,34,.25);
+}
+.ticket-badge a{color:var(--accent);text-decoration:none;font-size:.71rem}
+.ticket-badge a:hover{text-decoration:underline}
+.ticket-free{background:rgba(63,185,80,.1);color:var(--green);border-color:rgba(63,185,80,.25)}
+
+/* ─── CUSTOS ROTA (portagens + combustível) ─────── */
+.custos-rota-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;margin:.75rem 0}
+.custo-card{
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+  padding:.75rem;text-align:center;
+}
+.custo-card .cc-icon{font-size:1.3rem;margin-bottom:.3rem}
+.custo-card .cc-val{font-size:1.15rem;font-weight:700;color:var(--accent)}
+.custo-card .cc-label{font-size:.74rem;color:var(--text3);margin-top:.15rem}
+
+/* ─── SUPERMERCADOS / FASTFOOD ──────────────────── */
+.local-item{
+  display:flex;align-items:center;gap:.6rem;padding:.45rem 0;
+  border-bottom:1px solid var(--border);font-size:.83rem;
+}
+.local-item:last-child{border-bottom:none}
+.local-item .li-icon{font-size:1rem;flex-shrink:0}
+.local-item .li-info{flex:1}
+.local-item .li-dist{font-size:.73rem;color:var(--text3);white-space:nowrap}
+
+/* ─── RESERVA PDF ────────────────────────────────── */
+.res-docs{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem}
+.res-doc-chip{
+  display:inline-flex;align-items:center;gap:.3rem;font-size:.73rem;
+  background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.2);
+  border-radius:10px;padding:.15rem .5rem;cursor:pointer;color:var(--accent);
+}
+.res-doc-chip:hover{background:rgba(88,166,255,.2)}
+.res-doc-upload{
+  display:inline-flex;align-items:center;gap:.3rem;font-size:.73rem;
+  background:var(--bg3);border:1px dashed var(--border);
+  border-radius:10px;padding:.15rem .5rem;cursor:pointer;color:var(--text3);
+  transition:all .2s;
+}
+.res-doc-upload:hover{border-color:var(--accent);color:var(--accent)}
+
 /* ─── PESQUISA ───────────────────────────────────── */
 .search-result{
   background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
@@ -1061,11 +1133,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <input class="form-input" id="ap-nome" placeholder="Ex: Cascata de Staubbach">
       </div>
       <div class="form-group">
-        <label class="form-label">Hora prevista</label>
-        <input class="form-input" type="time" id="ap-hora">
+        <label class="form-label">Nº de ordem no roteiro</label>
+        <input class="form-input" type="number" id="ap-ordem" placeholder="Ex: 3">
       </div>
     </div>
     <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Hora prevista</label>
+        <input class="form-input" type="time" id="ap-hora">
+      </div>
       <div class="form-group">
         <label class="form-label">Tipo</label>
         <select class="form-select" id="ap-tipo">
@@ -1540,6 +1616,109 @@ const ROTEIROS = {
   }
 };
 
+/* Custos de rota por dia (portagens + combustível) */
+const ROTEIRO_CUSTOS = {
+  dia2:{
+    portagens:{custo:0,detalhe:"Vinheta suíça obrigatória (CHF 40 / ~€43) — cobre toda a rede auto-estrada. Sem portagens adicionais na Suíça."},
+    combustivel:{km:210,preco:1.73,moeda:'CHF'},
+    portagens_valor:43
+  },
+  dia3:{
+    portagens:{custo:8,detalhe:"Túnel San Gottardo (CH→IT) ~€0. A8/A2 Suíça coberta pela vinheta. Entrada em Itália (A26): ~€8."},
+    combustivel:{km:350,preco:1.73,moeda:'CHF/€'},
+    portagens_valor:8
+  },
+  dia4:{
+    portagens:{custo:18,detalhe:"A26 Castelletto→Como ~€4. SS340 Lago de Como (sem portagem). A9 Como→Lugano ~€6. A2 Lugano→Locarno ~€4. Total ~€14–18."},
+    combustivel:{km:320,preco:1.68,moeda:'€'},
+    portagens_valor:18
+  },
+  dia5:{
+    portagens:{custo:28,detalhe:"Suíça: vinheta. A35 Suíça→Colmar ~€0 (gratuita). Autoroute A35 Alsácia ~€0. N3 Luxemburgo: gratuita. Total ~€22–28."},
+    combustivel:{km:560,preco:1.62,moeda:'€'},
+    portagens_valor:28
+  }
+};
+
+/* Bilhetes de entrada por paragem (matched por 'local') */
+const PARAGEM_TICKETS = {
+  "Castelo de Thun":{required:true,custo:'€12',online:'https://www.schlossthun.ch',label:'Bilhete online'},
+  "Spiez — Castelo":{required:true,custo:'€8',online:'https://www.schlossspiez.ch',label:'Bilhete online'},
+  "Trümmelbach Falls":{required:true,custo:'€22',online:'https://www.truemmelbachfaelle.ch',label:'truemmelbachfaelle.ch'},
+  "Staubbachfall":{required:false,custo:'€0'},
+  "Mürren Viewpoint":{required:true,custo:'€31',online:'https://www.schilthornbahn.ch',label:'schilthornbahn.ch'},
+  "Lago Bachalpsee":{required:true,custo:'€53',online:'https://www.jungfrau.ch',label:'jungfrau.ch'},
+  "Interlaken — Harder Kulm":{required:true,custo:'€37',online:'https://www.hardergipfel.ch',label:'hardergipfel.ch'},
+  "Lago Oeschinen":{required:true,custo:'€28',online:'https://www.oeschinensee.ch',label:'oeschinensee.ch'},
+  "Täsch — Estacionamento":{required:true,custo:'€13/dia',label:'Pagar in-situ (sem online)'},
+  "Gornergrat — 3089m":{required:true,custo:'€50',online:'https://www.gornergrat.ch',label:'gornergrat.ch'},
+  "Matterhorn Glacier Paradise":{required:true,custo:'€109',online:'https://www.matterhornparadise.ch',label:'matterhornparadise.ch'},
+  "Funicolare Como-Brunate":{required:true,custo:'€6',online:'https://www.funicolarecomo.it',label:'funicolarecomo.it'},
+  "Villa del Balbianello":{required:true,custo:'€20',online:'https://www.fondoambiente.it',label:'fondoambiente.it ⚠️ Reserva obrigatória'},
+  "Varenna":{required:true,custo:'€5',label:'Balsa Bellagio→Varenna — pagar a bordo'},
+  "Orrido di Bellano":{required:true,custo:'€8',online:'https://www.orrido.it',label:'orrido.it'},
+  "Monte Pilatus":{required:true,custo:'€78',online:'https://www.pilatus.ch',label:'pilatus.ch ⚠️ Reservar antecipadamente'},
+  "Alpnachstad — Cremalheira":{required:true,custo:'€78',online:'https://www.pilatus.ch',label:'pilatus.ch ⚠️ Reservar antecipadamente'},
+  "Monte Rigi":{required:true,custo:'€41',online:'https://www.rigi.ch',label:'rigi.ch'},
+  "Colmar — La Petite Venise":{required:false,custo:'€8',label:'Passeio de barco opcional (pagar local)'},
+};
+
+/* Serviços (supermercados + fastfood) por dia */
+const ROTEIRO_SERVICOS = {
+  dia2:{
+    supermercados:[
+      {nome:'Migros Thun Bälliz',local:'Bälliz 54, Thun • na rota',icon:'🛒'},
+      {nome:'Coop Thun',local:'Bahnhofstr. 2, Thun • na rota',icon:'🛒'},
+      {nome:'Coop Interlaken',local:'Rosenstrasse 3, Interlaken • na rota',icon:'🛒'},
+      {nome:'Migros Grindelwald',local:'Hauptstrasse, Grindelwald',icon:'🛒'},
+    ],
+    fastfood:[
+      {nome:"McDonald's Thun",local:'Bälliz (Centro Comercial)',icon:'🍔'},
+      {nome:"Starbucks Interlaken",local:'Höheweg 8, Interlaken',icon:'☕'},
+      {nome:"Subway Berna",local:'Hauptbahnhof Berna',icon:'🥙'},
+    ]
+  },
+  dia3:{
+    supermercados:[
+      {nome:'Migros Visp',local:'Kantonsstrasse 2, Visp • antes de Zermatt',icon:'🛒'},
+      {nome:'Coop Zermatt',local:'Centro de Zermatt (Bahnhofplatz)',icon:'🛒'},
+      {nome:'Coop Airolo',local:'Via Stazione, Airolo • após San Gottardo',icon:'🛒'},
+      {nome:'Migros Bellinzona',local:'Via Lugano 6 • na rota A2',icon:'🛒'},
+    ],
+    fastfood:[
+      {nome:"McDonald's Visp",local:'A9 — saída Visp',icon:'🍔'},
+      {nome:"Burger King Bellinzona",local:'Area Autoroute A2',icon:'🍔'},
+      {nome:"McDonald's Locarno",local:'Via della Posta, Locarno',icon:'🍔'},
+    ]
+  },
+  dia4:{
+    supermercados:[
+      {nome:'Carrefour Market Como',local:'Via Bellinzona 11, Como',icon:'🛒'},
+      {nome:'Esselunga Malpensa',local:'SS33 saída Somma Lombardo',icon:'🛒'},
+      {nome:'Migros Lugano',local:'Via Agostino Maspoli 15, Lugano',icon:'🛒'},
+      {nome:'Coop Locarno',local:'Via della Pace 1, Locarno',icon:'🛒'},
+    ],
+    fastfood:[
+      {nome:"McDonald's Como",local:'Viale Innocenzo XI, Como',icon:'🍔'},
+      {nome:"McDonald's Lugano",local:'Via Cantonale, Lugano',icon:'🍔'},
+      {nome:"Burger King Malpensa",local:'Area Autoroute A26',icon:'🍔'},
+    ]
+  },
+  dia5:{
+    supermercados:[
+      {nome:'Coop Lucerna (Estação)',local:'Bahnhofplatz 1, Lucerna',icon:'🛒'},
+      {nome:'Migros Alpnach',local:'Flüelistrasse, Alpnach',icon:'🛒'},
+      {nome:'Leclerc Colmar',local:'Route de Strasbourg, Colmar',icon:'🛒'},
+      {nome:'Aldi Luxembourg',local:'Route de Longwy, Gasperich',icon:'🛒'},
+    ],
+    fastfood:[
+      {nome:"McDonald's Lucerna",local:'Pilatusstrasse 16, Lucerna',icon:'🍔'},
+      {nome:"McDonald's Colmar",local:'Route de Strasbourg, Colmar',icon:'🍔'},
+      {nome:"Burger King Luxembourg",local:'Route d\'Esch, Luxembourg',icon:'🍔'},
+    ]
+  }
+};
+
 const GASTRONOMIA = {
   suica:{
     titulo:"🇨🇭 Suíça — Valais, Berna & Oberland Bernês",
@@ -1822,122 +2001,118 @@ function transpConnector(p, pNext){
   </div>`;
 }
 
+function buildGoogleMapsUrl(r){
+  const allP=[];(r.seccoes||[]).forEach(s=>s.paragens.forEach(p=>{if(p.maps)allP.push(p.maps);}));
+  if(allP.length<2) return null;
+  return 'https://www.google.com/maps/dir/'+allP.map(p=>encodeURIComponent(p)).join('/');
+}
+function buildTimelineHTML(seccoes){
+  const pars=[];(seccoes||[]).forEach(s=>s.paragens.forEach(p=>pars.push(p)));
+  if(!pars.length) return '';
+  return `<div class="timeline-bar">${pars.map((p,i)=>`<div class="tl-step"><div class="tl-dot">${i+1}</div><div class="tl-hora">${p.hora||''}</div><div class="tl-nome">${(p.local||'').split('—')[0].split('(')[0].trim().slice(0,18)}</div>${p.km_prev?`<div class="tl-km">📏${p.km_prev}km</div>`:''}</div>`).join('')}</div>`;
+}
+function getTicket(local){
+  const k=Object.keys(PARAGEM_TICKETS).find(k=>local&&local.toLowerCase().includes(k.toLowerCase().split('—')[0].trim().split('(')[0].trim()));
+  return k?PARAGEM_TICKETS[k]:null;
+}
+function buildCustosHTML(key){
+  const c=ROTEIRO_CUSTOS[key],r=ROTEIROS[key]; if(!c||!r) return '';
+  const lit=(r.km*0.07).toFixed(1),comb=(r.km*0.07*c.combustivel.preco).toFixed(0);
+  const tMin=parseInt(r.custoMin)+c.portagens_valor+parseInt(comb);
+  const tMax=parseInt(r.custoMax)+c.portagens_valor+parseInt(comb);
+  return `<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">💶 Custos estimados da rota</div></div><div class="card-body">
+    <div class="custos-rota-grid">
+      <div class="custo-card"><div class="cc-icon">⛽</div><div class="cc-val">€${comb}</div><div class="cc-label">${lit}L × €${c.combustivel.preco}/L</div><div class="cc-label">(7L/100km · ${r.km}km)</div></div>
+      <div class="custo-card"><div class="cc-icon">🛣️</div><div class="cc-val">€${c.portagens_valor}</div><div class="cc-label">Portagens estimadas</div></div>
+      <div class="custo-card"><div class="cc-icon">🎭</div><div class="cc-val">€${r.custoMin}–€${r.custoMax}</div><div class="cc-label">Actividades / Bilhetes</div></div>
+      <div class="custo-card" style="border-color:rgba(88,166,255,.3)"><div class="cc-icon">📊</div><div class="cc-val" style="color:var(--green)">€${tMin}–€${tMax}</div><div class="cc-label">Total estimado/pessoa</div></div>
+    </div>
+    <div style="font-size:.76rem;color:var(--text3);margin-top:.5rem">🛣️ ${c.portagens.detalhe}</div>
+  </div></div>`;
+}
+function buildServicosHTML(key){
+  const s=ROTEIRO_SERVICOS[key]; if(!s) return '';
+  return `<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🛒 Supermercados & Fast Food na rota</div></div><div class="card-body">
+    <div class="grid-2" style="gap:.75rem">
+      <div><div style="font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:.4rem">🛒 Supermercados</div>${s.supermercados.map(m=>`<div class="local-item"><span class="li-icon">${m.icon}</span><div class="li-info"><div style="font-weight:500">${m.nome}</div><div style="font-size:.75rem;color:var(--text3)">${m.local}</div></div></div>`).join('')}</div>
+      <div><div style="font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:.4rem">🍔 Fast Food</div>${s.fastfood.map(f=>`<div class="local-item"><span class="li-icon">${f.icon}</span><div class="li-info"><div style="font-weight:500">${f.nome}</div><div style="font-size:.75rem;color:var(--text3)">${f.local}</div></div></div>`).join('')}</div>
+    </div>
+  </div></div>`;
+}
+
 function renderRoteiroContent(){
-  const customKey = roteiroAtivo.startsWith('custom_');
+  const customKey=roteiroAtivo.startsWith('custom_');
   if(customKey){
-    const r = (appData.roteiros_custom||[]).find(d=>'custom_'+d.id===roteiroAtivo);
-    if(!r){ document.getElementById('roteiro-content').innerHTML='<div class="empty-state">Roteiro não encontrado</div>'; return; }
-    const extra = appData.paragens_extra[roteiroAtivo]||[];
-    let html=`<div class="roteiro-header">
-      <div style="font-size:1.15rem;font-weight:700">${r.titulo}</div>
-      <div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">${r.data||''}</div>
-      ${r.rota?`<div class="rota-text">📍 ${r.rota}</div>`:''}
-      <div class="roteiro-meta">
-        <span class="meta-badge">🌍 ${r.pais||''}</span>
-        ${r.custo?`<span class="meta-badge">💶 €${r.custo}/pessoa</span>`:''}
-      </div>
-    </div>`;
+    const r=(appData.roteiros_custom||[]).find(d=>'custom_'+d.id===roteiroAtivo);
+    if(!r){document.getElementById('roteiro-content').innerHTML='<div class="empty-state">Roteiro não encontrado</div>';return;}
+    const extra=appData.paragens_extra[roteiroAtivo]||[];
+    let html=`<div class="roteiro-header"><div style="font-size:1.15rem;font-weight:700">${r.titulo}</div><div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">${r.data||''}</div>${r.rota?`<div class="rota-text">📍 ${r.rota}</div>`:''}<div class="roteiro-meta"><span class="meta-badge">🌍 ${r.pais||''}</span>${r.custo?`<span class="meta-badge">💶 €${r.custo}/pessoa</span>`:''}</div></div>`;
     if(r.notas) html+=`<div class="alertas-box" style="margin-bottom:1rem"><p>${r.notas}</p></div>`;
     if(extra.length){
-      html+=`<div class="seccao"><div class="seccao-titulo"><span>Paragens</span><span class="periodo"> ▾</span></div><div class="seccao-content">`;
-      extra.forEach((p,i)=>{
-        html+=`<div class="paragem"><div class="p-hora">${p.hora||'—'}</div><div><div class="p-local">${p.nome}</div><div class="p-desc">${p.notas||''}</div>${p.address?`<a class="p-maps" href="https://www.google.com/maps/search/${encodeURIComponent(p.address)}" target="_blank">📍 Maps</a>`:''}</div><div></div></div>`;
-        if(i<extra.length-1) html+=transpConnector(p,extra[i+1]);
-      });
+      html+=`<div class="seccao"><div class="seccao-titulo"><span>Paragens</span></div><div class="seccao-content">`;
+      extra.forEach((p,i)=>{html+=`<div class="paragem"><div class="p-hora"><span style="font-weight:700;color:var(--accent);font-size:.8rem">#${(p.ordem||i+1)}</span><br>${p.hora||'—'}</div><div><div class="p-local">${p.nome}</div><div class="p-desc">${p.notas||''}</div>${p.address?`<a class="p-maps" href="https://www.google.com/maps/search/${encodeURIComponent(p.address)}" target="_blank">📍 Maps</a>`:''}</div><div></div></div>`;if(i<extra.length-1)html+=transpConnector(p,extra[i+1]);});
       html+=`</div></div>`;
-    } else {
-      html+=`<div class="empty-state" style="padding:2rem 0"><div>Sem paragens. Use "+ Paragem" para adicionar.</div></div>`;
-    }
-    document.getElementById('roteiro-content').innerHTML=html;
-    return;
+    } else html+=`<div class="empty-state" style="padding:2rem 0"><div>Sem paragens. Use "+ Paragem" para adicionar.</div></div>`;
+    document.getElementById('roteiro-content').innerHTML=html; return;
   }
 
-  const r = ROTEIROS[roteiroAtivo];
-  const extra = appData.paragens_extra[roteiroAtivo]||[];
-  let html=`
-    <div class="roteiro-header">
-      <div style="font-size:1.15rem;font-weight:700">${r.titulo}</div>
-      <div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">${r.subtitulo}</div>
-      <div class="rota-text">📍 ${r.rota}</div>
-      <div class="roteiro-meta">
-        <span class="meta-badge">🚗 ${r.km} km · ${r.conducao} condução</span>
-        <span class="meta-badge">🌍 ${r.pais}</span>
-        <span class="meta-badge">💶 €${r.custoMin}–€${r.custoMax}/pessoa</span>
-        <a href="https://www.google.com/maps/dir/${encodeURIComponent(r.rota.replace(/→/g,'to'))}" target="_blank" class="meta-badge" style="color:var(--accent);text-decoration:none;cursor:pointer">🗺️ Maps</a>
-      </div>
+  const r=ROTEIROS[roteiroAtivo]; if(!r){document.getElementById('roteiro-content').innerHTML='';return;}
+  const extra=appData.paragens_extra[roteiroAtivo]||[];
+  const mapsUrl=buildGoogleMapsUrl(r);
+  let stopNum=0;
+
+  let html=`<div class="roteiro-header">
+    <div style="font-size:1.15rem;font-weight:700">${r.titulo}</div>
+    <div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">${r.subtitulo}</div>
+    <div class="rota-text">📍 ${r.rota}</div>
+    <div class="roteiro-meta">
+      <span class="meta-badge">🚗 ${r.km} km · ${r.conducao}</span>
+      <span class="meta-badge">🌍 ${r.pais}</span>
+      ${mapsUrl?`<a href="${mapsUrl}" target="_blank" class="meta-badge" style="color:var(--accent);text-decoration:none">🗺️ Ver trajecto numerado no Maps</a>`:''}
     </div>
-  `;
+  </div>`;
+
+  html+=buildTimelineHTML(r.seccoes);
+
   r.seccoes.forEach(s=>{
-    html+=`<div class="seccao">
-      <div class="seccao-titulo" onclick="toggleSeccao(this)">
-        <span>${s.nome}</span>
-        <span class="periodo">${s.periodo} ▾</span>
-      </div>
-      <div class="seccao-content">`;
+    html+=`<div class="seccao"><div class="seccao-titulo" onclick="toggleSeccao(this)"><span>${s.nome}</span><span class="periodo">${s.periodo} ▾</span></div><div class="seccao-content">`;
     s.paragens.forEach((p,i)=>{
-      const pNext = s.paragens[i+1] || (extra.filter(e=>e.seccao===s.nome)[0]);
+      stopNum++;
+      const ticket=getTicket(p.local);
+      const ticketHTML=ticket
+        ?(ticket.required
+          ?`<div class="ticket-badge">🎫 ${ticket.custo}${ticket.online?` · <a href="${ticket.online}" target="_blank">${ticket.label||'Comprar online'}</a>`:ticket.label?` · ${ticket.label}`:''}</div>`
+          :`<div class="ticket-badge ticket-free">✅ Gratuito</div>`)
+        :(p.custo?`<div class="ticket-badge">💶 ${p.custo}</div>`:'');
+      const pNext=s.paragens[i+1];
       html+=`<div class="paragem">
-        <div class="p-hora">${p.hora}</div>
-        <div>
-          <div class="p-local">${p.local}</div>
-          <div class="p-desc">${p.desc}</div>
+        <div class="p-hora"><span style="display:block;font-weight:700;color:var(--accent);font-size:.85rem">#${stopNum}</span>${p.hora}${p.transp?`<br><span style="font-size:.9rem">${p.transp}</span>`:''}</div>
+        <div><div class="p-local">${p.local}</div>${p.km_prev?`<div style="font-size:.72rem;color:var(--text3);margin-bottom:.2rem">📏 ${p.km_prev} km da paragem anterior</div>`:''}
+          <div class="p-desc">${p.desc}</div>${ticketHTML}
           ${p.maps?`<a class="p-maps" href="https://www.google.com/maps/search/${encodeURIComponent(p.maps)}" target="_blank">📍 Google Maps</a>`:''}
-        </div>
-        <div class="p-custo">${p.custo||''}</div>
+        </div><div class="p-custo">${p.custo||''}</div>
       </div>`;
-      if(pNext) html+=transpConnector(p, pNext);
+      if(pNext) html+=transpConnector(p,pNext);
     });
-    extra.filter(e=>e.seccao===s.nome).forEach((p,i,arr)=>{
-      html+=`<div class="paragem" style="background:rgba(88,166,255,.04)">
-        <div class="p-hora">${p.hora||'—'}</div>
-        <div>
-          <div class="p-local">⭐ ${p.nome}</div>
-          <div class="p-desc">${p.notas||''}</div>
-          ${p.address?`<a class="p-maps" href="https://www.google.com/maps/search/${encodeURIComponent(p.address)}" target="_blank">📍 Maps</a>`:''}
-        </div>
-        <div></div>
-      </div>`;
+    const extraSec=extra.filter(e=>e.seccao===s.nome);
+    extraSec.forEach((p,i,arr)=>{
+      stopNum++;
+      html+=`<div class="paragem" style="background:rgba(88,166,255,.04)"><div class="p-hora"><span style="display:block;font-weight:700;color:var(--accent);font-size:.85rem">#${p.ordem||stopNum}</span>${p.hora||'—'}</div><div><div class="p-local">⭐ ${p.nome}</div><div class="p-desc">${p.notas||''}</div>${p.address?`<a class="p-maps" href="https://www.google.com/maps/search/${encodeURIComponent(p.address)}" target="_blank">📍 Maps</a>`:''}</div><div></div></div>`;
       if(i<arr.length-1) html+=transpConnector(p,arr[i+1]);
     });
     html+=`</div></div>`;
   });
 
-  // Meteorologia com botão de actualização
-  html+=`<div class="card" style="margin-top:1.25rem">
-    <div class="card-header">
-      <div class="card-title">🌡️ Previsão do tempo — ${r.date}</div>
-      <button class="weather-refresh" id="btn-weather-${roteiroAtivo}" onclick="actualizarMeteo('${roteiroAtivo}')">🔄 Actualizar</button>
-    </div>
-    <div class="card-body" id="weather-body-${roteiroAtivo}">
-      <div class="tempo-grid">
-        ${r.tempo.map(t=>`<div class="tempo-card">
-          <div class="tempo-local">${t.local}</div>
-          <div class="tempo-range">${t.min} → ${t.max}</div>
-          <div class="tempo-cond">${t.cond}</div>
-          <div class="tempo-equip">🧥 ${t.equip}</div>
-        </div>`).join('')}
-      </div>
-      <div id="weather-live-${roteiroAtivo}" style="margin-top:.75rem"></div>
-    </div>
-  </div>`;
+  html+=buildCustosHTML(roteiroAtivo);
+  html+=buildServicosHTML(roteiroAtivo);
 
-  html+=`<div class="card" style="margin-top:1rem">
-    <div class="card-header"><div class="card-title">🍽️ Sugestões de refeições</div></div>
-    <div class="card-body">
-      <div class="refeicoes-grid">
-        <div class="refeicao-card"><h5>🥗 Almoço</h5><p>${r.refeicoes.almoco}</p></div>
-        <div class="refeicao-card"><h5>🥂 Jantar</h5><p>${r.refeicoes.jantar}</p></div>
-      </div>
-    </div>
-  </div>`;
-
-  html+=`<div class="alertas-box">
-    <h4>⚠️ Confirmar antes da partida</h4>
-    <ul>${r.alertas.map(a=>`<li>${a}</li>`).join('')}</ul>
-  </div>`;
+  html+=`<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🌡️ Previsão — ${r.date}</div><button class="weather-refresh" id="btn-weather-${roteiroAtivo}" onclick="actualizarMeteo('${roteiroAtivo}')">🔄 Actualizar</button></div><div class="card-body" id="weather-body-${roteiroAtivo}"><div class="tempo-grid">${r.tempo.map(t=>`<div class="tempo-card"><div class="tempo-local">${t.local}</div><div class="tempo-range">${t.min} → ${t.max}</div><div class="tempo-cond">${t.cond}</div><div class="tempo-equip">🧥 ${t.equip}</div></div>`).join('')}</div><div id="weather-live-${roteiroAtivo}" style="margin-top:.75rem"></div></div></div>`;
+  html+=`<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🍽️ Sugestões de refeições</div></div><div class="card-body"><div class="refeicoes-grid"><div class="refeicao-card"><h5>🥗 Almoço</h5><p>${r.refeicoes.almoco}</p></div><div class="refeicao-card"><h5>🥂 Jantar</h5><p>${r.refeicoes.jantar}</p></div></div></div></div>`;
+  html+=`<div class="alertas-box"><h4>⚠️ Confirmar antes da partida</h4><ul>${r.alertas.map(a=>`<li>${a}</li>`).join('')}</ul></div>`;
 
   document.getElementById('roteiro-content').innerHTML=html;
 }
+
 
 function toggleSeccao(el){
   const content = el.nextElementSibling;
@@ -1964,23 +2139,56 @@ function renderReservas(){
     html+=`<div class="card" style="margin-bottom:1rem">
       <div class="card-header"><div class="card-title">${tipo} ${titulos[tipo]||'Outros'}</div></div>
       <div style="padding:0">
-        ${lista.map(r=>`<div class="reserva-item">
-          <div class="reserva-icon">${r.tipo}</div>
-          <div class="reserva-info">
-            <div class="reserva-nome">${r.desc}</div>
-            <div class="reserva-det">${r.data||''} ${r.hora||''} · ${r.fornecedor||''}</div>
-            ${r.ref?`<div class="reserva-ref">Ref: ${r.ref}</div>`:''}
-            ${r.notas?`<div style="font-size:.75rem;color:var(--text3);margin-top:.2rem">${r.notas}</div>`:''}
-          </div>
-          <div style="text-align:right">
-            <div class="reserva-valor">${r.valor?'€'+r.valor.toFixed(2):''}</div>
-            <button onclick="eliminarReserva('${r.id}')" class="btn-danger" style="font-size:.72rem;padding:.15rem .4rem;margin-top:.3rem">🗑</button>
-          </div>
-        </div>`).join('')}
+        ${lista.map(r=>{
+          const docs = getReservaDocs(r.id);
+          const docsHTML = `<div class="res-docs">
+            ${docs.map(d=>`<span class="res-doc-chip" onclick="abrirDoc('${r.id}','${d.name}')">📄 ${d.name}</span>`).join('')}
+            <label class="res-doc-upload">📎 Anexar PDF<input type="file" accept=".pdf,image/*" style="display:none" onchange="uploadReservaDoc('${r.id}',this)"></label>
+          </div>`;
+          return `<div class="reserva-item">
+            <div class="reserva-icon">${r.tipo}</div>
+            <div class="reserva-info">
+              <div class="reserva-nome">${r.desc}</div>
+              <div class="reserva-det">${r.data||''} ${r.hora||''} · ${r.fornecedor||''}</div>
+              ${r.ref?`<div class="reserva-ref">Ref: ${r.ref}</div>`:''}
+              ${r.notas?`<div style="font-size:.75rem;color:var(--text3);margin-top:.2rem">${r.notas}</div>`:''}
+              ${docsHTML}
+            </div>
+            <div style="text-align:right">
+              <div class="reserva-valor">${r.valor?'€'+r.valor.toFixed(2):''}</div>
+              <button onclick="eliminarReserva('${r.id}')" class="btn-danger" style="font-size:.72rem;padding:.15rem .4rem;margin-top:.3rem">🗑</button>
+            </div>
+          </div>`;
+        }).join('')}
       </div>
     </div>`;
   });
   document.getElementById('reservas-list').innerHTML=html||`<div class="empty-state"><div class="empty-icon">🎫</div><div>Sem reservas. Adicione a primeira!</div></div>`;
+}
+
+function getReservaDocs(rid){
+  try{ return JSON.parse(localStorage.getItem('res_docs_'+rid)||'[]'); }catch(e){return [];}
+}
+function uploadReservaDoc(rid,input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const docs=getReservaDocs(rid);
+    docs.push({name:file.name,data:e.target.result,type:file.type});
+    localStorage.setItem('res_docs_'+rid,JSON.stringify(docs));
+    renderReservas();
+  };
+  reader.readAsDataURL(file);
+}
+function abrirDoc(rid,name){
+  const docs=getReservaDocs(rid);
+  const doc=docs.find(d=>d.name===name); if(!doc) return;
+  const win=window.open();
+  if(doc.type==='application/pdf'){
+    win.document.write(`<iframe src="${doc.data}" style="width:100%;height:100vh;border:none"></iframe>`);
+  } else {
+    win.document.write(`<img src="${doc.data}" style="max-width:100%">`);
+  }
 }
 
 function renderOrcamento(){
@@ -2105,310 +2313,4 @@ function renderGastronomia(){
             ${reg.vinhos.map(v=>`<tr>
               <td style="font-weight:600">${v.nome}</td>
               <td style="color:var(--text2)">${v.estilo}</td>
-              <td style="color:var(--text3);font-style:italic">${v.aromas}</td>
-              <td style="color:var(--text2)">${v.harmonia}</td>
-              <td><span class="stars-gold">${'★'.repeat(v.stars||0)}</span></td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-        <div style="margin-top:1.25rem;font-size:.85rem;font-weight:600;color:var(--text2);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.05em">Gastronomia típica</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem">
-          ${reg.pratos.map(p=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem">
-            <div style="font-weight:600;margin-bottom:.3rem">${p.nome}</div>
-            <div style="font-size:.8rem;color:var(--text2);margin-bottom:.4rem;line-height:1.5">${p.desc}</div>
-            <div style="font-size:.75rem;color:var(--accent)">🍷 ${p.vinho}</div>
-            <div style="font-size:.72rem;color:var(--text3);margin-top:.2rem">📅 ${p.epoca}</div>
-          </div>`).join('')}
-        </div>
-      </div>
-    </div>`;
-  });
-  document.getElementById('gastronomia-content').innerHTML=html;
-}
-
-/* ═══════════════════════════════════════════════════
-   ACTIONS
-═══════════════════════════════════════════════════ */
-function showTab(id){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  const map = {'tab-painel':0,'tab-destinos':1,'tab-mapa':2,'tab-roteiro':3,'tab-reservas':4,'tab-orcamento':5,'tab-memorias':6,'tab-mochila':7,'tab-gastronomia':8,'tab-pesquisa':9,'tab-partilha':10};
-  const items = document.querySelectorAll('.nav-item');
-  if(items[map[id]]) items[map[id]].classList.add('active');
-}
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.addEventListener('click',e=>{ if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open'); });
-
-function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-
-function criarViagem(){
-  const nome = document.getElementById('nv-nome').value.trim();
-  if(!nome){ alert('Preencha o nome da viagem.'); return; }
-  const v = {
-    id:genId(), nome,
-    pais:document.getElementById('nv-pais').value,
-    cidades:document.getElementById('nv-cidades').value,
-    inicio:document.getElementById('nv-inicio').value,
-    fim:document.getElementById('nv-fim').value,
-    orcamento:parseFloat(document.getElementById('nv-orcamento').value)||0,
-    stars:parseInt(document.getElementById('nv-stars').value)||3,
-    estado:document.getElementById('nv-estado').value,
-    notas:document.getElementById('nv-notas').value
-  };
-  appData.viagens.push(v);
-  saveFirestoreData();
-  closeModal('modal-nova-viagem');
-  renderAll();
-}
-
-function guardarReserva(){
-  const desc = document.getElementById('nr-desc').value.trim();
-  if(!desc){ alert('Preencha a descrição.'); return; }
-  const r = {
-    id:genId(), tipo:document.getElementById('nr-tipo').value, desc,
-    data:document.getElementById('nr-data').value, hora:document.getElementById('nr-hora').value,
-    ref:document.getElementById('nr-ref').value, fornecedor:document.getElementById('nr-fornecedor').value,
-    valor:parseFloat(document.getElementById('nr-valor').value)||0,
-    notas:document.getElementById('nr-notas').value
-  };
-  appData.reservas.push(r);
-  saveFirestoreData();
-  closeModal('modal-nova-reserva');
-  renderReservas();
-}
-
-function eliminarReserva(id){
-  if(!confirm('Eliminar esta reserva?')) return;
-  appData.reservas = appData.reservas.filter(r=>r.id!==id);
-  saveFirestoreData(); renderReservas();
-}
-
-function guardarDespesa(){
-  const desc = document.getElementById('nd-desc').value.trim();
-  if(!desc){ alert('Preencha a descrição.'); return; }
-  const d = {
-    id:genId(), desc, cat:document.getElementById('nd-cat').value,
-    valor:parseFloat(document.getElementById('nd-valor').value)||0,
-    data:document.getElementById('nd-data').value
-  };
-  appData.despesas.push(d);
-  saveFirestoreData();
-  closeModal('modal-nova-despesa');
-  renderOrcamento();
-  renderPainel();
-}
-
-function eliminarDespesa(id){
-  appData.despesas = appData.despesas.filter(d=>d.id!==id);
-  saveFirestoreData(); renderOrcamento(); renderPainel();
-}
-
-function guardarDiario(){
-  const texto = document.getElementById('md-texto').value.trim();
-  if(!texto){ alert('Escreva algo no diário.'); return; }
-  appData.diario.push({
-    id:genId(), data:document.getElementById('md-data').value,
-    local:document.getElementById('md-local').value, texto
-  });
-  saveFirestoreData(); closeModal('modal-diario'); renderMemorias();
-}
-
-function eliminarDiario(id){
-  appData.diario = appData.diario.filter(d=>d.id!==id);
-  saveFirestoreData(); renderMemorias();
-}
-
-function handlePhotoUpload(e){
-  const files = Array.from(e.target.files);
-  files.forEach(file=>{
-    const reader = new FileReader();
-    reader.onload = ev=>{
-      appData.fotos.push({ id:genId(), nome:file.name, src:ev.target.result, data:new Date().toISOString() });
-      renderMemorias();
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function addParagem(){
-  const nome = document.getElementById('ap-nome').value.trim();
-  if(!nome){ alert('Preencha o nome do local.'); return; }
-  if(!appData.paragens_extra[roteiroAtivo]) appData.paragens_extra[roteiroAtivo]=[];
-  appData.paragens_extra[roteiroAtivo].push({
-    id:genId(), nome, hora:document.getElementById('ap-hora').value,
-    tipo:document.getElementById('ap-tipo').value, dur:document.getElementById('ap-dur').value,
-    address:document.getElementById('ap-address').value, notas:document.getElementById('ap-notas').value,
-    seccao:'Extra'
-  });
-  saveFirestoreData(); closeModal('modal-add-paragem'); renderRoteiroContent();
-}
-
-function pesquisar(){
-  const q = document.getElementById('pesquisa-input').value.trim();
-  if(!q) return;
-  const url = `https://www.google.com/search?q=${encodeURIComponent(q+' viagem')}`;
-  window.open(url,'_blank');
-}
-
-function pesquisarRapido(q){
-  document.getElementById('pesquisa-input').value=q;
-  pesquisar();
-}
-
-function exportRoteiro(){
-  window.print();
-}
-
-/* ─── MOCHILA ──────────────────────────────────── */
-function renderMochila(){
-  const el = document.getElementById('mochila-content');
-  if(!el) return;
-  const items = appData.mochila||[];
-  if(!items.length){ el.innerHTML='<div class="empty-state"><div class="empty-icon">🎒</div><div>Sem itens. Adicione com o botão acima.</div></div>'; return; }
-  const cats = [...new Set(items.map(i=>i.cat))];
-  const catIcons = {Documentos:'📄',Roupa:'👕',Calçado:'👟',Higiene:'🧴',Electrónica:'📱',Medicamentos:'💊',Acessórios:'🕶️',Outro:'📦'};
-  let html='';
-  // Stats bar
-  const total=items.length, done=items.filter(i=>i.packed).length, pct=total?Math.round(done/total*100):0;
-  html+=`<div class="card" style="margin-bottom:1.25rem">
-    <div class="card-body" style="padding:.85rem">
-      <div style="display:flex;justify-content:space-between;font-size:.82rem;color:var(--text2);margin-bottom:.4rem">
-        <span>${done} de ${total} itens preparados</span>
-        <span style="color:${pct===100?'var(--green)':'var(--accent)'};font-weight:600">${pct}%</span>
-      </div>
-      <div class="mochila-progress"><div class="mochila-progress-fill" style="width:${pct}%"></div></div>
-    </div>
-  </div>`;
-  cats.forEach(cat=>{
-    const catItems = items.filter(i=>i.cat===cat);
-    const catDone = catItems.filter(i=>i.packed).length;
-    html+=`<div class="card mochila-cat" style="margin-bottom:1rem">
-      <div class="card-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'" style="cursor:pointer">
-        <div class="card-title">${catIcons[cat]||'📦'} ${cat}</div>
-        <span style="font-size:.75rem;color:var(--text3)">${catDone}/${catItems.length}</span>
-      </div>
-      <div style="padding:0 1rem .5rem">
-        ${catItems.map(item=>`
-          <div class="mochila-item ${item.packed?'packed':''}">
-            <input type="checkbox" ${item.packed?'checked':''} onchange="toggleMochila('${item.id}',this.checked)">
-            <span class="mochila-nome">${item.nome}</span>
-            ${item.obs?`<span class="mochila-obs">${item.obs}</span>`:''}
-            <button class="mochila-del" onclick="eliminarMochila('${item.id}')">✕</button>
-          </div>`).join('')}
-      </div>
-    </div>`;
-  });
-  el.innerHTML=html;
-}
-
-function toggleMochila(id,v){ const i=(appData.mochila||[]).find(x=>x.id===id); if(i){i.packed=v;saveFirestoreData();renderMochila();renderChecklistPainel();} }
-function eliminarMochila(id){ appData.mochila=(appData.mochila||[]).filter(x=>x.id!==id); saveFirestoreData(); renderMochila(); }
-function guardarItemMochila(){
-  const nome=document.getElementById('am-nome').value.trim();
-  if(!nome){ alert('Preencha o nome do item.'); return; }
-  if(!appData.mochila) appData.mochila=[];
-  appData.mochila.push({id:genId(),nome,cat:document.getElementById('am-cat').value,obs:document.getElementById('am-obs').value,packed:false});
-  saveFirestoreData(); closeModal('modal-add-mochila'); renderMochila();
-  document.getElementById('am-nome').value=''; document.getElementById('am-obs').value='';
-}
-
-/* ─── PARTILHA ─────────────────────────────────── */
-function renderPartilha(){
-  const el = document.getElementById('partilha-lista');
-  if(!el) return;
-  const lista = appData.partilha||[];
-  if(!lista.length){ el.innerHTML='<div class="empty-state" style="padding:1.5rem 0"><div>Nenhum utilizador convidado.</div></div>'; return; }
-  el.innerHTML = lista.map(p=>`
-    <div class="partilha-item">
-      <div class="partilha-avatar">👤</div>
-      <div class="partilha-email">${p.email}</div>
-      <span class="partilha-role">${p.role==='edit'?'✏️ Edição':'👁 Leitura'}</span>
-      <button class="partilha-del" onclick="revogarPartilha('${p.id}')">✕</button>
-    </div>`).join('');
-}
-function guardarPartilha(){
-  const email=document.getElementById('pc-email').value.trim();
-  if(!email||!email.includes('@')){ alert('Email inválido.'); return; }
-  if(!appData.partilha) appData.partilha=[];
-  if(appData.partilha.find(p=>p.email===email)){ alert('Este utilizador já tem acesso.'); return; }
-  appData.partilha.push({id:genId(),email,role:document.getElementById('pc-role').value,addedAt:new Date().toISOString()});
-  saveFirestoreData(); closeModal('modal-partilha'); renderPartilha();
-  document.getElementById('pc-email').value='';
-}
-function revogarPartilha(id){ appData.partilha=(appData.partilha||[]).filter(p=>p.id!==id); saveFirestoreData(); renderPartilha(); }
-
-/* ─── NOVO DIA ROTEIRO ─────────────────────────── */
-function guardarNovoDia(){
-  const titulo=document.getElementById('nd2-titulo').value.trim();
-  const data=document.getElementById('nd2-data').value;
-  if(!titulo||!data){ alert('Preencha data e título.'); return; }
-  if(!appData.roteiros_custom) appData.roteiros_custom=[];
-  const id=genId();
-  appData.roteiros_custom.push({
-    id, titulo, data, rota:document.getElementById('nd2-rota').value,
-    pais:document.getElementById('nd2-pais').value,
-    custo:document.getElementById('nd2-custo').value,
-    notas:document.getElementById('nd2-notas').value
-  });
-  roteiroAtivo='custom_'+id;
-  saveFirestoreData(); closeModal('modal-novo-dia'); renderRoteiros();
-  ['nd2-titulo','nd2-data','nd2-rota','nd2-pais','nd2-custo','nd2-notas'].forEach(id2=>{ const el=document.getElementById(id2); if(el) el.value=''; });
-}
-function eliminarDiaCustom(id){
-  if(!confirm('Eliminar este dia do roteiro?')) return;
-  appData.roteiros_custom=(appData.roteiros_custom||[]).filter(d=>d.id!==id);
-  roteiroAtivo='dia2'; saveFirestoreData(); renderRoteiros();
-}
-
-/* ─── METEOROLOGIA REAL (Open-Meteo — sem API key) ─ */
-const METEO_COORDS = {
-  dia2:{lat:46.7603,lon:7.6227,nome:'Interlaken'},
-  dia3:{lat:46.0207,lon:7.7491,nome:'Zermatt'},
-  dia4:{lat:45.9993,lon:9.0203,nome:'Lago de Como'},
-  dia5:{lat:46.9793,lon:8.3649,nome:'Pilatus / Lucerna'}
-};
-async function actualizarMeteo(key){
-  const btn=document.getElementById('btn-weather-'+key);
-  const container=document.getElementById('weather-live-'+key);
-  if(!container) return;
-  const coords=METEO_COORDS[key];
-  if(!coords){ container.innerHTML='<div style="font-size:.8rem;color:var(--text3)">Coordenadas não disponíveis para este dia.</div>'; return; }
-  if(btn){ btn.classList.add('loading'); btn.textContent='⏳ A carregar...'; }
-  try{
-    const r=ROTEIROS[key];
-    const date=r?r.date:'';
-    const url=`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_sum&timezone=Europe%2FZurich&forecast_days=14`;
-    const resp=await fetch(url);
-    const data=await resp.json();
-    const dates=data.daily.time||[];
-    const idx=dates.indexOf(date);
-    if(idx===-1){ container.innerHTML=`<div style="font-size:.8rem;color:var(--text3)">Previsão não disponível para ${date}. Consulte <a href="https://meteoswiss.admin.ch" target="_blank" style="color:var(--accent)">MeteoSwiss</a>.</div>`; return; }
-    const tmax=data.daily.temperature_2m_max[idx];
-    const tmin=data.daily.temperature_2m_min[idx];
-    const wcode=data.daily.weathercode[idx];
-    const prec=data.daily.precipitation_sum[idx];
-    const wIcons={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌧️',53:'🌧️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌦️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
-    const icon=wIcons[wcode]||'🌡️';
-    container.innerHTML=`<div class="weather-live">
-      <div class="wl-icon">${icon}</div>
-      <div class="wl-info">
-        <div class="wl-temp">${tmin}°C → ${tmax}°C</div>
-        <div class="wl-desc">Precipitação: ${prec} mm</div>
-        <div class="wl-loc">📍 ${coords.nome} · ${date} · Fonte: Open-Meteo</div>
-      </div>
-    </div>`;
-  }catch(e){
-    container.innerHTML=`<div style="font-size:.8rem;color:var(--red)">Erro ao carregar previsão. Verifique a ligação.</div>`;
-  }finally{
-    if(btn){ btn.classList.remove('loading'); btn.textContent='🔄 Actualizar'; }
-  }
-}
-
-function toggleDark(){
-  document.body.classList.toggle('light-mode');
-}
-</script>
-</body>
-</html>
+              <td style="color:var(--text3)
