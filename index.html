@@ -1073,6 +1073,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 </div>
 
 <script>
+// Captura erros JS silenciosos e mostra no ecrã de login
+window.onerror = function(msg, src, line, col, err){
+  console.error('JS Error:', msg, 'Line:', line);
+  const sub = document.querySelector('.login-subtitle');
+  if(sub && document.getElementById('login-screen').style.display !== 'none'){
+    sub.innerHTML += '<br><small style="color:#f85149">Erro JS (linha '+line+'): '+msg+'</small>';
+  }
+  return false;
+};
 /* ═══════════════════════════════════════════════════
    FIREBASE CONFIG
 ═══════════════════════════════════════════════════ */
@@ -1117,13 +1126,8 @@ try {
 } catch(e){
   console.error('Firebase init error:', e.message);
   const sub = document.querySelector('.login-subtitle');
-  if(sub) sub.innerHTML += '<br><small style="color:#f85149">Erro: '+e.message+'</small>';
-  setTimeout(()=>{
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').classList.add('visible');
-    document.getElementById('user-name').textContent = 'Demo';
-    initDemo();
-  },500);
+  if(sub) sub.innerHTML += '<br><small style="color:#f85149">Erro Firebase: '+e.message+'<br>Tente actualizar a página (F5).</small>';
+  // NÃO redireciona para demo — mantém ecrã de login visível
 }
 
 function signInWithGoogle(){
@@ -1144,7 +1148,11 @@ async function loadFirestoreData(){
     if(!appData.roteiros_custom) appData.roteiros_custom=[];
     if(!appData.partilha) appData.partilha=[];
     renderAll();
-  } catch(e){ initDemo(); }
+  } catch(e){
+    console.error('Firestore load error:', e.message);
+    // Mesmo com erro, tenta renderizar com dados locais
+    try { initDefaultData(); renderAll(); } catch(e2){ console.error('renderAll failed:', e2.message); }
+  }
 }
 
 async function saveFirestoreData(){
@@ -2124,4 +2132,163 @@ function renderPagamentosPainel(){
   el.innerHTML=pendentes.map(r=>`<div style="display:flex;align-items:center;gap:.6rem;padding:.55rem 0;border-bottom:1px solid var(--border)">
     <span style="font-size:1rem">${r.tipo||'📄'}</span>
     <span style="flex:1;font-size:.84rem">${r.desc}</span>
-    <span style="font-size:.87rem;font-weight:600;color:var(--orange)">€${(r.v
+    <span style="font-size:.87rem;font-weight:600;color:var(--orange)">€${(r.valor||0).toFixed(2)}</span>
+  </div>`).join('');
+}
+
+/* ── MOCHILA ── */
+function renderMochila(){
+  const el=document.getElementById('mochila-content'); if(!el) return;
+  const items=appData.mochila||[];
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">🎒</div><div>Sem itens. Adicione com o botão acima.</div></div>';return;}
+  const cats=[...new Set(items.map(i=>i.cat))];
+  const catIcons={Documentos:'📄',Roupa:'👕',Calçado:'👟',Higiene:'🧴',Electrónica:'📱',Medicamentos:'💊',Outro:'📦'};
+  const total=items.length, done=items.filter(i=>i.packed).length, pct=total?Math.round(done/total*100):0;
+  let html=`<div class="card" style="margin-bottom:1rem"><div class="card-body" style="padding:.75rem">
+    <div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--text2);margin-bottom:.3rem"><span>${done} de ${total} preparados</span><span style="color:${pct===100?'var(--green)':'var(--accent)'};font-weight:600">${pct}%</span></div>
+    <div class="checklist-progress-bar"><div class="checklist-progress-fill" style="width:${pct}%"></div></div>
+  </div></div>`;
+  cats.forEach(cat=>{
+    const catItems=items.filter(i=>i.cat===cat), catDone=catItems.filter(i=>i.packed).length;
+    html+=`<div class="card" style="margin-bottom:1rem"><div class="card-header"><div class="card-title">${catIcons[cat]||'📦'} ${cat}</div><span style="font-size:.74rem;color:var(--text3)">${catDone}/${catItems.length}</span></div>
+      <div style="padding:0 1rem .5rem">${catItems.map(item=>`<div class="mochila-item${item.packed?' packed':''}">
+        <input type="checkbox" ${item.packed?'checked':''} onchange="toggleMochila('${item.id}',this.checked)" style="accent-color:var(--green);width:15px;height:15px;cursor:pointer;flex-shrink:0">
+        <span class="mochila-nome">${item.nome}</span>
+        ${item.obs?`<span class="mochila-obs">${item.obs}</span>`:''}
+        <button class="mochila-del" onclick="eliminarMochila('${item.id}')">✕</button>
+      </div>`).join('')}</div></div>`;
+  });
+  el.innerHTML=html;
+}
+function toggleMochila(id,v){const i=(appData.mochila||[]).find(x=>x.id===id);if(i){i.packed=v;saveFirestoreData();renderMochila();}}
+function eliminarMochila(id){appData.mochila=(appData.mochila||[]).filter(x=>x.id!==id);saveFirestoreData();renderMochila();}
+function guardarItemMochila(){
+  const nome=document.getElementById('am-nome').value.trim();if(!nome){alert('Preencha o nome.');return;}
+  if(!appData.mochila)appData.mochila=[];
+  appData.mochila.push({id:genId(),nome,cat:document.getElementById('am-cat').value,obs:document.getElementById('am-obs').value,packed:false});
+  saveFirestoreData();closeModal('modal-add-mochila');renderMochila();
+  document.getElementById('am-nome').value='';document.getElementById('am-obs').value='';
+}
+
+/* ── PARTILHA ── */
+function renderPartilha(){
+  const el=document.getElementById('partilha-lista');if(!el)return;
+  const lista=appData.partilha||[];
+  if(!lista.length){el.innerHTML='<div class="empty-state" style="padding:1.5rem 0">Nenhum utilizador convidado.</div>';return;}
+  el.innerHTML=lista.map(p=>`<div class="partilha-item">
+    <div style="width:30px;height:30px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center">👤</div>
+    <span class="partilha-email">${p.email}</span>
+    <span class="partilha-role">${p.role==='edit'?'✏️ Edição':'👁 Leitura'}</span>
+    <button onclick="revogarPartilha('${p.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer">✕</button>
+  </div>`).join('');
+}
+function guardarPartilha(){
+  const email=document.getElementById('pc-email').value.trim();
+  if(!email||!email.includes('@')){alert('Email inválido.');return;}
+  if(!appData.partilha)appData.partilha=[];
+  if(appData.partilha.find(p=>p.email===email)){alert('Já tem acesso.');return;}
+  appData.partilha.push({id:genId(),email,role:document.getElementById('pc-role').value});
+  saveFirestoreData();closeModal('modal-partilha');renderPartilha();
+  document.getElementById('pc-email').value='';
+}
+function revogarPartilha(id){appData.partilha=(appData.partilha||[]).filter(p=>p.id!==id);saveFirestoreData();renderPartilha();}
+
+/* ── NOVO DIA ROTEIRO ── */
+function guardarNovoDia(){
+  const titulo=document.getElementById('nd2-titulo').value.trim();
+  const data=document.getElementById('nd2-data').value;
+  if(!titulo||!data){alert('Preencha data e título.');return;}
+  if(!appData.roteiros_custom)appData.roteiros_custom=[];
+  const id=genId();
+  appData.roteiros_custom.push({id,titulo,data,rota:document.getElementById('nd2-rota').value,pais:document.getElementById('nd2-pais').value,custo:document.getElementById('nd2-custo').value,notas:document.getElementById('nd2-notas').value});
+  roteiroAtivo='custom_'+id;
+  saveFirestoreData();closeModal('modal-novo-dia');renderRoteiros();
+}
+function eliminarDiaCustom(id){
+  if(!confirm('Eliminar este dia?'))return;
+  appData.roteiros_custom=(appData.roteiros_custom||[]).filter(d=>d.id!==id);
+  roteiroAtivo='dia2';saveFirestoreData();renderRoteiros();
+}
+
+/* ── METEOROLOGIA REAL ── */
+const METEO_COORDS={dia2:{lat:46.76,lon:7.62,nome:'Interlaken'},dia3:{lat:46.02,lon:7.75,nome:'Zermatt'},dia4:{lat:45.99,lon:9.02,nome:'Lago de Como'},dia5:{lat:46.98,lon:8.36,nome:'Pilatus / Lucerna'}};
+async function actualizarMeteo(key){
+  const btn=document.getElementById('btn-weather-'+key);
+  const container=document.getElementById('weather-live-'+key);
+  if(!container)return;
+  const coords=METEO_COORDS[key];if(!coords){container.innerHTML='<div style="font-size:.8rem;color:var(--text3)">Coordenadas não disponíveis.</div>';return;}
+  if(btn){btn.classList.add('loading');btn.textContent='⏳ A carregar...';}
+  try{
+    const r=ROTEIROS[key];const date=r?r.date:'';
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+coords.lat+'&longitude='+coords.lon+'&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_sum&timezone=Europe%2FZurich&forecast_days=14';
+    const resp=await fetch(url);const data=await resp.json();
+    const idx=(data.daily.time||[]).indexOf(date);
+    if(idx===-1){container.innerHTML='<div style="font-size:.8rem;color:var(--text3)">Data fora do alcance da previsão. Consulte <a href="https://meteoswiss.admin.ch" target="_blank" style="color:var(--accent)">MeteoSwiss</a>.</div>';return;}
+    const tmax=data.daily.temperature_2m_max[idx],tmin=data.daily.temperature_2m_min[idx],prec=data.daily.precipitation_sum[idx];
+    const wc=data.daily.weathercode[idx];
+    const icons={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌧️',61:'🌧️',71:'🌨️',80:'🌦️',95:'⛈️'};
+    const icon=icons[wc]||'🌡️';
+    container.innerHTML='<div class="weather-live"><div class="wl-icon">'+icon+'</div><div class="wl-info"><div class="wl-temp">'+tmin+'°C → '+tmax+'°C</div><div class="wl-desc">Precipitação: '+prec+' mm</div><div class="wl-loc">📍 '+coords.nome+' · '+date+' · Open-Meteo</div></div></div>';
+  }catch(e){container.innerHTML='<div style="font-size:.8rem;color:var(--red)">Erro ao carregar previsão.</div>';}
+  finally{if(btn){btn.classList.remove('loading');btn.textContent='🔄 Actualizar';}}
+}
+
+/* ── RESERVAS COM PDF ── */
+function getReservaDocs(rid){try{return JSON.parse(localStorage.getItem('res_docs_'+rid)||'[]');}catch(e){return[];}}
+function uploadReservaDoc(rid,input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const docs=getReservaDocs(rid);
+    docs.push({name:file.name,data:e.target.result,type:file.type});
+    localStorage.setItem('res_docs_'+rid,JSON.stringify(docs));
+    renderReservas();
+  };
+  reader.readAsDataURL(file);
+}
+function abrirDoc(rid,name){
+  const doc=(getReservaDocs(rid)||[]).find(d=>d.name===name);if(!doc)return;
+  const win=window.open();
+  if(doc.type==='application/pdf'){win.document.write('<iframe src="'+doc.data+'" style="width:100%;height:100vh;border:none"></iframe>');}
+  else{win.document.write('<img src="'+doc.data+'" style="max-width:100%">');}
+}
+
+/* ── UPLOAD FOTOS COM DIA ── */
+function handlePhotoUpload(e){
+  const files=Array.from(e.target.files);if(!files.length)return;
+  const dias=Object.entries(ROTEIROS).map(([k,r])=>({k,label:r.date+' — '+r.titulo}));
+  (appData.roteiros_custom||[]).forEach(d=>dias.push({k:'custom_'+d.id,label:d.data+' — '+d.titulo}));
+  dias.push({k:'',label:'Sem data específica'});
+  const opts=dias.map(d=>'<option value="'+d.k+'">'+d.label+'</option>').join('');
+  window._pendingFotos=files;
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center';
+  const inner=document.createElement('div');
+  inner.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1.5rem;min-width:320px';
+  inner.innerHTML='<div style="font-weight:600;margin-bottom:1rem">📷 Associar '+files.length+' foto(s) a um dia</div>';
+  const sel=document.createElement('select');sel.id='foto-dia-sel';sel.className='form-select';sel.style.marginBottom='1rem';sel.innerHTML=opts;inner.appendChild(sel);
+  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:.75rem;justify-content:flex-end';
+  const btnCancel=document.createElement('button');btnCancel.className='btn-secondary';btnCancel.textContent='Cancelar';btnCancel.onclick=function(){this.closest('[style*=fixed]').remove();};
+  const btnOk=document.createElement('button');btnOk.className='btn-primary';btnOk.textContent='✓ Confirmar';btnOk.onclick=function(){confirmarFotoUpload(this);};
+  btns.appendChild(btnCancel);btns.appendChild(btnOk);inner.appendChild(btns);
+  overlay.appendChild(inner);
+  document.body.appendChild(overlay);
+}
+function confirmarFotoUpload(btn){
+  const overlay=btn.closest('[style*=fixed]');
+  const diaKey=document.getElementById('foto-dia-sel').value;
+  overlay.remove();
+  const diaDate=diaKey&&ROTEIROS[diaKey]?ROTEIROS[diaKey].date:diaKey&&diaKey.startsWith('custom_')?(appData.roteiros_custom||[]).find(d=>'custom_'+d.id===diaKey)?.data:null;
+  (window._pendingFotos||[]).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      appData.fotos.push({id:genId(),nome:file.name,src:ev.target.result,data:(diaDate?diaDate:'')+'T12:00:00',diaKey});
+      saveFirestoreData();renderMemorias();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+</script>
+</body>
+</html>
