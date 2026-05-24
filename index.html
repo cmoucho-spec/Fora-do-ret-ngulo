@@ -1172,9 +1172,29 @@ try {
 }
 
 function signInWithGoogle(){
-  if(!auth){ alert('Autenticação não iniciada. Actualize a página (F5) e tente novamente.'); return; }
+  if(!auth){
+    alert('Firebase não iniciado. Actualize a página (F5).');
+    return;
+  }
+  // Usar redirect em vez de popup (evita bloqueio de popups)
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(e=>{ alert('Erro ao entrar com Google: '+e.message); });
+  firebase.auth().signInWithRedirect(provider).catch(function(e){
+    alert('Erro ao iniciar sessão: ' + e.message);
+  });
+}
+
+// Verificar se voltou de um redirect de autenticação
+if(typeof firebase !== 'undefined'){
+  firebase.auth().getRedirectResult().then(function(result){
+    if(result && result.user){
+      // Autenticação por redirect bem-sucedida (já tratada pelo onAuthStateChanged)
+      console.log('Redirect auth OK:', result.user.email);
+    }
+  }).catch(function(e){
+    if(e.code !== 'auth/no-auth-event'){
+      console.error('Redirect result error:', e.message);
+    }
+  });
 }
 function signOut(){ if(auth) auth.signOut(); }
 
@@ -2535,4 +2555,48 @@ function uploadReservaDoc(rid,input){
   reader.readAsDataURL(file);
 }
 function abrirDoc(rid,name){
-  const doc=(getReservaDocs(rid)||[]).f
+  const doc=(getReservaDocs(rid)||[]).find(d=>d.name===name);if(!doc)return;
+  const win=window.open();
+  if(doc.type==='application/pdf'){win.document.write('<iframe src="'+doc.data+'" style="width:100%;height:100vh;border:none"></iframe>');}
+  else{win.document.write('<img src="'+doc.data+'" style="max-width:100%">');}
+}
+
+/* ── UPLOAD FOTOS COM DIA ── */
+function handlePhotoUpload(e){
+  const files=Array.from(e.target.files);if(!files.length)return;
+  const dias=Object.entries(ROTEIROS).map(([k,r])=>({k,label:r.date+' — '+r.titulo}));
+  (appData.roteiros_custom||[]).forEach(d=>dias.push({k:'custom_'+d.id,label:d.data+' — '+d.titulo}));
+  dias.push({k:'',label:'Sem data específica'});
+  const opts=dias.map(d=>'<option value="'+d.k+'">'+d.label+'</option>').join('');
+  window._pendingFotos=files;
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center';
+  const inner=document.createElement('div');
+  inner.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1.5rem;min-width:320px';
+  inner.innerHTML='<div style="font-weight:600;margin-bottom:1rem">📷 Associar '+files.length+' foto(s) a um dia</div>';
+  const sel=document.createElement('select');sel.id='foto-dia-sel';sel.className='form-select';sel.style.marginBottom='1rem';sel.innerHTML=opts;inner.appendChild(sel);
+  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:.75rem;justify-content:flex-end';
+  const btnCancel=document.createElement('button');btnCancel.className='btn-secondary';btnCancel.textContent='Cancelar';btnCancel.onclick=function(){this.closest('[style*=fixed]').remove();};
+  const btnOk=document.createElement('button');btnOk.className='btn-primary';btnOk.textContent='✓ Confirmar';btnOk.onclick=function(){confirmarFotoUpload(this);};
+  btns.appendChild(btnCancel);btns.appendChild(btnOk);inner.appendChild(btns);
+  overlay.appendChild(inner);
+  document.body.appendChild(overlay);
+}
+function confirmarFotoUpload(btn){
+  const overlay=btn.closest('[style*=fixed]');
+  const diaKey=document.getElementById('foto-dia-sel').value;
+  overlay.remove();
+  const diaDate=diaKey&&ROTEIROS[diaKey]?ROTEIROS[diaKey].date:diaKey&&diaKey.startsWith('custom_')?(appData.roteiros_custom||[]).find(d=>'custom_'+d.id===diaKey)?.data:null;
+  (window._pendingFotos||[]).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      appData.fotos.push({id:genId(),nome:file.name,src:ev.target.result,data:(diaDate?diaDate:'')+'T12:00:00',diaKey});
+      saveFirestoreData();renderMemorias();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+</script>
+</body>
+</html>
