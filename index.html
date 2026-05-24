@@ -645,7 +645,11 @@ try {
 function signInWithGoogle(){
   if(!auth){ alert('Firebase não iniciado. Actualize a página (F5).'); return; }
   const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithRedirect(provider).catch(function(e){ alert('Erro ao iniciar sessão: ' + e.message); });
+  firebase.auth().signInWithPopup(provider).catch(function(e){
+    if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user'){
+      firebase.auth().signInWithRedirect(provider).catch(function(e2){ alert('Erro: '+e2.message); });
+    } else { alert('Erro ao iniciar sessão: '+e.message); }
+  });
 }
 if(typeof firebase !== 'undefined'){
   firebase.auth().getRedirectResult().then(function(result){
