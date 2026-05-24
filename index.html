@@ -1213,7 +1213,8 @@ function renderRoteiroContent(){
   html+=buildCustosHTML(roteiroAtivo);
   html+=buildServicosHTML(roteiroAtivo);
   const wkey=roteiroAtivo;
-  html+='<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🌡️ Previsão — '+r.date+'</div><button class="weather-refresh" id="btn-weather-'+wkey+'" onclick="actualizarMeteo(''+wkey+''">🔄 Actualizar</button></div><div class="card-body" id="weather-body-'+wkey+'"><div class="tempo-grid">'+r.tempo.map(function(t){return'<div class="tempo-card"><div class="tempo-local">'+t.local+'</div><div class="tempo-range">'+t.min+' → '+t.max+'</div><div class="tempo-cond">'+t.cond+'</div><div class="tempo-equip">🧥 '+t.equip+'</div></div>';}).join('')+'</div><div id="weather-live-'+wkey+'" style="margin-top:.75rem"></div></div></div>';
+  html+='<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🌡️ Previsão — '+r.date+'</div><button class="weather-refresh" id="btn-weather-'+wkey+'" onclick="actualizarMeteo(''+wkey+'')">
+🔄 Actualizar</button></div><div class="card-body" id="weather-body-'+wkey+'"><div class="tempo-grid">'+r.tempo.map(function(t){return'<div class="tempo-card"><div class="tempo-local">'+t.local+'</div><div class="tempo-range">'+t.min+' → '+t.max+'</div><div class="tempo-cond">'+t.cond+'</div><div class="tempo-equip">🧥 '+t.equip+'</div></div>';}).join('')+'</div><div id="weather-live-'+wkey+'" style="margin-top:.75rem"></div></div></div>';
   html+='<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🍽️ Sugestões de refeições</div></div><div class="card-body"><div class="refeicoes-grid"><div class="refeicao-card"><h5>🥗 Almoço</h5><p>'+r.refeicoes.almoco+'</p></div><div class="refeicao-card"><h5>🥂 Jantar</h5><p>'+r.refeicoes.jantar+'</p></div></div></div></div>';
   html+='<div class="alertas-box"><h4>⚠️ Confirmar antes da partida</h4><ul>'+r.alertas.map(a=>'<li>'+a+'</li>').join('')+'</ul></div>';
   document.getElementById('roteiro-content').innerHTML=html;
@@ -1292,7 +1293,22 @@ function guardarDiario(){
 function eliminarDiario(id){appData.diario=appData.diario.filter(d=>d.id!==id);saveFirestoreData();renderMemorias();}
 function handlePhotoUpload(e){
   const files=Array.from(e.target.files);if(!files.length)return;
-  files.forEach(file=>{const reader=new FileReader();reader.onload=ev=>{appData.fotos.push({id:genId(),nome:file.name,src:ev.target.result,data:new Date().toISOString()});renderMemorias();};reader.readAsDataURL(file);});
+  const dias=Object.entries(ROTEIROS).map(([k,r])=>({k,label:r.date+' — '+r.titulo}));
+  (appData.roteiros_custom||[]).forEach(d=>dias.push({k:'custom_'+d.id,label:d.data+' — '+d.titulo}));
+  dias.push({k:'',label:'Sem data específica'});
+  const opts=dias.map(d=>'<option value="'+d.k+'">'+d.label+'</option>').join('');
+  window._pendingFotos=files;
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center';
+  const inner=document.createElement('div');
+  inner.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1.5rem;min-width:320px';
+  inner.innerHTML='<div style="font-weight:600;margin-bottom:1rem">📷 Associar '+files.length+' foto(s) a um dia</div>';
+  const sel=document.createElement('select');sel.id='foto-dia-sel';sel.className='form-select';sel.style.marginBottom='1rem';sel.innerHTML=opts;inner.appendChild(sel);
+  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:.75rem;justify-content:flex-end';
+  const btnCancel=document.createElement('button');btnCancel.className='btn-secondary';btnCancel.textContent='Cancelar';btnCancel.onclick=function(){this.closest('[style*=fixed]').remove();};
+  const btnOk=document.createElement('button');btnOk.className='btn-primary';btnOk.textContent='✓ Confirmar';btnOk.onclick=function(){confirmarFotoUpload(this);};
+  btns.appendChild(btnCancel);btns.appendChild(btnOk);inner.appendChild(btns);
+  overlay.appendChild(inner);document.body.appendChild(overlay);
 }
 function addParagem(){
   const nome=document.getElementById('ap-nome').value.trim();if(!nome){alert('Preencha o nome do local.');return;}
@@ -1426,6 +1442,21 @@ function abrirDoc(rid,name){
   const win=window.open();
   if(doc.type==='application/pdf'){win.document.write('<iframe src="'+doc.data+'" style="width:100%;height:100vh;border:none"></iframe>');}
   else{win.document.write('<img src="'+doc.data+'" style="max-width:100%">');}
+}
+
+function confirmarFotoUpload(btn){
+  const overlay=btn.closest('[style*=fixed]');
+  const diaKey=document.getElementById('foto-dia-sel').value;
+  overlay.remove();
+  const diaDate=diaKey&&ROTEIROS[diaKey]?ROTEIROS[diaKey].date:diaKey&&diaKey.startsWith('custom_')?(appData.roteiros_custom||[]).find(d=>'custom_'+d.id===diaKey)?.data:null;
+  (window._pendingFotos||[]).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      appData.fotos.push({id:genId(),nome:file.name,src:ev.target.result,data:(diaDate?diaDate:'')+'T12:00:00',diaKey});
+      saveFirestoreData();renderMemorias();
+    };
+    reader.readAsDataURL(file);
+  });
 }
 </script>
 </body>
