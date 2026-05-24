@@ -490,9 +490,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   .p-custo{display:none}
 }
 </style>
-  <!-- Leaflet.js -->
+  <!-- Leaflet.js (defer = não bloqueia o carregamento da página) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 </head>
 <body>
 
@@ -1172,8 +1172,9 @@ try {
 }
 
 function signInWithGoogle(){
+  if(!auth){ alert('Autenticação não iniciada. Actualize a página (F5) e tente novamente.'); return; }
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(e=>{ alert('Erro: '+e.message); });
+  auth.signInWithPopup(provider).catch(e=>{ alert('Erro ao entrar com Google: '+e.message); });
 }
 function signOut(){ if(auth) auth.signOut(); }
 
@@ -1603,6 +1604,7 @@ const PAISES_VISITADOS = ['Portugal','Spain','France','Germany','Netherlands','B
 const PAISES_A_VISITAR = ['Luxembourg','Switzerland','Italy'];
 
 function initWorldMap(){
+  if(typeof L === 'undefined'){ console.warn('Leaflet not loaded yet'); return; }
   if(_worldMap){ _worldMap.invalidateSize(); return; }
   const el = document.getElementById('world-map-leaflet');
   if(!el) return;
@@ -1664,7 +1666,7 @@ function initWorldMap(){
 }
 
 function initRoteiroMap(key){
-  // Destroy previous map
+  if(typeof L === 'undefined'){ console.warn('Leaflet not loaded yet'); return; }
   if(_roteiroMap){ _roteiroMap.remove(); _roteiroMap=null; }
   const container = document.getElementById('roteiro-map-container');
   if(!container) return;
@@ -2533,10 +2535,4 @@ function uploadReservaDoc(rid,input){
   reader.readAsDataURL(file);
 }
 function abrirDoc(rid,name){
-  const doc=(getReservaDocs(rid)||[]).find(d=>d.name===name);if(!doc)return;
-  const win=window.open();
-  if(doc.type==='application/pdf'){win.document.write('<iframe src="'+doc.data+'" style="width:100%;height:100vh;border:none"></iframe>');}
-  else{win.document.write('<img src="'+doc.data+'" style="max-width:100%">');}
-}
-
-/* ── UPLOAD FOTOS COM DIA ──
+  const doc=(getReservaDocs(rid)||[]).f
