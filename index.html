@@ -1703,34 +1703,63 @@ function initRoteiroMap(key){
 
 /* ── EDITAR VIAGEM ── */
 function openEditarViagem(){
+  // Preencher campos com dados actuais da viagem
+  const v = appData.viagens && appData.viagens[0];
+  const nomeEl = document.getElementById('ev-nome');
+  const inicioEl = document.getElementById('ev-inicio');
+  const fimEl = document.getElementById('ev-fim');
+  const paisesEl = document.getElementById('ev-paises');
+
+  if(nomeEl) nomeEl.value = v ? (v.nome||'Luxemburgo, Suíça & Itália') : 'Luxemburgo, Suíça & Itália';
+  if(inicioEl) inicioEl.value = v ? (v.inicio||'2026-05-26') : '2026-05-26';
+  if(fimEl) fimEl.value = v ? (v.fim||'2026-05-30') : '2026-05-30';
+  if(paisesEl) paisesEl.value = v ? (v.paises||'Luxemburgo, Suíça, Itália') : 'Luxemburgo, Suíça, Itália';
+
+  // Mostrar dias do roteiro (fixos + personalizados)
   const lista = document.getElementById('ev-dias-lista');
-  if(!lista) return;
-  // Mostrar dias custom existentes
-  const custom = appData.roteiros_custom||[];
-  if(!custom.length){
-    lista.innerHTML='<div style="font-size:.82rem;color:var(--text3);padding:.5rem 0">Sem dias personalizados. Clique em "+ Adicionar novo dia" para criar.</div>';
-  } else {
-    lista.innerHTML = custom.map(d=>`<div style="display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:.83rem;flex:1"><strong>${d.data}</strong> — ${d.titulo}</span>
-      <button onclick="eliminarDiaCustom('${d.id}')" class="btn-danger" style="font-size:.72rem;padding:.12rem .35rem">🗑</button>
-    </div>`).join('');
+  if(lista){
+    const custom = appData.roteiros_custom||[];
+    // Dias fixos do ROTEIROS
+    const diasFixos = Object.entries(ROTEIROS).map(([k,r])=>`
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.35rem 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.75rem;background:var(--bg3);border-radius:4px;padding:.1rem .4rem;color:var(--text3)">fixo</span>
+        <span style="font-size:.83rem;flex:1"><strong>${r.date}</strong> — ${r.titulo}</span>
+      </div>`).join('');
+    // Dias personalizados (editáveis/elimináveis)
+    const diasCustom = custom.length ? custom.map(d=>`
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.35rem 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.75rem;background:rgba(88,166,255,.15);border-radius:4px;padding:.1rem .4rem;color:var(--accent)">custom</span>
+        <span style="font-size:.83rem;flex:1"><strong>${d.data}</strong> — ${d.titulo}</span>
+        <button onclick="eliminarDiaCustom('${d.id}');openEditarViagem();" class="btn-danger" style="font-size:.72rem;padding:.12rem .35rem">🗑</button>
+      </div>`).join('') : '<div style="font-size:.8rem;color:var(--text3);padding:.35rem 0">Sem dias personalizados.</div>';
+
+    lista.innerHTML = diasFixos + diasCustom;
   }
+
   openModal('modal-editar-viagem');
 }
 
 function guardarEdicaoViagem(){
-  // Guardar nome e datas da viagem principal (guarda em appData.viagens[0])
-  const v = appData.viagens[0];
-  if(v){
-    v.nome = document.getElementById('ev-nome').value || v.nome;
-    v.inicio = document.getElementById('ev-inicio').value || v.inicio;
-    v.fim = document.getElementById('ev-fim').value || v.fim;
-    v.paises = document.getElementById('ev-paises').value || v.paises;
-    saveFirestoreData();
+  const nome = document.getElementById('ev-nome')?.value?.trim();
+  const inicio = document.getElementById('ev-inicio')?.value;
+  const fim = document.getElementById('ev-fim')?.value;
+  const paises = document.getElementById('ev-paises')?.value?.trim();
+
+  if(!appData.viagens) appData.viagens = [];
+  if(!appData.viagens.length){
+    // Criar viagem se não existir
+    appData.viagens.push({id:genId(), nome:'', inicio:'', fim:'', paises:'', destinos:[]});
   }
+  const v = appData.viagens[0];
+  if(nome) v.nome = nome;
+  if(inicio) v.inicio = inicio;
+  if(fim) v.fim = fim;
+  if(paises) v.paises = paises;
+
+  saveFirestoreData();
   closeModal('modal-editar-viagem');
   renderPainel();
-  renderRoteiros();
+  renderDestinos();
 }
 
 function renderAll(){
@@ -1837,13 +1866,20 @@ function renderDestinos(){
 }
 
 function renderRoteiros(){
-  // Selector
-  document.getElementById('roteiro-selector').innerHTML = Object.entries(ROTEIROS).map(([k,r])=>`
+  const custom = appData.roteiros_custom||[];
+  // Fixed days
+  const fixedBtns = Object.entries(ROTEIROS).map(([k,r])=>`
     <button class="roteiro-btn ${k===roteiroAtivo?'active':''}" onclick="setRoteiro('${k}')">
       <span class="dia">${r.date}</span>
       <span class="titulo">${r.titulo}</span>
-    </button>
-  `).join('');
+    </button>`).join('');
+  // Custom days
+  const customBtns = custom.map(d=>`
+    <button class="roteiro-btn ${('custom_'+d.id)===roteiroAtivo?'active':''}" onclick="setRoteiro('custom_${d.id}')">
+      <span class="dia">${d.data}</span>
+      <span class="titulo">★ ${d.titulo}</span>
+    </button>`).join('');
+  document.getElementById('roteiro-selector').innerHTML = fixedBtns + customBtns;
   renderRoteiroContent();
 }
 
@@ -2432,14 +2468,32 @@ function guardarNovoDia(){
   if(!titulo||!data){alert('Preencha data e título.');return;}
   if(!appData.roteiros_custom)appData.roteiros_custom=[];
   const id=genId();
-  appData.roteiros_custom.push({id,titulo,data,rota:document.getElementById('nd2-rota').value,pais:document.getElementById('nd2-pais').value,custo:document.getElementById('nd2-custo').value,notas:document.getElementById('nd2-notas').value});
+  appData.roteiros_custom.push({
+    id, titulo, data,
+    rota:document.getElementById('nd2-rota').value,
+    pais:document.getElementById('nd2-pais').value,
+    custo:document.getElementById('nd2-custo').value,
+    notas:document.getElementById('nd2-notas').value
+  });
   roteiroAtivo='custom_'+id;
-  saveFirestoreData();closeModal('modal-novo-dia');renderRoteiros();
+  saveFirestoreData();
+  closeModal('modal-novo-dia');
+  // Limpar campos
+  ['nd2-titulo','nd2-data','nd2-rota','nd2-pais','nd2-custo','nd2-notas'].forEach(fid=>{
+    const el=document.getElementById(fid); if(el) el.value='';
+  });
+  renderRoteiros();
+  showTab('tab-roteiro');
 }
 function eliminarDiaCustom(id){
-  if(!confirm('Eliminar este dia?'))return;
+  if(!confirm('Eliminar este dia do roteiro?')) return;
   appData.roteiros_custom=(appData.roteiros_custom||[]).filter(d=>d.id!==id);
-  roteiroAtivo='dia2';saveFirestoreData();renderRoteiros();
+  if(roteiroAtivo==='custom_'+id) roteiroAtivo='dia2';
+  saveFirestoreData();
+  renderRoteiros();
+  // Se modal editar viagem estiver aberto, actualizar a lista
+  const modal=document.getElementById('modal-editar-viagem');
+  if(modal && modal.classList.contains('open')) openEditarViagem();
 }
 
 /* ── METEOROLOGIA REAL ── */
@@ -2485,42 +2539,4 @@ function abrirDoc(rid,name){
   else{win.document.write('<img src="'+doc.data+'" style="max-width:100%">');}
 }
 
-/* ── UPLOAD FOTOS COM DIA ── */
-function handlePhotoUpload(e){
-  const files=Array.from(e.target.files);if(!files.length)return;
-  const dias=Object.entries(ROTEIROS).map(([k,r])=>({k,label:r.date+' — '+r.titulo}));
-  (appData.roteiros_custom||[]).forEach(d=>dias.push({k:'custom_'+d.id,label:d.data+' — '+d.titulo}));
-  dias.push({k:'',label:'Sem data específica'});
-  const opts=dias.map(d=>'<option value="'+d.k+'">'+d.label+'</option>').join('');
-  window._pendingFotos=files;
-  const overlay=document.createElement('div');
-  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center';
-  const inner=document.createElement('div');
-  inner.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1.5rem;min-width:320px';
-  inner.innerHTML='<div style="font-weight:600;margin-bottom:1rem">📷 Associar '+files.length+' foto(s) a um dia</div>';
-  const sel=document.createElement('select');sel.id='foto-dia-sel';sel.className='form-select';sel.style.marginBottom='1rem';sel.innerHTML=opts;inner.appendChild(sel);
-  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:.75rem;justify-content:flex-end';
-  const btnCancel=document.createElement('button');btnCancel.className='btn-secondary';btnCancel.textContent='Cancelar';btnCancel.onclick=function(){this.closest('[style*=fixed]').remove();};
-  const btnOk=document.createElement('button');btnOk.className='btn-primary';btnOk.textContent='✓ Confirmar';btnOk.onclick=function(){confirmarFotoUpload(this);};
-  btns.appendChild(btnCancel);btns.appendChild(btnOk);inner.appendChild(btns);
-  overlay.appendChild(inner);
-  document.body.appendChild(overlay);
-}
-function confirmarFotoUpload(btn){
-  const overlay=btn.closest('[style*=fixed]');
-  const diaKey=document.getElementById('foto-dia-sel').value;
-  overlay.remove();
-  const diaDate=diaKey&&ROTEIROS[diaKey]?ROTEIROS[diaKey].date:diaKey&&diaKey.startsWith('custom_')?(appData.roteiros_custom||[]).find(d=>'custom_'+d.id===diaKey)?.data:null;
-  (window._pendingFotos||[]).forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      appData.fotos.push({id:genId(),nome:file.name,src:ev.target.result,data:(diaDate?diaDate:'')+'T12:00:00',diaKey});
-      saveFirestoreData();renderMemorias();
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-</script>
-</body>
-</html>
+/* ── UPLOAD FOTOS COM DIA ──
