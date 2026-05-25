@@ -544,8 +544,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <!-- ── ROTEIROS ── -->
       <div id="tab-roteiro" class="tab">
         <div class="page-header">
-          <div class="page-title">🗺️ Roteiros Diários</div>
-          <div class="page-sub">Luxemburgo, Suíça & Itália · 26–30 Maio 2026 · 5 dias</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem">
+            <div>
+              <div class="page-title">🗺️ Roteiros Diários</div>
+              <div class="page-sub">Luxemburgo, Suíça & Itália · 26–30 Maio 2026 · 5 dias</div>
+            </div>
+            <div style="display:flex;gap:.5rem;flex-shrink:0">
+              <button class="btn-primary" onclick="openAddParagem()">+ Adicionar paragem</button>
+              <button class="btn-secondary" onclick="exportRoteiro()">⬇ PDF</button>
+            </div>
+          </div>
         </div>
 
         <!-- Selector de dia -->
@@ -553,12 +561,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
         <!-- Conteúdo roteiro -->
         <div id="roteiro-content"></div>
-
-        <!-- Botão adicionar paragem manual -->
-        <div style="margin-top:1rem;display:flex;gap:.75rem">
-          <button class="btn-primary" onclick="openAddParagem()">+ Adicionar paragem</button>
-          <button class="btn-secondary" onclick="exportRoteiro()">⬇ Exportar PDF</button>
-        </div>
       </div>
 
       <!-- ── RESERVAS ── -->
@@ -1386,7 +1388,7 @@ function renderRoteiroContent(){
         <span class="meta-badge">🚗 ${r.km} km · ${r.conducao} condução</span>
         <span class="meta-badge">🌍 ${r.pais}</span>
         <span class="meta-badge">💶 €${r.custoMin}–€${r.custoMax}/pessoa</span>
-        <a href="https://www.google.com/maps/dir/${encodeURIComponent(r.rota.replace(/→/g,'to'))}" target="_blank" class="meta-badge" style="color:var(--accent);text-decoration:none;cursor:pointer">🗺️ Abrir percurso no Maps</a>
+        <a href="https://www.google.com/maps/dir/${r.rota.split('→').map(s=>encodeURIComponent(s.trim())).join('/')}" target="_blank" class="meta-badge" style="color:var(--accent);text-decoration:none;cursor:pointer">🗺️ Abrir percurso no Maps</a>
       </div>
     </div>
   `;
