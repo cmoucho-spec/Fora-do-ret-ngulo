@@ -358,6 +358,95 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .countdown-texto{font-size:.88rem;color:var(--text2)}
 .countdown-viagem{font-weight:600;color:var(--text);margin:.25rem 0}
 
+
+
+/* ── LEAFLET MAPS ── */
+#world-map-leaflet{ height:480px;border-radius:var(--radius2);overflow:hidden;border:1px solid var(--border) }
+#roteiro-map-container{ height:360px;border-radius:var(--radius2);overflow:hidden;border:1px solid var(--border);margin-bottom:1rem }
+.leaflet-tile-pane{ filter:brightness(.85) saturate(.7) }
+.numbered-marker{
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:700;
+  border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.4);
+  color:#fff;
+}
+.num-start{background:#3fb950}
+.num-end{background:#f85149}
+.num-mid{background:#58a6ff}
+.num-custom{background:#d29922}
+.leaflet-popup-content-wrapper{background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.leaflet-popup-tip{background:var(--bg2)}
+.leaflet-popup-content{margin:.65rem .85rem;font-size:.82rem}
+.leaflet-popup-content strong{color:var(--accent)}
+.map-country-visited{fill:#3fb950;fill-opacity:.45;stroke:#3fb950;stroke-width:1}
+.map-country-tovisit{fill:#58a6ff;fill-opacity:.35;stroke:#58a6ff;stroke-width:1}
+
+/* ── TIMELINE ── */
+.timeline-bar{display:flex;align-items:flex-start;overflow-x:auto;padding:.5rem 0 1rem;margin-bottom:.5rem}
+.tl-step{flex:1;min-width:70px;display:flex;flex-direction:column;align-items:center;position:relative}
+.tl-step::before{content:'';position:absolute;top:13px;left:50%;right:-50%;height:2px;background:var(--border);z-index:0}
+.tl-step:last-child::before{display:none}
+.tl-dot{width:26px;height:26px;border-radius:50%;background:var(--bg3);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;z-index:1;color:var(--accent)}
+.tl-hora{font-size:.64rem;color:var(--text3);margin-top:.25rem;white-space:nowrap}
+.tl-nome{font-size:.66rem;color:var(--text2);text-align:center;max-width:70px;line-height:1.2}
+.tl-km{font-size:.62rem;color:var(--text3)}
+/* ── TICKETS ── */
+.ticket-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.73rem;padding:.18rem .5rem;border-radius:10px;margin-top:.3rem;background:rgba(210,153,34,.1);color:var(--orange);border:1px solid rgba(210,153,34,.25)}
+.ticket-badge a{color:var(--accent);font-size:.71rem;text-decoration:none}
+.ticket-badge a:hover{text-decoration:underline}
+.ticket-free{background:rgba(63,185,80,.1);color:var(--green);border-color:rgba(63,185,80,.25)}
+/* ── CUSTOS ROTA ── */
+.custos-rota-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.65rem;margin:.65rem 0}
+.custo-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:.65rem;text-align:center}
+.custo-card .cc-icon{font-size:1.2rem;margin-bottom:.25rem}
+.custo-card .cc-val{font-size:1.1rem;font-weight:700;color:var(--accent)}
+.custo-card .cc-label{font-size:.72rem;color:var(--text3);margin-top:.1rem}
+/* ── SERVICOS ── */
+.local-item{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.local-item:last-child{border-bottom:none}
+.local-item .li-icon{font-size:.95rem;flex-shrink:0}
+.local-item .li-info{flex:1}
+/* ── RESERVA DOCS ── */
+.res-docs{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.35rem}
+.res-doc-chip{display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.2);border-radius:10px;padding:.12rem .45rem;cursor:pointer;color:var(--accent)}
+.res-doc-upload{display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;background:var(--bg3);border:1px dashed var(--border);border-radius:10px;padding:.12rem .45rem;cursor:pointer;color:var(--text3);transition:all .2s}
+.res-doc-upload:hover{border-color:var(--accent);color:var(--accent)}
+/* ── NOTIF BANNER ── */
+#notif-banner{display:none;align-items:center;justify-content:center;gap:.6rem;padding:.5rem 1.5rem;background:rgba(88,166,255,.1);border-bottom:1px solid rgba(88,166,255,.2);font-size:.82rem;color:var(--text);flex-shrink:0;position:relative}
+#notif-banner.visible{display:flex}
+#notif-banner .notif-close{position:absolute;right:.75rem;background:none;border:none;color:var(--text3);cursor:pointer;font-size:1rem}
+/* ── CHECKLIST ── */
+.checklist-progress-bar{height:5px;background:var(--bg4);border-radius:3px;margin:.5rem 0 .75rem;overflow:hidden}
+.checklist-progress-fill{height:100%;background:var(--green);border-radius:3px;transition:width .3s}
+.checklist-item{display:flex;align-items:flex-start;gap:.5rem;padding:.45rem 0;border-bottom:1px solid var(--border)}
+.checklist-item:last-child{border-bottom:none}
+.checklist-item.done .checklist-label{text-decoration:line-through;color:var(--text3)}
+.checklist-label{flex:1;font-size:.84rem}
+.checklist-cat{font-size:.69rem;padding:.1rem .4rem;border-radius:10px;white-space:nowrap;background:rgba(88,166,255,.1);color:var(--accent);border:1px solid rgba(88,166,255,.2)}
+/* ── MOCHILA ── */
+.mochila-item{display:flex;align-items:center;gap:.5rem;padding:.4rem .85rem;border-bottom:1px solid var(--border)}
+.mochila-item:last-child{border-bottom:none}
+.mochila-item.packed .mochila-nome{text-decoration:line-through;color:var(--text3)}
+.mochila-nome{flex:1;font-size:.84rem}
+.mochila-obs{font-size:.73rem;color:var(--text3)}
+.mochila-del{background:none;border:none;color:var(--text3);cursor:pointer;opacity:.5}
+.mochila-del:hover{opacity:1;color:var(--red)}
+/* ── PARTILHA ── */
+.partilha-item{display:flex;align-items:center;gap:.65rem;padding:.55rem 0;border-bottom:1px solid var(--border)}
+.partilha-item:last-child{border-bottom:none}
+.partilha-email{flex:1;font-size:.84rem}
+.partilha-role{font-size:.71rem;padding:.12rem .4rem;border-radius:10px;background:rgba(88,166,255,.1);color:var(--accent);border:1px solid rgba(88,166,255,.2)}
+/* ── WEATHER REFRESH ── */
+.weather-refresh{display:flex;align-items:center;gap:.35rem;font-size:.77rem;padding:.28rem .65rem;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;color:var(--text2);transition:all .2s}
+.weather-refresh:hover{border-color:var(--accent);color:var(--accent)}
+.weather-refresh.loading{opacity:.5;pointer-events:none}
+.weather-live{display:flex;align-items:center;gap:.65rem;padding:.5rem .75rem;background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.15);border-radius:var(--radius);margin-bottom:.4rem;font-size:.83rem}
+.weather-live .wl-icon{font-size:1.4rem}
+.weather-live .wl-temp{font-weight:700;font-size:1rem;color:var(--accent)}
+.weather-live .wl-desc{font-size:.77rem;color:var(--text2)}
+.weather-live .wl-loc{font-size:.71rem;color:var(--text3)}
+
 /* ─── PESQUISA ───────────────────────────────────── */
 .search-result{
   background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
@@ -401,6 +490,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   .p-custo{display:none}
 }
 </style>
+  <!-- Leaflet.js (defer = não bloqueia o carregamento da página) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 </head>
 <body>
 
@@ -436,6 +528,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     </div>
   </header>
 
+  <!-- NOTIFICATION BANNER -->
+  <div id="notif-banner">
+    <span>🗓️</span>
+    <span id="notif-text"></span>
+    <button class="notif-close" onclick="document.getElementById('notif-banner').style.display='none'">✕</button>
+  </div>
+
   <div class="app-body">
     <!-- SIDEBAR -->
     <nav class="sidebar">
@@ -451,6 +550,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 
       <div class="nav-section">Memórias</div>
       <div class="nav-item" onclick="showTab('tab-memorias')"><span class="icon">📷</span> Fotos & Diário</div>
+      <div class="nav-item" onclick="showTab('tab-mochila')"><span class="icon">🎒</span> O que levar</div>
+      <div class="nav-item" onclick="showTab('tab-partilha')"><span class="icon">👥</span> Partilha</div>
       <div class="nav-item" onclick="showTab('tab-gastronomia')"><span class="icon">🍷</span> Gastronomia</div>
       <div class="nav-item" onclick="showTab('tab-pesquisa')"><span class="icon">🔍</span> Pesquisa</div>
     </nav>
@@ -478,6 +579,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
             <div class="card-body" id="orcamento-resumo-painel"></div>
           </div>
         </div>
+        <!-- Segunda linha: Checklist + Pagamentos -->
+        <div class="grid-2" style="margin-top:1rem">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">✅ Checklist pré-viagem</div>
+              <button class="btn-secondary" style="font-size:.74rem;padding:.22rem .55rem" onclick="showTab('tab-mochila')">Ver tudo</button>
+            </div>
+            <div class="card-body" id="checklist-painel"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">💳 Pagamentos pendentes</div></div>
+            <div class="card-body" id="pagamentos-painel"></div>
+          </div>
+        </div>
       </div>
 
       <!-- ── DESTINOS ── -->
@@ -497,64 +612,41 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <!-- ── MAPA ── -->
       <div id="tab-mapa" class="tab">
         <div class="page-header">
-          <div class="page-title">🌍 Mapa de viagens</div>
-          <div class="page-sub">Clique sobre um país para ver detalhes</div>
-        </div>
-        <div id="map-container">
-          <svg id="world-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
-            <!-- Fundo oceano -->
-            <rect width="1000" height="500" fill="#1a2332"/>
-            <!-- Continentes simplificados -->
-            <!-- América do Norte -->
-            <path d="M60,60 L80,50 L120,55 L160,70 L180,90 L200,110 L210,140 L220,170 L200,200 L180,220 L160,240 L140,230 L120,220 L100,210 L80,190 L70,170 L60,150 L55,120 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5" id="north-america"/>
-            <!-- América Central/México -->
-            <path d="M160,240 L180,220 L200,200 L220,210 L225,240 L210,260 L190,270 L170,265 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
-            <!-- América do Sul -->
-            <path d="M190,270 L210,260 L240,250 L270,255 L290,280 L300,320 L290,360 L270,390 L240,400 L210,380 L195,350 L185,310 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5" id="south-america"/>
-            <!-- Europa -->
-            <path d="M430,60 L460,55 L490,60 L510,75 L520,95 L510,115 L490,120 L470,125 L450,120 L430,110 L420,90 Z" fill="#21262d" stroke="#30363d" stroke-width="0.8" id="europe" class="map-country"/>
-            <!-- Portugal -->
-            <ellipse cx="428" cy="100" rx="8" ry="12" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="portugal" class="map-country" data-name="Portugal"/>
-            <!-- Suíça -->
-            <ellipse cx="472" cy="85" rx="7" ry="5" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="switzerland" class="map-country" data-name="Suíça"/>
-            <!-- Itália -->
-            <path d="M468,100 L480,98 L490,105 L488,120 L478,130 L468,125 L462,110 Z" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="italy" class="map-country" data-name="Itália"/>
-            <!-- Luxemburgo -->
-            <circle cx="457" cy="78" r="4" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="luxembourg" class="map-country" data-name="Luxemburgo"/>
-            <!-- França -->
-            <path d="M435,80 L455,75 L465,85 L460,100 L445,105 L433,98 Z" fill="#2d333b" stroke="#30363d" stroke-width="0.5" id="france" class="map-country" data-name="França"/>
-            <!-- África -->
-            <path d="M450,140 L480,135 L510,140 L530,165 L540,200 L535,240 L520,270 L495,290 L465,285 L445,265 L435,230 L430,195 L435,165 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
-            <!-- Ásia -->
-            <path d="M520,40 L600,35 L680,45 L740,60 L780,80 L800,110 L790,140 L760,155 L720,155 L680,145 L640,140 L600,135 L560,130 L530,115 L515,95 L515,65 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
-            <!-- Oceânia -->
-            <path d="M720,300 L760,290 L800,300 L820,330 L810,360 L780,370 L750,360 L730,340 Z" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
-          </svg>
-          <div style="padding:.75rem 1rem;border-top:1px solid var(--border)">
-            <div class="map-legend">
-              <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div> Visitado</div>
-              <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div> A visitar</div>
-              <div class="legend-item"><div class="legend-dot" style="background:#d29922"></div> Em destaque</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div class="page-title">🌍 Mapa de viagens</div>
+              <div class="page-sub">Fronteiras políticas · Países visitados e a visitar</div>
+            </div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <div class="map-legend" style="margin:0">
+                <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div> Visitado</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div> A visitar</div>
+              </div>
             </div>
           </div>
         </div>
+        <div id="world-map-leaflet"></div>
         <div id="map-pins" style="margin-top:1.25rem"></div>
       </div>
 
       <!-- ── ROTEIROS ── -->
       <div id="tab-roteiro" class="tab">
         <div class="page-header">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
             <div>
               <div class="page-title">🗺️ Roteiros Diários</div>
               <div class="page-sub">Luxemburgo, Suíça & Itália · 26–30 Maio 2026 · 5 dias</div>
             </div>
-            <div style="display:flex;gap:.5rem;flex-shrink:0">
-              <button class="btn-primary" onclick="openAddParagem()">+ Adicionar paragem</button>
-              <button class="btn-secondary" onclick="exportRoteiro()">⬇ PDF</button>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <button class="btn-secondary" onclick="openModal('modal-add-paragem')">+ Paragem</button>
+              <button class="btn-secondary" onclick="openModal('modal-novo-dia')">📅 + Novo dia</button>
+              <button class="btn-secondary" onclick="openEditarViagem()">✏️ Editar viagem</button>
             </div>
           </div>
         </div>
+
+        <!-- Mapa do itinerário do dia -->
+        <div id="roteiro-map-container"></div>
 
         <!-- Selector de dia -->
         <div class="roteiro-selector" id="roteiro-selector"></div>
@@ -636,6 +728,43 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
           <div class="section-title">🔖 Notas de pesquisa guardadas</div>
         </div>
         <div id="pesquisa-notas"></div>
+      </div>
+
+      <!-- ── MOCHILA ── -->
+      <div id="tab-mochila" class="tab">
+        <div class="page-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div class="page-title">🎒 O que levar</div><div class="page-sub">Lista de bagagem · Luxemburgo, Suíça & Itália 2026</div></div>
+            <button class="btn-new" onclick="openModal('modal-add-mochila')">+ Adicionar item</button>
+          </div>
+        </div>
+        <div id="mochila-content"></div>
+      </div>
+
+      <!-- ── PARTILHA ── -->
+      <div id="tab-partilha" class="tab">
+        <div class="page-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div class="page-title">👥 Partilha</div><div class="page-sub">Convidar utilizadores para aceder ao dashboard</div></div>
+            <button class="btn-new" onclick="openModal('modal-partilha')">+ Convidar</button>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">👤 Utilizadores com acesso</div></div>
+            <div class="card-body" id="partilha-lista"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">ℹ️ Como funciona</div></div>
+            <div class="card-body">
+              <p style="font-size:.85rem;color:var(--text2);line-height:1.7">
+                <strong style="color:var(--accent)">Leitura</strong> — pode ver tudo mas não pode editar.<br>
+                <strong style="color:var(--green)">Edição</strong> — pode adicionar reservas, despesas e paragens.<br>
+                O acesso pode ser revogado a qualquer momento.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
     </main>
@@ -849,22 +978,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       <div class="modal-title">🗺️ Adicionar paragem ao percurso</div>
       <button class="modal-close" onclick="closeModal('modal-add-paragem')">✕</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Secção do dia *</label>
-      <select class="form-select" id="ap-seccao">
-        <!-- preenchido dinamicamente -->
-      </select>
-    </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Nome do local *</label>
         <input class="form-input" id="ap-nome" placeholder="Ex: Cascata de Staubbach">
       </div>
       <div class="form-group">
+        <label class="form-label">Nº de ordem no roteiro</label>
+        <input class="form-input" type="number" id="ap-ordem" placeholder="Ex: 3 (posição no itinerário)">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
         <label class="form-label">Hora prevista</label>
         <input class="form-input" type="time" id="ap-hora">
       </div>
-    </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Tipo</label>
@@ -877,10 +1005,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
         <label class="form-label">Duração estimada</label>
         <input class="form-input" id="ap-dur" placeholder="Ex: 45 min">
       </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Custo estimado</label>
-      <input class="form-input" id="ap-custo" placeholder="Ex: €12 ou gratuito">
     </div>
     <div class="form-group">
       <label class="form-label">Endereço para Google Maps</label>
@@ -897,7 +1021,108 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
   </div>
 </div>
 
+<!-- Modal: Adicionar item mochila -->
+<div class="modal-overlay" id="modal-add-mochila">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🎒 Adicionar item</div><button class="modal-close" onclick="closeModal('modal-add-mochila')">✕</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Item *</label><input class="form-input" id="am-nome" placeholder="Ex: Casaco impermeável"></div>
+      <div class="form-group"><label class="form-label">Categoria</label>
+        <select class="form-select" id="am-cat">
+          <option>Documentos</option><option>Roupa</option><option>Calçado</option><option>Higiene</option><option>Electrónica</option><option>Medicamentos</option><option>Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="am-obs" placeholder="Ex: Para o frio dos Alpes"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-add-mochila')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarItemMochila()">✓ Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Novo dia roteiro -->
+<div class="modal-overlay" id="modal-novo-dia">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">📅 Novo dia de roteiro</div><button class="modal-close" onclick="closeModal('modal-novo-dia')">✕</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data *</label><input class="form-input" type="date" id="nd2-data"></div>
+      <div class="form-group"><label class="form-label">Título *</label><input class="form-input" id="nd2-titulo" placeholder="Ex: Dia em Lucerna"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Rota</label><input class="form-input" id="nd2-rota" placeholder="Ex: Lucerna → Pilatus → Rigi"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">País(es)</label><input class="form-input" id="nd2-pais" placeholder="Ex: Suíça"></div>
+      <div class="form-group"><label class="form-label">Custo estimado (€/p)</label><input class="form-input" type="number" id="nd2-custo" placeholder="Ex: 80"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notas</label><textarea class="form-textarea" id="nd2-notas" placeholder="Informações, dicas..."></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-novo-dia')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarNovoDia()">✓ Criar dia</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Convidar utilizador -->
+<div class="modal-overlay" id="modal-partilha">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">👥 Convidar utilizador</div><button class="modal-close" onclick="closeModal('modal-partilha')">✕</button></div>
+    <div class="form-group"><label class="form-label">Email Google *</label><input class="form-input" type="email" id="pc-email" placeholder="email@gmail.com"></div>
+    <div class="form-group"><label class="form-label">Nível de acesso</label>
+      <select class="form-select" id="pc-role"><option value="read">👁 Leitura</option><option value="edit">✏️ Edição</option></select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-partilha')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarPartilha()">✓ Convidar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar viagem -->
+<div class="modal-overlay" id="modal-editar-viagem">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar viagem</div>
+      <button class="modal-close" onclick="closeModal('modal-editar-viagem')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome da viagem</label>
+      <input class="form-input" id="ev-nome" value="Luxemburgo, Suíça & Itália">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data início</label>
+        <input class="form-input" type="date" id="ev-inicio" value="2026-05-26">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data fim</label>
+        <input class="form-input" type="date" id="ev-fim" value="2026-05-30">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Países</label>
+      <input class="form-input" id="ev-paises" value="Luxemburgo, Suíça, Itália">
+    </div>
+    <hr style="border-color:var(--border);margin:1rem 0">
+    <div style="font-size:.85rem;font-weight:600;color:var(--text2);margin-bottom:.75rem">📅 Dias do roteiro</div>
+    <div id="ev-dias-lista" style="margin-bottom:.75rem"></div>
+    <button class="btn-secondary" style="width:100%;margin-bottom:.5rem" onclick="closeModal('modal-editar-viagem');openModal('modal-novo-dia')">+ Adicionar novo dia ao roteiro</button>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-editar-viagem')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEdicaoViagem()">✓ Guardar alterações</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// Captura erros JS silenciosos e mostra no ecrã de login
+window.onerror = function(msg, src, line, col, err){
+  console.error('JS Error:', msg, 'Line:', line);
+  const sub = document.querySelector('.login-subtitle');
+  if(sub && document.getElementById('login-screen').style.display !== 'none'){
+    sub.innerHTML += '<br><small style="color:#f85149">Erro JS (linha '+line+'): '+msg+'</small>';
+  }
+  return false;
+};
 /* ═══════════════════════════════════════════════════
    FIREBASE CONFIG
 ═══════════════════════════════════════════════════ */
@@ -920,10 +1145,10 @@ let appData = {
   notas:[],
   paragens_extra:{}
 };
-let roteiroAtivo = 'dia1';
+let roteiroAtivo = 'dia2';
 
 try {
-  firebase.initializeApp(firebaseConfig);
+  if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
   auth = firebase.auth();
   auth.onAuthStateChanged(user=>{
@@ -940,27 +1165,36 @@ try {
     }
   });
 } catch(e){
-  console.warn('Firebase not configured, running in demo mode');
-  setTimeout(()=>{
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').classList.add('visible');
-    document.getElementById('user-name').textContent = 'Demo';
-    initDemo();
-  },500);
+  console.error('Firebase init error:', e.message);
+  const sub = document.querySelector('.login-subtitle');
+  if(sub) sub.innerHTML += '<br><small style="color:#f85149">Erro Firebase: '+e.message+'<br>Tente actualizar a página (F5).</small>';
+  // NÃO redireciona para demo — mantém ecrã de login visível
 }
 
-let _signingIn = false;
 function signInWithGoogle(){
-  if(_signingIn) return;
-  _signingIn = true;
+  if(!auth){
+    alert('Firebase não iniciado. Actualize a página (F5).');
+    return;
+  }
+  // Usar redirect em vez de popup (evita bloqueio de popups)
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .catch(e=>{
-      if(e.code !== 'auth/cancelled-popup-request' && e.code !== 'auth/popup-closed-by-user'){
-        alert('Erro: '+e.message);
-      }
-    })
-    .finally(()=>{ _signingIn = false; });
+  firebase.auth().signInWithRedirect(provider).catch(function(e){
+    alert('Erro ao iniciar sessão: ' + e.message);
+  });
+}
+
+// Verificar se voltou de um redirect de autenticação
+if(typeof firebase !== 'undefined'){
+  firebase.auth().getRedirectResult().then(function(result){
+    if(result && result.user){
+      // Autenticação por redirect bem-sucedida (já tratada pelo onAuthStateChanged)
+      console.log('Redirect auth OK:', result.user.email);
+    }
+  }).catch(function(e){
+    if(e.code !== 'auth/no-auth-event'){
+      console.error('Redirect result error:', e.message);
+    }
+  });
 }
 function signOut(){ if(auth) auth.signOut(); }
 
@@ -971,8 +1205,16 @@ async function loadFirestoreData(){
     if(snap.exists){ Object.assign(appData, snap.data()); }
     // Defaults se vazio
     if(!appData.viagens.length) initDefaultData();
+    if(!appData.checklist||!appData.checklist.length) initChecklistDefault();
+    if(!appData.mochila||!appData.mochila.length) initMochilaDefault();
+    if(!appData.roteiros_custom) appData.roteiros_custom=[];
+    if(!appData.partilha) appData.partilha=[];
     renderAll();
-  } catch(e){ initDemo(); }
+  } catch(e){
+    console.error('Firestore load error:', e.message);
+    // Mesmo com erro, tenta renderizar com dados locais
+    try { initDefaultData(); renderAll(); } catch(e2){ console.error('renderAll failed:', e2.message); }
+  }
 }
 
 async function saveFirestoreData(){
@@ -1020,46 +1262,16 @@ function initDefaultData(){
   appData.fotos = [];
   appData.notas = [];
   appData.paragens_extra = {};
+  appData.roteiros_custom = [];
+  appData.partilha = [];
+  initChecklistDefault();
+  initMochilaDefault();
 }
 
 /* ═══════════════════════════════════════════════════
    ROTEIROS DATA
 ═══════════════════════════════════════════════════ */
 const ROTEIROS = {
-  dia1:{
-    date:"2026-05-26", titulo:"Luxemburgo → Estrasburgo → Berna",
-    subtitulo:"Dia 1 · Terça-feira, 26 de Maio de 2026",
-    rota:"Luxemburgo (Gasperich) → Estrasburgo → Berna → Münchenbuchsee",
-    km:450, conducao:"4h30", pais:"Luxemburgo · França · Suíça",
-    custoMin:85, custoMax:147,
-    seccoes:[
-      { nome:"🇫🇷 Estrasburgo — Cidade Velha", periodo:"Manhã · 08h30 → 12h00 · Catedral Gótica & Petite France", paragens:[
-        {hora:"06h00",local:"Partida — Luxemburgo (Gasperich)",desc:"Partida de Rue Jean-Gaspard de Cicignon. Rota via A31/A4 — aprox. 2h15 até Estrasburgo. Estacionamento no Parking Kléber ou Gutenberg. Partida sugerida às 06h00–06h15 para chegar descansado.",custo:"€4–10",maps:"Gasperich+Luxembourg"},
-        {hora:"09h00",local:"Place Kléber",desc:"A maior praça de Estrasburgo — coração pulsante da cidade com a estátua do General Kléber ao centro. Foi aqui que a Marseillaise foi cantada pela primeira vez. Rodeada pela Aubette e pelo Opéra. Acesso pedonal a partir da Rue de la Mésange.",maps:"Place+Kleber+Strasbourg"},
-        {hora:"09h30",local:"Petite-France",desc:"O bairro mais fotogénico de Estrasburgo — casas alsacianas de enxaimel à beira dos canais do Ill. Antigas tanoarias e curtumes convertidos em lojas e restaurantes. Atravessar as Ponts Couverts para a melhor vista panorâmica. Chegar cedo para evitar multidões. Bom momento para uma tarte flambée de petisco.",maps:"Petite+France+Strasbourg"},
-        {hora:"10h15",local:"Catedral Notre-Dame de Estrasburgo",desc:"Uma das mais impressionantes catedrais góticas da Europa, em arenito rosado. Foi a construção mais alta do mundo durante 227 anos. Interior gratuito (entrada paga para o relógio astronómico). Horário: 08h30–11h15 / 12h45–17h45. Domingo só a partir das 14h00.",custo:"€0",maps:"Cathedrale+Notre-Dame+Strasbourg"},
-        {hora:"11h15",local:"L'Art du Vin Strasbourg",desc:"Enoteca de referência na Rue d'Austerlitz — especializada em vinhos alsacianos (Riesling, Gewurztraminer, Pinot Gris) e demais regiões francesas. Staff experiente disponível para orientar a escolha. ⚠️ Encerrado ao domingo. Aberto a partir das 09h00.",custo:"€0–25",maps:"Art+du+Vin+Strasbourg"}
-      ]},
-      { nome:"🇨🇭 Berna — Cidade Velha UNESCO", periodo:"Tarde · 14h00 → 17h30 · Fontes Históricas & Catedral", paragens:[
-        {hora:"14h00",local:"Chegada a Berna",desc:"De Estrasburgo a Berna: aprox. 2h15 de carro via A35/A5. ⚠️ Ao entrar na Suíça pela A5/A2 em Basel a vinheta de autoestrada suíça (40 CHF) é OBRIGATÓRIA. Estacionamento no Parkhaus Rathaus ou Parkhaus Kochergasse — ambos próximos da Cidade Velha.",custo:"€40+8–12",maps:"Parkhaus+Rathaus+Bern"},
-        {hora:"14h30",local:"Kindlifresserbrunnen",desc:"O 'Comedor de Crianças' — uma das fontes mais perturbadoras e icónicas da Europa. Ogre de 1545 a devorar uma criança enquanto segura um saco com mais. Localizado na Kornhausplatz. Excelente ponto de entrada na Cidade Velha.",custo:"€0",maps:"Kindlifresserbrunnen+Bern"},
-        {hora:"14h50",local:"Zytglogge — Torre do Relógio",desc:"O monumento mais antigo de Berna (séc. XIII). O relógio astronómico do séc. XV coloca em marcha figuras mecânicas a cada hora cheia: urso, galo e cavaleiro. Einstein viveu na Kramgasse 49, a poucos metros. Espectáculo dos autómatos: 4 minutos antes de cada hora cheia.",maps:"Zytglogge+Bern"},
-        {hora:"15h15",local:"Kramgasse + Zähringerbrunnen",desc:"O eixo medieval de Berna — a rua mais bela da cidade, ladeada por arcadas barrocas e bandeiras suíças. O Zähringerbrunnen (1535) representa um urso armado, símbolo do fundador Berchtold von Zähringen. Toda esta zona é Património UNESCO. As arcadas (Lauben) protegem da chuva.",maps:"Kramgasse+Bern"},
-        {hora:"15h45",local:"Mosesbrunnen + Catedral de Berna (Berner Münster)",desc:"A Fonte de Moisés (1544) está no adro da Catedral — representa Moisés com os raios de luz na cabeça. A Catedral é o maior templo gótico da Suíça. Subida à torre: 6 CHF, vista panorâmica sobre os telhados e os Alpes. Aberta 10h00–17h00 (dom. 11h30). 344 degraus.",custo:"€6",maps:"Berner+Münster+Bern"},
-        {hora:"16h30",local:"Gerechtigkeitsbrunnen — Fonte da Justiça",desc:"Lady Justice dourada com espada, balança e venda nos olhos, dominando quatro figuras (Papa, Imperador, Sultão e Magistrado) aos seus pés. Uma das mais elaboradas das 11 fontes da Cidade Velha. Fica na Gerechtigkeitsgasse — rua com belas fachadas e galerias de arte.",custo:"€0",maps:"Gerechtigkeitsbrunnen+Bern"},
-        {hora:"17h00",local:"Moosgasse 39 — Münchenbuchsee (Chegada)",desc:"Chegada ao alojamento em Münchenbuchsee, a cerca de 10 km a norte do centro de Berna. ⚠️ Confirmar horário de check-in antes da partida de Luxemburgo.",maps:"Moosgasse+39+Münchenbuchsee"}
-      ]}
-    ],
-    refeicoes:{almoco:"Winstub S'Kaechele (Rue des Frères) — menu do dia ~€16/p | Caveau Gurtlerhoft (perto da Catedral) — tarte flambée ~€22/p | Marché Broglie (mercado coberto) — queijos + charcutaria ~€10-15/p",jantar:"Kornhauskeller (Kornhausplatz 18) — sala abobadada séc. XVIII, menu suíço ~€38/p | Altes Tramdepot (Parque dos Ursos) — cervejaria artesanal, vista sobre o Aar ~€35/p | Coop Restaurant (Estação Berna) — económico ~€17/p"},
-    alertas:["⚠️ Partida às 06h00–06h15 de Luxemburgo para chegar descansado a Estrasburgo","L'Art du Vin Strasbourg — encerrado ao domingo; verificar o dia da semana antes de partir","⚠️ Vinheta suíça (40 CHF / ~€40) — obrigatória ao entrar na Suíça pela A5 em Basel; disponível em e-vignette.ch","Almoço em Estrasburgo ao sábado — winstubs lotadas; chegar antes das 12h30 ou reservar","⚠️ Moosgasse 39 (Münchenbuchsee) — confirmar natureza e horário do estabelecimento antes da partida","Catedral de Berna — subida à torre: 344 degraus, 6 CHF/adulto; aberta até às 17h00"],
-    tempo:[
-      {local:"Luxemburgo/Gasperich (06h00)",min:"~13°C",max:"~24°C",cond:"Ameno, nuvens com sol",equip:"Roupa leve; casaco para manhã cedo"},
-      {local:"Estrasburgo (08h30–12h00)",min:"~14°C",max:"~26°C",cond:"Excelente — dia quente e ensolarado",equip:"Roupa leve; protetor solar; óculos de sol"},
-      {local:"Estrasburgo → Berna (12h–14h)",min:"~12°C",max:"~22°C",cond:"Sol com nuvens na subida para a Suíça",equip:"Camada intermédia para Berna"},
-      {local:"Berna — tarde (14h00–18h00)",min:"~10°C",max:"~19°C",cond:"Sol com nuvens, fresco à tarde",equip:"Casaco leve para a tarde"},
-      {local:"Berna — noite (18h+)",min:"~10°C",max:"~14°C",cond:"Arrefece ao entardecer — típico em Berna",equip:"Casaco para passeio e jantar"}
-    ]
-  },
   dia2:{
     date:"2026-05-27", titulo:"Oberland Bernês Completo",
     subtitulo:"Dia 2 · Terça-feira, 27 de Maio de 2026",
@@ -1210,6 +1422,49 @@ const ROTEIROS = {
   }
 };
 
+/* ═══════════ DADOS EXTRAS DE ROTA ═══════════ */
+const ROTEIRO_CUSTOS = {
+  dia2:{portagens:{custo:0,detalhe:"Vinheta suíça (CHF 40/€43) cobre toda a A-road. Sem portagens adicionais."},combustivel:{preco:1.73},portagens_valor:43},
+  dia3:{portagens:{custo:8,detalhe:"A2 CH→IT (Bellinzona): ~€8. Suíça coberta pela vinheta."},combustivel:{preco:1.70},portagens_valor:8},
+  dia4:{portagens:{custo:18,detalhe:"A26 Castelletto→Como ~€4; A9 Como→Lugano ~€6; A2 Lugano→Locarno ~€4. Total ~€18."},combustivel:{preco:1.68},portagens_valor:18},
+  dia5:{portagens:{custo:0,detalhe:"Suíça: vinheta. A35 Alsácia: gratuita. N3 Luxemburgo: gratuita. Portagens ~€0."},combustivel:{preco:1.62},portagens_valor:0}
+};
+const PARAGEM_TICKETS = {
+  "Castelo de Thun":{required:true,custo:"€12",online:"https://www.schlossthun.ch"},
+  "Trümmelbach Falls":{required:true,custo:"€22",online:"https://www.truemmelbachfaelle.ch"},
+  "Mürren Viewpoint":{required:true,custo:"€31",online:"https://www.schilthornbahn.ch"},
+  "Lago Bachalpsee":{required:true,custo:"€53",online:"https://www.jungfrau.ch"},
+  "Interlaken — Harder Kulm":{required:true,custo:"€37",online:"https://www.hardergipfel.ch"},
+  "Lago Oeschinen":{required:true,custo:"€28",online:"https://www.oeschinensee.ch"},
+  "Staubbachfall":{required:false,custo:"€0"},
+  "Täsch — Estacionamento":{required:true,custo:"€13/dia",label:"Pagar in-situ"},
+  "Gornergrat":{required:true,custo:"€50",online:"https://www.gornergrat.ch"},
+  "Matterhorn Glacier Paradise":{required:true,custo:"€109",online:"https://www.matterhornparadise.ch"},
+  "Funicolare Como-Brunate":{required:true,custo:"€6",online:"https://www.funicolarecomo.it"},
+  "Villa del Balbianello":{required:true,custo:"€20",online:"https://www.fondoambiente.it",label:"⚠️ Reserva obrigatória"},
+  "Orrido di Bellano":{required:true,custo:"€8",online:"https://www.orrido.it"},
+  "Alpnachstad — Cremalheira":{required:true,custo:"€78",online:"https://www.pilatus.ch",label:"⚠️ Reservar antecipadamente"},
+  "Monte Rigi":{required:true,custo:"€41",online:"https://www.rigi.ch"}
+};
+const ROTEIRO_SERVICOS = {
+  dia2:{
+    supermercados:[{nome:"Migros Thun Bälliz",local:"Bälliz 54, Thun",icon:"🛒"},{nome:"Coop Interlaken",local:"Rosenstrasse 3, Interlaken",icon:"🛒"},{nome:"Denner Lauterbrunnen",local:"Centro Lauterbrunnen",icon:"🛒"}],
+    fastfood:[{nome:"McDonald's Thun",local:"Bälliz, Thun",icon:"🍔"},{nome:"Starbucks Interlaken",local:"Höheweg 8, Interlaken",icon:"☕"}]
+  },
+  dia3:{
+    supermercados:[{nome:"Migros Visp",local:"Kantonsstrasse 2, Visp",icon:"🛒"},{nome:"Coop Zermatt",local:"Bahnhofplatz, Zermatt",icon:"🛒"},{nome:"Coop Airolo",local:"Via Stazione, Airolo",icon:"🛒"}],
+    fastfood:[{nome:"McDonald's Visp",local:"A9 — saída Visp",icon:"🍔"},{nome:"Burger King Bellinzona",local:"Area A2",icon:"🍔"}]
+  },
+  dia4:{
+    supermercados:[{nome:"Carrefour Como",local:"Via Bellinzona 11, Como",icon:"🛒"},{nome:"Migros Lugano",local:"Via Maspoli 15, Lugano",icon:"🛒"},{nome:"Coop Locarno",local:"Via della Pace 1, Locarno",icon:"🛒"}],
+    fastfood:[{nome:"McDonald's Como",local:"Viale Innocenzo XI, Como",icon:"🍔"},{nome:"McDonald's Lugano",local:"Via Cantonale, Lugano",icon:"🍔"}]
+  },
+  dia5:{
+    supermercados:[{nome:"Coop Lucerna (Estação)",local:"Bahnhofplatz 1, Lucerna",icon:"🛒"},{nome:"Leclerc Colmar",local:"Route de Strasbourg, Colmar",icon:"🛒"},{nome:"Aldi Luxembourg",local:"Route de Longwy, Gasperich",icon:"🛒"}],
+    fastfood:[{nome:"McDonald's Lucerna",local:"Pilatusstrasse 16, Lucerna",icon:"🍔"},{nome:"McDonald's Colmar",local:"Route de Strasbourg, Colmar",icon:"🍔"}]
+  }
+};
+
 const GASTRONOMIA = {
   suica:{
     titulo:"🇨🇭 Suíça — Valais, Berna & Oberland Bernês",
@@ -1263,6 +1518,272 @@ const GASTRONOMIA = {
 /* ═══════════════════════════════════════════════════
    RENDER FUNCTIONS
 ═══════════════════════════════════════════════════ */
+function initChecklistDefault(){
+  appData.checklist = [
+    {id:'c1',label:'Verificar validade do passaporte (min. 6 meses)',cat:'doc',done:false},
+    {id:'c2',label:'Carta de condução internacional',cat:'doc',done:false},
+    {id:'c3',label:'Cartão europeu de saúde (CESD)',cat:'doc',done:false},
+    {id:'c4',label:'Confirmar check-in online TAP TP531',cat:'res',done:false},
+    {id:'c5',label:'Imprimir/guardar voucher Hertz',cat:'res',done:false},
+    {id:'c6',label:'Descarregar mapas offline (Google Maps)',cat:'res',done:false},
+    {id:'c7',label:'Seguro de viagem activo',cat:'doc',done:false},
+    {id:'c8',label:'Adaptadores de tomada (tipo J — Suíça)',cat:'bag',done:false},
+    {id:'c9',label:'Roupa para frio (0°C — Alpes)',cat:'bag',done:false},
+    {id:'c10',label:'Impermeável e calçado impermeável',cat:'bag',done:false},
+    {id:'c11',label:'Câmara fotográfica carregada',cat:'bag',done:false},
+    {id:'c12',label:'Levantar/confirmar euros em dinheiro',cat:'fin',done:false},
+    {id:'c13',label:'Confirmar francos suíços (CHF)',cat:'fin',done:false},
+    {id:'c14',label:'Informar banco sobre viagem ao estrangeiro',cat:'fin',done:false},
+    {id:'c15',label:'Reservas de restaurante confirmadas',cat:'res',done:false},
+    {id:'c16',label:'Power bank carregado',cat:'bag',done:false},
+  ];
+}
+
+function initMochilaDefault(){
+  appData.mochila = [
+    {id:'m1',nome:'Passaporte válido (min. 6 meses)',cat:'Documentos',obs:'Verificar prazo de validade',packed:false},
+    {id:'m2',nome:'Carta de condução internacional',cat:'Documentos',obs:'',packed:false},
+    {id:'m3',nome:'Cartão europeu de saúde (CESD)',cat:'Documentos',obs:'',packed:false},
+    {id:'m4',nome:'Seguro de viagem (impresso/digital)',cat:'Documentos',obs:'',packed:false},
+    {id:'m5',nome:'Voucher Hertz Geneva Airport',cat:'Documentos',obs:'Ref: HERTZ2026',packed:false},
+    {id:'m6',nome:'Reservas de hotel impressas',cat:'Documentos',obs:'',packed:false},
+    {id:'m7',nome:'Casaco de inverno / down jacket',cat:'Roupa',obs:'Para Alpes 0°C (Bachalpsee, Mürren)',packed:false},
+    {id:'m8',nome:'Casaco impermeável',cat:'Roupa',obs:'Cataratas Trümmelbach, Staubbachfall',packed:false},
+    {id:'m9',nome:'Camisolas térmicas (x3)',cat:'Roupa',obs:'',packed:false},
+    {id:'m10',nome:'Calças compridas (x2)',cat:'Roupa',obs:'',packed:false},
+    {id:'m11',nome:'T-shirts (x3)',cat:'Roupa',obs:'',packed:false},
+    {id:'m12',nome:'Roupa interior (x5)',cat:'Roupa',obs:'',packed:false},
+    {id:'m13',nome:'Meias quentes (x4 pares)',cat:'Roupa',obs:'',packed:false},
+    {id:'m14',nome:'Gorro e luvas',cat:'Roupa',obs:'Para cumes acima de 1500m',packed:false},
+    {id:'m15',nome:'Botas de caminhada impermeáveis',cat:'Calçado',obs:'Obrigatório para Trümmelbach',packed:false},
+    {id:'m16',nome:'Sapatos para cidade',cat:'Calçado',obs:'Berna, Lucerna, Como',packed:false},
+    {id:'m17',nome:'Adaptador tipo J (Suíça)',cat:'Electrónica',obs:'Diferentes das tomadas PT',packed:false},
+    {id:'m18',nome:'Power bank (≥10.000mAh)',cat:'Electrónica',obs:'',packed:false},
+    {id:'m19',nome:'Câmara fotográfica + cartão SD',cat:'Electrónica',obs:'',packed:false},
+    {id:'m20',nome:'Carregador telemóvel',cat:'Electrónica',obs:'',packed:false},
+    {id:'m21',nome:'Medicamentos habituais',cat:'Medicamentos',obs:'',packed:false},
+    {id:'m22',nome:'Protector solar FPS 30+',cat:'Higiene',obs:'Reflexo neve nos Alpes',packed:false},
+    {id:'m23',nome:'Kit primeiros socorros',cat:'Medicamentos',obs:'Pensos, analgésicos',packed:false},
+  ];
+}
+
+/* ═══════════ LEAFLET MAPS ═══════════ */
+let _worldMap = null;
+let _roteiroMap = null;
+let _worldMapLoaded = false;
+
+// Coordenadas das paragens por dia
+const ROTEIRO_COORDS = {
+  dia2:[
+    {nome:"Münchenbuchsee",lat:47.025,lon:7.430,num:1},
+    {nome:"Berna — Altstadt",lat:46.948,lon:7.448,num:2},
+    {nome:"Castelo de Thun",lat:46.758,lon:7.629,num:3},
+    {nome:"Lauterbrunnen",lat:46.593,lon:7.908,num:4},
+    {nome:"Staubbachfall",lat:46.595,lon:7.910,num:5},
+    {nome:"Trümmelbach Falls",lat:46.573,lon:7.922,num:6},
+    {nome:"Mürren",lat:46.558,lon:7.893,num:7},
+    {nome:"Grindelwald / Bachalpsee",lat:46.624,lon:8.041,num:8},
+    {nome:"Giessbach Falls",lat:46.718,lon:8.000,num:9},
+    {nome:"Interlaken",lat:46.686,lon:7.863,num:10},
+    {nome:"Spiez",lat:46.686,lon:7.672,num:11},
+  ],
+  dia3:[
+    {nome:"Spiez",lat:46.686,lon:7.672,num:1},
+    {nome:"Kandersteg",lat:46.498,lon:7.672,num:2},
+    {nome:"Lago Oeschinen",lat:46.515,lon:7.713,num:3},
+    {nome:"Zermatt",lat:46.020,lon:7.749,num:4},
+    {nome:"Gornergrat 3089m",lat:45.984,lon:7.785,num:5},
+    {nome:"Matterhorn Glacier",lat:45.979,lon:7.734,num:6},
+    {nome:"Locarno",lat:46.170,lon:8.799,num:7},
+    {nome:"Ascona",lat:46.158,lon:8.773,num:8},
+  ],
+  dia4:[
+    {nome:"Castelletto",lat:45.924,lon:8.560,num:1},
+    {nome:"Como",lat:45.801,lon:9.085,num:2},
+    {nome:"Villa Balbianello",lat:45.968,lon:9.139,num:3},
+    {nome:"Bellagio",lat:45.984,lon:9.259,num:4},
+    {nome:"Varenna",lat:46.014,lon:9.282,num:5},
+    {nome:"Orrido di Bellano",lat:46.052,lon:9.298,num:6},
+    {nome:"Lugano",lat:46.004,lon:8.951,num:7},
+    {nome:"Locarno",lat:46.170,lon:8.799,num:8},
+    {nome:"Ballenberg",lat:46.762,lon:8.093,num:9},
+  ],
+  dia5:[
+    {nome:"Ballenberg",lat:46.762,lon:8.093,num:1},
+    {nome:"Alpnachstad / Pilatus",lat:46.983,lon:8.255,num:2},
+    {nome:"Monte Pilatus — Kulm",lat:46.979,lon:8.252,num:3},
+    {nome:"Monte Rigi",lat:47.055,lon:8.484,num:4},
+    {nome:"Lucerna",lat:47.050,lon:8.309,num:5},
+    {nome:"Colmar",lat:48.078,lon:7.357,num:6},
+    {nome:"Luxembourg",lat:49.611,lon:6.130,num:7},
+  ],
+};
+
+// Países visitados e a visitar (ISO codes para GeoJSON)
+const PAISES_VISITADOS = ['Portugal','Spain','France','Germany','Netherlands','Belgium','United Kingdom','United States of America','Brazil','Morocco','Tunisia'];
+const PAISES_A_VISITAR = ['Luxembourg','Switzerland','Italy'];
+
+function initWorldMap(){
+  if(typeof L === 'undefined'){ console.warn('Leaflet not loaded yet'); return; }
+  if(_worldMap){ _worldMap.invalidateSize(); return; }
+  const el = document.getElementById('world-map-leaflet');
+  if(!el) return;
+
+  _worldMap = L.map('world-map-leaflet', {
+    center:[20,10], zoom:2, zoomControl:true,
+    attributionControl:true
+  });
+
+  // Dark tile layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'© OpenStreetMap © CartoDB',
+    subdomains:'abcd', maxZoom:19
+  }).addTo(_worldMap);
+
+  // Load GeoJSON boundaries
+  fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+    .then(r=>r.json())
+    .then(data=>{
+      L.geoJSON(data, {
+        style: function(feature){
+          const name = feature.properties.ADMIN || feature.properties.name || '';
+          if(PAISES_A_VISITAR.some(p=>name.includes(p)||p.includes(name.split(' ')[0]))){
+            return {fillColor:'#58a6ff',fillOpacity:.4,color:'#58a6ff',weight:1.5};
+          }
+          if(PAISES_VISITADOS.some(p=>name.includes(p)||p.includes(name.split(' ')[0]))){
+            return {fillColor:'#3fb950',fillOpacity:.35,color:'#3fb950',weight:1};
+          }
+          return {fillColor:'#21262d',fillOpacity:.8,color:'#30363d',weight:.5};
+        },
+        onEachFeature: function(feature, layer){
+          const name = feature.properties.ADMIN || feature.properties.name || '';
+          const isVisit = PAISES_A_VISITAR.some(p=>name.includes(p)||p.includes(name.split(' ')[0]));
+          const isVisited = PAISES_VISITADOS.some(p=>name.includes(p)||p.includes(name.split(' ')[0]));
+          if(isVisit || isVisited){
+            layer.bindTooltip(name+(isVisit?' 🔵':' 🟢'),{className:'',sticky:true});
+          }
+        }
+      }).addTo(_worldMap);
+    })
+    .catch(()=>{
+      // fallback: add simple markers for key countries
+      const markers = [
+        {lat:46.8,lon:8.2,name:'Suíça 🔵'},{lat:41.9,lon:12.5,name:'Itália 🔵'},
+        {lat:49.8,lon:6.1,name:'Luxemburgo 🔵'},{lat:39.5,lon:-8.0,name:'Portugal 🟢'}
+      ];
+      markers.forEach(m=>L.circleMarker([m.lat,m.lon],{radius:8,color:'#58a6ff',fillColor:'#58a6ff',fillOpacity:.6}).bindTooltip(m.name).addTo(_worldMap));
+    });
+
+  // Add destination pins from appData
+  (appData.destinos||[]).forEach(d=>{
+    if(d.lat && d.lon){
+      const color = d.estado==='visitado'?'#3fb950':'#58a6ff';
+      L.circleMarker([d.lat,d.lon],{radius:7,color,fillColor:color,fillOpacity:.9,weight:2})
+        .bindPopup('<strong>'+d.nome+'</strong><br>'+( d.estado==='visitado'?'✅ Visitado':'🔵 A visitar'))
+        .addTo(_worldMap);
+    }
+  });
+}
+
+function initRoteiroMap(key){
+  if(typeof L === 'undefined'){ console.warn('Leaflet not loaded yet'); return; }
+  if(_roteiroMap){ _roteiroMap.remove(); _roteiroMap=null; }
+  const container = document.getElementById('roteiro-map-container');
+  if(!container) return;
+  const pts = ROTEIRO_COORDS[key];
+  // Custom days: no coords
+  if(!pts || !pts.length){ container.style.display='none'; return; }
+  container.style.display='block';
+
+  _roteiroMap = L.map('roteiro-map-container',{zoomControl:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'© OpenStreetMap © CartoDB', subdomains:'abcd', maxZoom:19
+  }).addTo(_roteiroMap);
+
+  const latlngs = pts.map(p=>[p.lat,p.lon]);
+
+  // Draw route polyline
+  L.polyline(latlngs,{color:'#58a6ff',weight:3,opacity:.8,dashArray:'6,4'}).addTo(_roteiroMap);
+
+  // Add numbered markers
+  pts.forEach(function(p,i){
+    const isFirst = i===0, isLast = i===pts.length-1;
+    const color = isFirst?'#3fb950':isLast?'#f85149':'#58a6ff';
+    const icon = L.divIcon({
+      className:'',
+      html:'<div class="numbered-marker" style="background:'+color+'">'+p.num+'</div>',
+      iconSize:[28,28], iconAnchor:[14,14], popupAnchor:[0,-16]
+    });
+    L.marker([p.lat,p.lon],{icon})
+      .bindPopup('<strong>#'+p.num+' '+p.nome+'</strong>')
+      .addTo(_roteiroMap);
+  });
+
+  // Fit bounds with padding
+  _roteiroMap.fitBounds(L.latLngBounds(latlngs),{padding:[30,30]});
+}
+
+/* ── EDITAR VIAGEM ── */
+function openEditarViagem(){
+  // Preencher campos com dados actuais da viagem
+  const v = appData.viagens && appData.viagens[0];
+  const nomeEl = document.getElementById('ev-nome');
+  const inicioEl = document.getElementById('ev-inicio');
+  const fimEl = document.getElementById('ev-fim');
+  const paisesEl = document.getElementById('ev-paises');
+
+  if(nomeEl) nomeEl.value = v ? (v.nome||'Luxemburgo, Suíça & Itália') : 'Luxemburgo, Suíça & Itália';
+  if(inicioEl) inicioEl.value = v ? (v.inicio||'2026-05-26') : '2026-05-26';
+  if(fimEl) fimEl.value = v ? (v.fim||'2026-05-30') : '2026-05-30';
+  if(paisesEl) paisesEl.value = v ? (v.paises||'Luxemburgo, Suíça, Itália') : 'Luxemburgo, Suíça, Itália';
+
+  // Mostrar dias do roteiro (fixos + personalizados)
+  const lista = document.getElementById('ev-dias-lista');
+  if(lista){
+    const custom = appData.roteiros_custom||[];
+    // Dias fixos do ROTEIROS
+    const diasFixos = Object.entries(ROTEIROS).map(([k,r])=>`
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.35rem 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.75rem;background:var(--bg3);border-radius:4px;padding:.1rem .4rem;color:var(--text3)">fixo</span>
+        <span style="font-size:.83rem;flex:1"><strong>${r.date}</strong> — ${r.titulo}</span>
+      </div>`).join('');
+    // Dias personalizados (editáveis/elimináveis)
+    const diasCustom = custom.length ? custom.map(d=>`
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.35rem 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.75rem;background:rgba(88,166,255,.15);border-radius:4px;padding:.1rem .4rem;color:var(--accent)">custom</span>
+        <span style="font-size:.83rem;flex:1"><strong>${d.data}</strong> — ${d.titulo}</span>
+        <button onclick="eliminarDiaCustom('${d.id}');openEditarViagem();" class="btn-danger" style="font-size:.72rem;padding:.12rem .35rem">🗑</button>
+      </div>`).join('') : '<div style="font-size:.8rem;color:var(--text3);padding:.35rem 0">Sem dias personalizados.</div>';
+
+    lista.innerHTML = diasFixos + diasCustom;
+  }
+
+  openModal('modal-editar-viagem');
+}
+
+function guardarEdicaoViagem(){
+  const nome = document.getElementById('ev-nome')?.value?.trim();
+  const inicio = document.getElementById('ev-inicio')?.value;
+  const fim = document.getElementById('ev-fim')?.value;
+  const paises = document.getElementById('ev-paises')?.value?.trim();
+
+  if(!appData.viagens) appData.viagens = [];
+  if(!appData.viagens.length){
+    // Criar viagem se não existir
+    appData.viagens.push({id:genId(), nome:'', inicio:'', fim:'', paises:'', destinos:[]});
+  }
+  const v = appData.viagens[0];
+  if(nome) v.nome = nome;
+  if(inicio) v.inicio = inicio;
+  if(fim) v.fim = fim;
+  if(paises) v.paises = paises;
+
+  saveFirestoreData();
+  closeModal('modal-editar-viagem');
+  renderPainel();
+  renderDestinos();
+}
+
 function renderAll(){
   renderPainel();
   renderDestinos();
@@ -1270,10 +1791,16 @@ function renderAll(){
   renderReservas();
   renderOrcamento();
   renderMemorias();
+  renderMochila();
   renderGastronomia();
+  renderPartilha();
 }
 
 function renderPainel(){
+  startCountdown();
+  renderNotifBanner();
+  renderChecklistPainel();
+  renderPagamentosPainel();
   // Countdown
   const hoje = new Date();
   const viagem = new Date('2026-05-26');
@@ -1361,103 +1888,136 @@ function renderDestinos(){
 }
 
 function renderRoteiros(){
-  // Selector
-  document.getElementById('roteiro-selector').innerHTML = Object.entries(ROTEIROS).map(([k,r])=>`
+  const custom = appData.roteiros_custom||[];
+  // Fixed days
+  const fixedBtns = Object.entries(ROTEIROS).map(([k,r])=>`
     <button class="roteiro-btn ${k===roteiroAtivo?'active':''}" onclick="setRoteiro('${k}')">
       <span class="dia">${r.date}</span>
       <span class="titulo">${r.titulo}</span>
-    </button>
-  `).join('');
+    </button>`).join('');
+  // Custom days
+  const customBtns = custom.map(d=>`
+    <button class="roteiro-btn ${('custom_'+d.id)===roteiroAtivo?'active':''}" onclick="setRoteiro('custom_${d.id}')">
+      <span class="dia">${d.data}</span>
+      <span class="titulo">★ ${d.titulo}</span>
+    </button>`).join('');
+  document.getElementById('roteiro-selector').innerHTML = fixedBtns + customBtns;
   renderRoteiroContent();
 }
 
 function setRoteiro(k){
   roteiroAtivo=k;
   renderRoteiros();
+  setTimeout(()=>initRoteiroMap(k),100);
+}
+
+function buildGoogleMapsUrl(r){
+  const pts=[];(r.seccoes||[]).forEach(s=>s.paragens.forEach(p=>{if(p.maps)pts.push(p.maps);}));
+  if(pts.length<2) return null;
+  return 'https://www.google.com/maps/dir/'+pts.map(p=>encodeURIComponent(p)).join('/');
+}
+
+function buildTimelineHTML(seccoes){
+  const pts=[];(seccoes||[]).forEach(s=>s.paragens.forEach(p=>pts.push(p)));
+  if(!pts.length) return '';
+  return '<div class="timeline-bar">'+pts.map((p,i)=>'<div class="tl-step"><div class="tl-dot">'+(i+1)+'</div><div class="tl-hora">'+(p.hora||'')+'</div><div class="tl-nome">'+(p.local||'').split('—')[0].split('(')[0].trim().slice(0,16)+'</div>'+(p.km_prev?'<div class="tl-km">'+p.km_prev+'km</div>':'')+'</div>').join('')+'</div>';
+}
+
+function getTicket(local){
+  const k=Object.keys(PARAGEM_TICKETS).find(k2=>local&&local.toLowerCase().includes(k2.toLowerCase().split('—')[0].trim().split('(')[0].trim().toLowerCase()));
+  return k?PARAGEM_TICKETS[k]:null;
+}
+
+function buildCustosHTML(key){
+  const c=ROTEIRO_CUSTOS[key],r=ROTEIROS[key];if(!c||!r)return'';
+  const lit=(r.km*0.07).toFixed(1),comb=Math.round(r.km*0.07*c.combustivel.preco);
+  const tMin=r.custoMin+c.portagens_valor+comb,tMax=r.custoMax+c.portagens_valor+comb;
+  return '<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">💶 Custos estimados da rota</div></div><div class="card-body"><div class="custos-rota-grid">'
+    +'<div class="custo-card"><div class="cc-icon">⛽</div><div class="cc-val">€'+comb+'</div><div class="cc-label">'+lit+'L × €'+c.combustivel.preco+'/L</div><div class="cc-label">7L/100km · '+r.km+'km</div></div>'
+    +'<div class="custo-card"><div class="cc-icon">🛣️</div><div class="cc-val">€'+c.portagens_valor+'</div><div class="cc-label">Portagens estimadas</div></div>'
+    +'<div class="custo-card"><div class="cc-icon">🎭</div><div class="cc-val">€'+r.custoMin+'–€'+r.custoMax+'</div><div class="cc-label">Actividades / Bilhetes</div></div>'
+    +'<div class="custo-card" style="border-color:rgba(88,166,255,.3)"><div class="cc-icon">📊</div><div class="cc-val" style="color:var(--green)">€'+tMin+'–€'+tMax+'</div><div class="cc-label">Total/pessoa</div></div>'
+    +'</div><div style="font-size:.75rem;color:var(--text3);margin-top:.4rem">🛣️ '+c.portagens.detalhe+'</div></div></div>';
+}
+
+function buildServicosHTML(key){
+  const s=ROTEIRO_SERVICOS[key];if(!s)return'';
+  const supHTML=s.supermercados.map(m=>'<div class="local-item"><span class="li-icon">'+m.icon+'</span><div class="li-info"><div style="font-weight:500">'+m.nome+'</div><div style="font-size:.74rem;color:var(--text3)">'+m.local+'</div></div></div>').join('');
+  const ffHTML=s.fastfood.map(f=>'<div class="local-item"><span class="li-icon">'+f.icon+'</span><div class="li-info"><div style="font-weight:500">'+f.nome+'</div><div style="font-size:.74rem;color:var(--text3)">'+f.local+'</div></div></div>').join('');
+  return '<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🛒 Supermercados & Fast Food na rota</div></div><div class="card-body"><div class="grid-2" style="gap:.75rem"><div><div style="font-size:.79rem;font-weight:600;color:var(--text2);margin-bottom:.35rem">🛒 Supermercados</div>'+supHTML+'</div><div><div style="font-size:.79rem;font-weight:600;color:var(--text2);margin-bottom:.35rem">🍔 Fast Food</div>'+ffHTML+'</div></div></div></div>';
+}
+
+function transpConnector(p,pNext){
+  if(!pNext)return'';
+  const transp=p.transp||'🚗';
+  const km=p.km_next?p.km_next+' km':'';
+  return '<div class="transp-connector"><div class="transp-line"></div><div class="transp-badge">'+transp+(km?' · '+km:'')+'</div><div class="transp-line"></div></div>';
 }
 
 function renderRoteiroContent(){
-  const r = ROTEIROS[roteiroAtivo];
-  const extra = appData.paragens_extra[roteiroAtivo]||[];
-  let html=`
-    <div class="roteiro-header">
-      <div style="font-size:1.15rem;font-weight:700">${r.titulo}</div>
-      <div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">${r.subtitulo}</div>
-      <div class="rota-text">📍 ${r.rota}</div>
-      <div class="roteiro-meta">
-        <span class="meta-badge">🚗 ${r.km} km · ${r.conducao} condução</span>
-        <span class="meta-badge">🌍 ${r.pais}</span>
-        <span class="meta-badge">💶 €${r.custoMin}–€${r.custoMax}/pessoa</span>
-        <a href="https://www.google.com/maps/dir/${r.rota.split('→').map(s=>encodeURIComponent(s.trim())).join('/')}" target="_blank" class="meta-badge" style="color:var(--accent);text-decoration:none;cursor:pointer">🗺️ Abrir percurso no Maps</a>
-      </div>
-    </div>
-  `;
-  r.seccoes.forEach(s=>{
-    html+=`<div class="seccao">
-      <div class="seccao-titulo" onclick="toggleSeccao(this)">
-        <span>${s.nome}</span>
-        <span class="periodo">${s.periodo} ▾</span>
-      </div>
-      <div class="seccao-content">`;
-    s.paragens.forEach(p=>{
-      html+=`<div class="paragem">
-        <div class="p-hora">${p.hora}</div>
-        <div>
-          <div class="p-local">${p.local}</div>
-          <div class="p-desc">${p.desc}</div>
-          ${p.maps?`<a class="p-maps" href="https://www.google.com/maps/search/${encodeURIComponent(p.maps)}" target="_blank">📍 Google Maps</a>`:''}
-        </div>
-        <div class="p-custo">${p.custo||''}</div>
-      </div>`;
+  const customKey=roteiroAtivo.startsWith('custom_');
+  if(customKey){
+    const r=(appData.roteiros_custom||[]).find(d=>'custom_'+d.id===roteiroAtivo);
+    if(!r){document.getElementById('roteiro-content').innerHTML='<div class="empty-state">Roteiro não encontrado</div>';return;}
+    const extra=appData.paragens_extra[roteiroAtivo]||[];
+    let html='<div class="roteiro-header"><div style="font-size:1.15rem;font-weight:700">'+r.titulo+'</div><div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">'+( r.data||'')+'</div>'+(r.rota?'<div class="rota-text">📍 '+r.rota+'</div>':'')+'<div class="roteiro-meta"><span class="meta-badge">🌍 '+(r.pais||'')+'</span>'+(r.custo?'<span class="meta-badge">💶 €'+r.custo+'/pessoa</span>':'')+'</div></div>';
+    if(r.notas)html+='<div class="alertas-box" style="margin-bottom:1rem"><p>'+r.notas+'</p></div>';
+    if(extra.length){
+      html+='<div class="seccao"><div class="seccao-titulo"><span>Paragens</span></div><div class="seccao-content">';
+      extra.forEach((p,i)=>{
+        html+='<div class="paragem"><div class="p-hora"><span style="display:block;font-weight:700;color:var(--accent);font-size:.8rem">#'+(p.ordem||i+1)+'</span>'+(p.hora||'—')+'</div><div><div class="p-local">'+p.nome+'</div><div class="p-desc">'+(p.notas||'')+'</div>'+(p.address?'<a class="p-maps" href="https://www.google.com/maps/search/'+encodeURIComponent(p.address)+'" target="_blank">📍 Maps</a>':'')+'</div><div></div></div>';
+        if(i<extra.length-1)html+=transpConnector(p,extra[i+1]);
+      });
+      html+='</div></div>';
+    } else html+='<div class="empty-state" style="padding:2rem 0">Sem paragens. Use "+ Paragem" para adicionar.</div>';
+    document.getElementById('roteiro-content').innerHTML=html;return;
+  }
+
+  const r=ROTEIROS[roteiroAtivo];if(!r){document.getElementById('roteiro-content').innerHTML='';return;}
+  const extra=appData.paragens_extra[roteiroAtivo]||[];
+  const mapsUrl=buildGoogleMapsUrl(r);
+  let stopNum=0;
+
+  let html='<div class="roteiro-header"><div style="font-size:1.15rem;font-weight:700">'+r.titulo+'</div><div style="color:var(--text2);font-size:.88rem;margin-top:.2rem">'+r.subtitulo+'</div><div class="rota-text">📍 '+r.rota+'</div><div class="roteiro-meta"><span class="meta-badge">🚗 '+r.km+' km · '+r.conducao+'</span><span class="meta-badge">🌍 '+r.pais+'</span>'+(mapsUrl?'<a href="'+mapsUrl+'" target="_blank" class="meta-badge" style="color:var(--accent);text-decoration:none">🗺️ Ver trajecto no Maps</a>':'')+'</div></div>';
+
+  html+=buildTimelineHTML(r.seccoes);
+
+  r.seccoes.forEach(function(s){
+    html+='<div class="seccao"><div class="seccao-titulo" onclick="toggleSeccao(this)"><span>'+s.nome+'</span><span class="periodo">'+s.periodo+' ▾</span></div><div class="seccao-content">';
+    s.paragens.forEach(function(p,i){
+      stopNum++;
+      const ticket=getTicket(p.local);
+      let ticketHTML='';
+      if(ticket){
+        if(ticket.required){
+          ticketHTML='<div class="ticket-badge">🎫 '+ticket.custo+(ticket.online?' · <a href="'+ticket.online+'" target="_blank">'+(ticket.label||'Comprar online')+'</a>':(ticket.label?' · '+ticket.label:''))+'</div>';
+        } else {
+          ticketHTML='<div class="ticket-badge ticket-free">✅ Entrada gratuita</div>';
+        }
+      } else if(p.custo){
+        ticketHTML='<div class="ticket-badge">💶 '+p.custo+'</div>';
+      }
+      const pNext=s.paragens[i+1];
+      html+='<div class="paragem"><div class="p-hora"><span style="display:block;font-weight:700;color:var(--accent);font-size:.85rem">#'+stopNum+'</span>'+p.hora+'</div><div><div class="p-local">'+p.local+'</div>'+(p.km_prev?'<div style="font-size:.71rem;color:var(--text3);margin-bottom:.15rem">📏 '+p.km_prev+' km da paragem anterior</div>':'')+'<div class="p-desc">'+p.desc+'</div>'+ticketHTML+(p.maps?'<a class="p-maps" href="https://www.google.com/maps/search/'+encodeURIComponent(p.maps)+'" target="_blank">📍 Google Maps</a>':'')+'</div><div class="p-custo">'+(p.custo||'')+'</div></div>';
+      if(pNext)html+=transpConnector(p,pNext);
     });
-    // Paragens extra do utilizador nesta secção
-    extra.filter(e=>e.seccao===s.nome).forEach(p=>{
-      html+=`<div class="paragem" style="background:rgba(88,166,255,.04);border-left:2px solid var(--accent)">
-        <div class="p-hora">${p.hora||'—'}</div>
-        <div style="flex:1">
-          <div class="p-local">⭐ ${p.nome}</div>
-          ${p.tipo?`<div style="font-size:.72rem;color:var(--accent);margin-bottom:.2rem">${p.tipo}${p.dur?' · '+p.dur:''}</div>`:''}
-          <div class="p-desc">${p.notas||''}</div>
-          ${p.custo?`<div class="p-custo" style="margin-top:.2rem">${p.custo}</div>`:''}
-          ${p.address?`<a class="p-maps" href="https://www.google.com/maps/search/${encodeURIComponent(p.address)}" target="_blank">📍 Maps</a>`:''}
-        </div>
-        <button onclick="deleteParagem('${roteiroAtivo}','${p.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem;padding:.25rem;flex-shrink:0" title="Eliminar paragem">🗑</button>
-      </div>`;
+    const extraSec=extra.filter(function(e){return e.seccao===s.nome;});
+    extraSec.forEach(function(p,i,arr){
+      stopNum++;
+      html+='<div class="paragem" style="background:rgba(88,166,255,.04)"><div class="p-hora"><span style="display:block;font-weight:700;color:var(--accent);font-size:.85rem">#'+(p.ordem||stopNum)+'</span>'+(p.hora||'—')+'</div><div><div class="p-local">⭐ '+p.nome+'</div><div class="p-desc">'+(p.notas||'')+'</div>'+(p.address?'<a class="p-maps" href="https://www.google.com/maps/search/'+encodeURIComponent(p.address)+'" target="_blank">📍 Maps</a>':'')+'</div><div></div></div>';
+      if(i<arr.length-1)html+=transpConnector(p,arr[i+1]);
     });
-    html+=`</div></div>`;
+    html+='</div></div>';
   });
 
-  // Previsão tempo
-  html+=`<div class="card" style="margin-top:1.25rem">
-    <div class="card-header"><div class="card-title">🌡️ Previsão do tempo — ${r.date}</div><div class="card-sub">Verificar em meteoswiss.admin.ch 2-3 dias antes</div></div>
-    <div class="card-body">
-      <div class="tempo-grid">
-        ${r.tempo.map(t=>`<div class="tempo-card">
-          <div class="tempo-local">${t.local}</div>
-          <div class="tempo-range">${t.min} → ${t.max}</div>
-          <div class="tempo-cond">${t.cond}</div>
-          <div class="tempo-equip">🧥 ${t.equip}</div>
-        </div>`).join('')}
-      </div>
-    </div>
-  </div>`;
+  html+=buildCustosHTML(roteiroAtivo);
+  html+=buildServicosHTML(roteiroAtivo);
 
-  // Refeições
-  html+=`<div class="card" style="margin-top:1rem">
-    <div class="card-header"><div class="card-title">🍽️ Sugestões de refeições</div></div>
-    <div class="card-body">
-      <div class="refeicoes-grid">
-        <div class="refeicao-card"><h5>🥗 Almoço</h5><p>${r.refeicoes.almoco}</p></div>
-        <div class="refeicao-card"><h5>🥂 Jantar</h5><p>${r.refeicoes.jantar}</p></div>
-      </div>
-    </div>
-  </div>`;
-
-  // Alertas
-  html+=`<div class="alertas-box">
-    <h4>⚠️ Confirmar antes da partida</h4>
-    <ul>${r.alertas.map(a=>`<li>${a}</li>`).join('')}</ul>
-  </div>`;
+  const wkey=roteiroAtivo;
+  const wHtml='<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🌡️ Previsão — '+r.date+'</div><button class="weather-refresh" id="btn-weather-'+wkey+'" onclick="actualizarMeteo('+JSON.stringify(wkey)+')">🔄 Actualizar</button></div><div class="card-body" id="weather-body-'+wkey+'"><div class="tempo-grid">'+r.tempo.map(function(t){return '<div class="tempo-card"><div class="tempo-local">'+t.local+'</div><div class="tempo-range">'+t.min+' → '+t.max+'</div><div class="tempo-cond">'+t.cond+'</div><div class="tempo-equip">🧥 '+t.equip+'</div></div>';}).join('')+'</div><div id="weather-live-'+wkey+'" style="margin-top:.75rem"></div></div></div>';
+  html+=wHtml;
+  html+='<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🍽️ Sugestões de refeições</div></div><div class="card-body"><div class="refeicoes-grid"><div class="refeicao-card"><h5>🥗 Almoço</h5><p>'+r.refeicoes.almoco+'</p></div><div class="refeicao-card"><h5>🥂 Jantar</h5><p>'+r.refeicoes.jantar+'</p></div></div></div></div>';
+  html+='<div class="alertas-box"><h4>⚠️ Confirmar antes da partida</h4><ul>'+r.alertas.map(a=>'<li>'+a+'</li>').join('')+'</ul></div>';
 
   document.getElementById('roteiro-content').innerHTML=html;
 }
@@ -1498,6 +2058,12 @@ function renderReservas(){
           <div style="text-align:right">
             <div class="reserva-valor">${r.valor?'€'+r.valor.toFixed(2):''}</div>
             <button onclick="eliminarReserva('${r.id}')" class="btn-danger" style="font-size:.72rem;padding:.15rem .4rem;margin-top:.3rem">🗑</button>
+          </div>
+        </div>
+        <div style="padding:.3rem 1rem .6rem 3.2rem">
+          <div class="res-docs">
+            ${getReservaDocs(r.id).map(d=>'<span class="res-doc-chip" onclick="abrirDoc(\''+r.id+'\',\''+d.name+'\')">📄 '+d.name+'</span>').join('')}
+            <label class="res-doc-upload">📎 Anexar<input type="file" accept=".pdf,image/*" style="display:none" onchange="uploadReservaDoc('${r.id}',this)"></label>
           </div>
         </div>`).join('')}
       </div>
@@ -1645,9 +2211,12 @@ function showTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const map = {'tab-painel':0,'tab-destinos':1,'tab-mapa':2,'tab-roteiro':3,'tab-reservas':4,'tab-orcamento':5,'tab-memorias':6,'tab-gastronomia':7,'tab-pesquisa':8};
+  const map = {'tab-painel':0,'tab-destinos':1,'tab-mapa':2,'tab-roteiro':3,'tab-reservas':4,'tab-orcamento':5,'tab-memorias':6,'tab-mochila':7,'tab-gastronomia':8,'tab-pesquisa':9,'tab-partilha':10};
   const items = document.querySelectorAll('.nav-item');
   if(items[map[id]]) items[map[id]].classList.add('active');
+  // Inicializar mapas Leaflet quando os tabs ficam visíveis
+  if(id==='tab-mapa') setTimeout(()=>initWorldMap(),50);
+  if(id==='tab-roteiro') setTimeout(()=>initRoteiroMap(roteiroAtivo),50);
 }
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
@@ -1744,44 +2313,18 @@ function handlePhotoUpload(e){
   });
 }
 
-function openAddParagem(){
-  const r = ROTEIROS[roteiroAtivo];
-  const sel = document.getElementById('ap-seccao');
-  sel.innerHTML = r.seccoes.map(s=>`<option value="${s.nome.replace(/"/g,'&quot;')}">${s.nome}</option>`).join('');
-  // Reset campos
-  document.getElementById('ap-nome').value='';
-  document.getElementById('ap-hora').value='';
-  document.getElementById('ap-custo').value='';
-  document.getElementById('ap-address').value='';
-  document.getElementById('ap-notas').value='';
-  openModal('modal-add-paragem');
-}
-
 function addParagem(){
   const nome = document.getElementById('ap-nome').value.trim();
   if(!nome){ alert('Preencha o nome do local.'); return; }
   if(!appData.paragens_extra[roteiroAtivo]) appData.paragens_extra[roteiroAtivo]=[];
-  const horaRaw = document.getElementById('ap-hora').value;
-  const horaFmt = horaRaw ? horaRaw.replace(':','h') : '';
   appData.paragens_extra[roteiroAtivo].push({
-    id:genId(), nome, hora:horaFmt,
-    tipo:document.getElementById('ap-tipo').value,
-    dur:document.getElementById('ap-dur').value,
-    custo:document.getElementById('ap-custo').value,
-    address:document.getElementById('ap-address').value,
-    notas:document.getElementById('ap-notas').value,
-    seccao:document.getElementById('ap-seccao').value
+    id:genId(), nome, hora:document.getElementById('ap-hora').value,
+    tipo:document.getElementById('ap-tipo').value, dur:document.getElementById('ap-dur').value,
+    address:document.getElementById('ap-address').value, notas:document.getElementById('ap-notas').value,
+    seccao:'Extra', ordem:parseInt(document.getElementById('ap-ordem')?.value)||null
   });
+  if(document.getElementById('ap-ordem')?.value) appData.paragens_extra[roteiroAtivo].sort((a,b)=>(a.ordem||999)-(b.ordem||999));
   saveFirestoreData(); closeModal('modal-add-paragem'); renderRoteiroContent();
-}
-
-function deleteParagem(roteiro, id){
-  if(!confirm('Eliminar esta paragem?')) return;
-  if(appData.paragens_extra[roteiro]){
-    appData.paragens_extra[roteiro] = appData.paragens_extra[roteiro].filter(p=>p.id!==id);
-    saveFirestoreData();
-    renderRoteiroContent();
-  }
 }
 
 function pesquisar(){
@@ -1803,6 +2346,257 @@ function exportRoteiro(){
 function toggleDark(){
   document.body.classList.toggle('light-mode');
 }
+/* ═══════════ NOVOS COMPONENTES ═══════════ */
+let _cdInterval = null;
+
+function startCountdown(){
+  if(_cdInterval) clearInterval(_cdInterval);
+  function tick(){
+    const cc = document.getElementById('countdown-container');
+    if(!cc) return;
+    const now = new Date();
+    const viagem = new Date('2026-05-26T06:15:00');
+    const diff = viagem - now;
+    if(diff <= 0){ clearInterval(_cdInterval); cc.innerHTML='<div class="countdown-widget"><div class="countdown-dias">🎒</div><div class="countdown-viagem" style="color:var(--green)">Viagem a decorrer!</div></div>'; return; }
+    const totalSec = Math.floor(diff/1000);
+    const dias = Math.floor(totalSec/86400);
+    const horas = Math.floor((totalSec%86400)/3600);
+    const mins = Math.floor((totalSec%3600)/60);
+    const segs = totalSec%60;
+    const pad = n=>String(n).padStart(2,'0');
+    const voo = (appData.reservas||[]).find(r=>r.tipo==='✈' && r.data==='2026-05-26');
+    const vooHTML = voo ? `<div style="display:inline-flex;align-items:center;gap:.4rem;margin-top:.6rem;font-size:.82rem;color:var(--text2);background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);border-radius:20px;padding:.25rem .75rem">✈ ${voo.ref||'TP531'} · 26 Mai · ${voo.hora||'06h15'} · Lisboa → Genebra</div>` : '';
+    cc.innerHTML = `<div style="background:linear-gradient(135deg,rgba(88,166,255,.1),rgba(188,140,255,.08));border:1px solid rgba(88,166,255,.3);border-radius:var(--radius2);padding:1.5rem 1.25rem 1.25rem;text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:3.5rem;font-weight:800;line-height:1;color:var(--accent)">${dias}</div>
+      <div style="font-size:.95rem;color:var(--text3);margin:.2rem 0;font-variant-numeric:tabular-nums">${pad(horas)}h ${pad(mins)}m ${pad(segs)}s</div>
+      <div style="font-weight:600;color:var(--accent);font-size:1.05rem">Luxemburgo, Suíça & Itália</div>
+      <div style="font-size:.86rem;color:var(--text2)">26 — 30 de Maio de 2026 · 5 dias · 4 países</div>
+      ${vooHTML}
+    </div>`;
+  }
+  tick();
+  _cdInterval = setInterval(tick, 1000);
+}
+
+function renderNotifBanner(){
+  const banner = document.getElementById('notif-banner');
+  const textEl = document.getElementById('notif-text');
+  if(!banner||!textEl) return;
+  const now = new Date();
+  const upcoming = (appData.reservas||[])
+    .map(r=>{ const d=new Date((r.data||'')+'T'+(r.hora||'00:00')+':00'); return {r,d}; })
+    .filter(({d})=>{ const diff=(d-now)/86400000; return diff>0&&diff<=7; })
+    .sort((a,b)=>a.d-b.d);
+  if(!upcoming.length){ banner.classList.remove('visible'); return; }
+  const {r,d}=upcoming[0];
+  const dias=Math.ceil((d-now)/86400000);
+  textEl.innerHTML=`<strong>Daqui a ${dias} dia${dias===1?'':'s'}:</strong> ${r.desc}`;
+  banner.classList.add('visible');
+}
+
+function renderChecklistPainel(){
+  const el = document.getElementById('checklist-painel'); if(!el) return;
+  if(!appData.checklist||!appData.checklist.length) return;
+  const total=appData.checklist.length, done=appData.checklist.filter(i=>i.done).length;
+  const pct=total?Math.round(done/total*100):0;
+  const catClass={doc:'',res:'',bag:'',fin:''};
+  const catLabel={doc:'Documentos',res:'Reservas',bag:'Bagagem',fin:'Finanças'};
+  const pending=appData.checklist.filter(i=>!i.done).slice(0,4);
+  el.innerHTML=`
+    <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text2);margin-bottom:.3rem"><span>${done} de ${total} concluídas</span><span style="color:var(--accent);font-weight:600">${pct}%</span></div>
+    <div class="checklist-progress-bar"><div class="checklist-progress-fill" style="width:${pct}%"></div></div>
+    ${pending.map(item=>`<label class="checklist-item${item.done?' done':''}">
+      <input type="checkbox" ${item.done?'checked':''} onchange="toggleChecklist('${item.id}',this.checked)" style="accent-color:var(--green);width:15px;height:15px;cursor:pointer;flex-shrink:0">
+      <span class="checklist-label">${item.label}</span>
+      <span class="checklist-cat">${catLabel[item.cat]||item.cat}</span>
+    </label>`).join('')}
+    ${pending.length===0?'<div style="text-align:center;padding:1rem;color:var(--green)">✅ Tudo concluído!</div>':''}`;
+}
+
+function toggleChecklist(id,v){ const i=(appData.checklist||[]).find(x=>x.id===id); if(i){i.done=v;saveFirestoreData();renderChecklistPainel();} }
+
+function renderPagamentosPainel(){
+  const el = document.getElementById('pagamentos-painel'); if(!el) return;
+  const pendentes=(appData.reservas||[]).filter(r=>r.estado!=='pago');
+  if(!pendentes.length){ el.innerHTML='<div class="empty-state" style="padding:1rem 0">✅ Sem pagamentos pendentes</div>'; return; }
+  el.innerHTML=pendentes.map(r=>`<div style="display:flex;align-items:center;gap:.6rem;padding:.55rem 0;border-bottom:1px solid var(--border)">
+    <span style="font-size:1rem">${r.tipo||'📄'}</span>
+    <span style="flex:1;font-size:.84rem">${r.desc}</span>
+    <span style="font-size:.87rem;font-weight:600;color:var(--orange)">€${(r.valor||0).toFixed(2)}</span>
+  </div>`).join('');
+}
+
+/* ── MOCHILA ── */
+function renderMochila(){
+  const el=document.getElementById('mochila-content'); if(!el) return;
+  const items=appData.mochila||[];
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">🎒</div><div>Sem itens. Adicione com o botão acima.</div></div>';return;}
+  const cats=[...new Set(items.map(i=>i.cat))];
+  const catIcons={Documentos:'📄',Roupa:'👕',Calçado:'👟',Higiene:'🧴',Electrónica:'📱',Medicamentos:'💊',Outro:'📦'};
+  const total=items.length, done=items.filter(i=>i.packed).length, pct=total?Math.round(done/total*100):0;
+  let html=`<div class="card" style="margin-bottom:1rem"><div class="card-body" style="padding:.75rem">
+    <div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--text2);margin-bottom:.3rem"><span>${done} de ${total} preparados</span><span style="color:${pct===100?'var(--green)':'var(--accent)'};font-weight:600">${pct}%</span></div>
+    <div class="checklist-progress-bar"><div class="checklist-progress-fill" style="width:${pct}%"></div></div>
+  </div></div>`;
+  cats.forEach(cat=>{
+    const catItems=items.filter(i=>i.cat===cat), catDone=catItems.filter(i=>i.packed).length;
+    html+=`<div class="card" style="margin-bottom:1rem"><div class="card-header"><div class="card-title">${catIcons[cat]||'📦'} ${cat}</div><span style="font-size:.74rem;color:var(--text3)">${catDone}/${catItems.length}</span></div>
+      <div style="padding:0 1rem .5rem">${catItems.map(item=>`<div class="mochila-item${item.packed?' packed':''}">
+        <input type="checkbox" ${item.packed?'checked':''} onchange="toggleMochila('${item.id}',this.checked)" style="accent-color:var(--green);width:15px;height:15px;cursor:pointer;flex-shrink:0">
+        <span class="mochila-nome">${item.nome}</span>
+        ${item.obs?`<span class="mochila-obs">${item.obs}</span>`:''}
+        <button class="mochila-del" onclick="eliminarMochila('${item.id}')">✕</button>
+      </div>`).join('')}</div></div>`;
+  });
+  el.innerHTML=html;
+}
+function toggleMochila(id,v){const i=(appData.mochila||[]).find(x=>x.id===id);if(i){i.packed=v;saveFirestoreData();renderMochila();}}
+function eliminarMochila(id){appData.mochila=(appData.mochila||[]).filter(x=>x.id!==id);saveFirestoreData();renderMochila();}
+function guardarItemMochila(){
+  const nome=document.getElementById('am-nome').value.trim();if(!nome){alert('Preencha o nome.');return;}
+  if(!appData.mochila)appData.mochila=[];
+  appData.mochila.push({id:genId(),nome,cat:document.getElementById('am-cat').value,obs:document.getElementById('am-obs').value,packed:false});
+  saveFirestoreData();closeModal('modal-add-mochila');renderMochila();
+  document.getElementById('am-nome').value='';document.getElementById('am-obs').value='';
+}
+
+/* ── PARTILHA ── */
+function renderPartilha(){
+  const el=document.getElementById('partilha-lista');if(!el)return;
+  const lista=appData.partilha||[];
+  if(!lista.length){el.innerHTML='<div class="empty-state" style="padding:1.5rem 0">Nenhum utilizador convidado.</div>';return;}
+  el.innerHTML=lista.map(p=>`<div class="partilha-item">
+    <div style="width:30px;height:30px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center">👤</div>
+    <span class="partilha-email">${p.email}</span>
+    <span class="partilha-role">${p.role==='edit'?'✏️ Edição':'👁 Leitura'}</span>
+    <button onclick="revogarPartilha('${p.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer">✕</button>
+  </div>`).join('');
+}
+function guardarPartilha(){
+  const email=document.getElementById('pc-email').value.trim();
+  if(!email||!email.includes('@')){alert('Email inválido.');return;}
+  if(!appData.partilha)appData.partilha=[];
+  if(appData.partilha.find(p=>p.email===email)){alert('Já tem acesso.');return;}
+  appData.partilha.push({id:genId(),email,role:document.getElementById('pc-role').value});
+  saveFirestoreData();closeModal('modal-partilha');renderPartilha();
+  document.getElementById('pc-email').value='';
+}
+function revogarPartilha(id){appData.partilha=(appData.partilha||[]).filter(p=>p.id!==id);saveFirestoreData();renderPartilha();}
+
+/* ── NOVO DIA ROTEIRO ── */
+function guardarNovoDia(){
+  const titulo=document.getElementById('nd2-titulo').value.trim();
+  const data=document.getElementById('nd2-data').value;
+  if(!titulo||!data){alert('Preencha data e título.');return;}
+  if(!appData.roteiros_custom)appData.roteiros_custom=[];
+  const id=genId();
+  appData.roteiros_custom.push({
+    id, titulo, data,
+    rota:document.getElementById('nd2-rota').value,
+    pais:document.getElementById('nd2-pais').value,
+    custo:document.getElementById('nd2-custo').value,
+    notas:document.getElementById('nd2-notas').value
+  });
+  roteiroAtivo='custom_'+id;
+  saveFirestoreData();
+  closeModal('modal-novo-dia');
+  // Limpar campos
+  ['nd2-titulo','nd2-data','nd2-rota','nd2-pais','nd2-custo','nd2-notas'].forEach(fid=>{
+    const el=document.getElementById(fid); if(el) el.value='';
+  });
+  renderRoteiros();
+  showTab('tab-roteiro');
+}
+function eliminarDiaCustom(id){
+  if(!confirm('Eliminar este dia do roteiro?')) return;
+  appData.roteiros_custom=(appData.roteiros_custom||[]).filter(d=>d.id!==id);
+  if(roteiroAtivo==='custom_'+id) roteiroAtivo='dia2';
+  saveFirestoreData();
+  renderRoteiros();
+  // Se modal editar viagem estiver aberto, actualizar a lista
+  const modal=document.getElementById('modal-editar-viagem');
+  if(modal && modal.classList.contains('open')) openEditarViagem();
+}
+
+/* ── METEOROLOGIA REAL ── */
+const METEO_COORDS={dia2:{lat:46.76,lon:7.62,nome:'Interlaken'},dia3:{lat:46.02,lon:7.75,nome:'Zermatt'},dia4:{lat:45.99,lon:9.02,nome:'Lago de Como'},dia5:{lat:46.98,lon:8.36,nome:'Pilatus / Lucerna'}};
+async function actualizarMeteo(key){
+  const btn=document.getElementById('btn-weather-'+key);
+  const container=document.getElementById('weather-live-'+key);
+  if(!container)return;
+  const coords=METEO_COORDS[key];if(!coords){container.innerHTML='<div style="font-size:.8rem;color:var(--text3)">Coordenadas não disponíveis.</div>';return;}
+  if(btn){btn.classList.add('loading');btn.textContent='⏳ A carregar...';}
+  try{
+    const r=ROTEIROS[key];const date=r?r.date:'';
+    const url='https://api.open-meteo.com/v1/forecast?latitude='+coords.lat+'&longitude='+coords.lon+'&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_sum&timezone=Europe%2FZurich&forecast_days=14';
+    const resp=await fetch(url);const data=await resp.json();
+    const idx=(data.daily.time||[]).indexOf(date);
+    if(idx===-1){container.innerHTML='<div style="font-size:.8rem;color:var(--text3)">Data fora do alcance da previsão. Consulte <a href="https://meteoswiss.admin.ch" target="_blank" style="color:var(--accent)">MeteoSwiss</a>.</div>';return;}
+    const tmax=data.daily.temperature_2m_max[idx],tmin=data.daily.temperature_2m_min[idx],prec=data.daily.precipitation_sum[idx];
+    const wc=data.daily.weathercode[idx];
+    const icons={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌧️',61:'🌧️',71:'🌨️',80:'🌦️',95:'⛈️'};
+    const icon=icons[wc]||'🌡️';
+    container.innerHTML='<div class="weather-live"><div class="wl-icon">'+icon+'</div><div class="wl-info"><div class="wl-temp">'+tmin+'°C → '+tmax+'°C</div><div class="wl-desc">Precipitação: '+prec+' mm</div><div class="wl-loc">📍 '+coords.nome+' · '+date+' · Open-Meteo</div></div></div>';
+  }catch(e){container.innerHTML='<div style="font-size:.8rem;color:var(--red)">Erro ao carregar previsão.</div>';}
+  finally{if(btn){btn.classList.remove('loading');btn.textContent='🔄 Actualizar';}}
+}
+
+/* ── RESERVAS COM PDF ── */
+function getReservaDocs(rid){try{return JSON.parse(localStorage.getItem('res_docs_'+rid)||'[]');}catch(e){return[];}}
+function uploadReservaDoc(rid,input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const docs=getReservaDocs(rid);
+    docs.push({name:file.name,data:e.target.result,type:file.type});
+    localStorage.setItem('res_docs_'+rid,JSON.stringify(docs));
+    renderReservas();
+  };
+  reader.readAsDataURL(file);
+}
+function abrirDoc(rid,name){
+  const doc=(getReservaDocs(rid)||[]).find(d=>d.name===name);if(!doc)return;
+  const win=window.open();
+  if(doc.type==='application/pdf'){win.document.write('<iframe src="'+doc.data+'" style="width:100%;height:100vh;border:none"></iframe>');}
+  else{win.document.write('<img src="'+doc.data+'" style="max-width:100%">');}
+}
+
+/* ── UPLOAD FOTOS COM DIA ── */
+function handlePhotoUpload(e){
+  const files=Array.from(e.target.files);if(!files.length)return;
+  const dias=Object.entries(ROTEIROS).map(([k,r])=>({k,label:r.date+' — '+r.titulo}));
+  (appData.roteiros_custom||[]).forEach(d=>dias.push({k:'custom_'+d.id,label:d.data+' — '+d.titulo}));
+  dias.push({k:'',label:'Sem data específica'});
+  const opts=dias.map(d=>'<option value="'+d.k+'">'+d.label+'</option>').join('');
+  window._pendingFotos=files;
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center';
+  const inner=document.createElement('div');
+  inner.style.cssText='background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:1.5rem;min-width:320px';
+  inner.innerHTML='<div style="font-weight:600;margin-bottom:1rem">📷 Associar '+files.length+' foto(s) a um dia</div>';
+  const sel=document.createElement('select');sel.id='foto-dia-sel';sel.className='form-select';sel.style.marginBottom='1rem';sel.innerHTML=opts;inner.appendChild(sel);
+  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:.75rem;justify-content:flex-end';
+  const btnCancel=document.createElement('button');btnCancel.className='btn-secondary';btnCancel.textContent='Cancelar';btnCancel.onclick=function(){this.closest('[style*=fixed]').remove();};
+  const btnOk=document.createElement('button');btnOk.className='btn-primary';btnOk.textContent='✓ Confirmar';btnOk.onclick=function(){confirmarFotoUpload(this);};
+  btns.appendChild(btnCancel);btns.appendChild(btnOk);inner.appendChild(btns);
+  overlay.appendChild(inner);
+  document.body.appendChild(overlay);
+}
+function confirmarFotoUpload(btn){
+  const overlay=btn.closest('[style*=fixed]');
+  const diaKey=document.getElementById('foto-dia-sel').value;
+  overlay.remove();
+  const diaDate=diaKey&&ROTEIROS[diaKey]?ROTEIROS[diaKey].date:diaKey&&diaKey.startsWith('custom_')?(appData.roteiros_custom||[]).find(d=>'custom_'+d.id===diaKey)?.data:null;
+  (window._pendingFotos||[]).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      appData.fotos.push({id:genId(),nome:file.name,src:ev.target.result,data:(diaDate?diaDate:'')+'T12:00:00',diaKey});
+      saveFirestoreData();renderMemorias();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 </script>
 </body>
 </html>
