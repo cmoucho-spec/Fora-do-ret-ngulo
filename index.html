@@ -388,11 +388,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
       </div>
       <div id="tab-memorias" class="tab">
         <div class="page-header"><div class="page-title">📷 Fotos & Diário</div><div class="page-sub">Memórias de viagem</div></div>
-        <div style="display:flex;gap:.75rem;margin-bottom:1.25rem">
-          <button class="btn-primary" onclick="document.getElementById('photo-input').click()">📎 Adicionar foto/vídeo</button>
+        <div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap">
+          <button class="btn-primary" onclick="abrirModalFoto()">📎 Adicionar foto/vídeo</button>
           <button class="btn-secondary" onclick="openModal('modal-diario')">📓 Nova entrada diário</button>
+          <select class="form-select" id="filtro-memorias" onchange="renderMemorias()" style="width:auto;min-width:160px">
+            <option value="">📅 Todos os dias</option>
+          </select>
         </div>
-        <input type="file" id="photo-input" accept="image/*,video/*" multiple style="display:none" onchange="handlePhotoUpload(event)">
         <div id="memorias-content"></div>
       </div>
       <div id="tab-gastronomia" class="tab">
@@ -527,6 +529,34 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <div class="form-group"><label class="form-label">Texto</label><textarea class="form-textarea" id="md-texto" style="min-height:120px" placeholder="Escreva as memórias do dia..."></textarea></div>
     <div class="form-actions"><button class="btn-secondary" onclick="closeModal('modal-diario')">Cancelar</button><button class="btn-primary" onclick="guardarDiario()">✓ Guardar</button></div>
   </div>
+</div>
+<div class="modal-overlay" id="modal-foto">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">📷 Adicionar foto / vídeo</div><button class="modal-close" onclick="closeModal('modal-foto')">✕</button></div>
+    <div class="form-group">
+      <label class="form-label">Ficheiro(s) *</label>
+      <input class="form-input" type="file" id="mf-file" accept="image/*,video/*" multiple>
+      <div style="font-size:.73rem;color:var(--text3);margin-top:.3rem">Pode seleccionar várias fotos/vídeos de uma vez. A catalogação aplica-se a todos.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Dia do itinerário</label>
+        <select class="form-select" id="mf-dia" onchange="atualizarParagensModal()"></select>
+      </div>
+      <div class="form-group"><label class="form-label">Ponto de paragem</label>
+        <select class="form-select" id="mf-paragem"><option value="">— (geral do dia) —</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Legenda / Nota (opcional)</label><textarea class="form-textarea" id="mf-legenda" style="min-height:70px" placeholder="Ex: Vista da cascata ao fim da tarde..."></textarea></div>
+    <div id="mf-progresso" style="display:none;font-size:.82rem;color:var(--accent);margin-bottom:.5rem"></div>
+    <div class="form-actions"><button class="btn-secondary" onclick="closeModal('modal-foto')">Cancelar</button><button class="btn-primary" id="mf-btn" onclick="confirmarFoto()">✓ Carregar</button></div>
+  </div>
+</div>
+<div id="lightbox" onclick="fecharLightbox(event)" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.92);align-items:center;justify-content:center;flex-direction:column;padding:1rem">
+  <button onclick="fecharLightbox(event,true)" style="position:absolute;top:1rem;right:1.25rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:1.4rem;cursor:pointer;border-radius:50%;width:44px;height:44px">✕</button>
+  <button onclick="navLightbox(event,-1)" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:1.6rem;cursor:pointer;border-radius:50%;width:48px;height:48px">‹</button>
+  <button onclick="navLightbox(event,1)" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:1.6rem;cursor:pointer;border-radius:50%;width:48px;height:48px">›</button>
+  <div id="lightbox-media" style="max-width:92vw;max-height:78vh;display:flex;align-items:center;justify-content:center"></div>
+  <div id="lightbox-caption" style="color:#fff;text-align:center;margin-top:1rem;max-width:80vw;font-size:.9rem;line-height:1.5"></div>
 </div>
 <div class="modal-overlay" id="modal-add-paragem">
   <div class="modal">
@@ -1302,36 +1332,164 @@ function converterMoeda(){
   }).catch(()=>{document.getElementById('conv-rate').textContent='Sem ligação à taxa de câmbio';});
 }
 function eliminarDespesa(id){appData.despesas=appData.despesas.filter(d=>d.id!==id);saveFirestoreData();renderOrcamento();renderPainel();}
+function listaDiasMemorias(){
+  // Devolve [{key, label, paragens:[nomes]}] para dias fixos + personalizados
+  const dias=[];
+  Object.entries(ROTEIROS).forEach(function(e){
+    const k=e[0],r=e[1];
+    const paragens=[];
+    (r.seccoes||[]).forEach(function(s){s.paragens.forEach(function(p){if(p.local)paragens.push(p.local);});});
+    (appData.paragens_extra&&appData.paragens_extra[k]||[]).forEach(function(p){if(p.nome)paragens.push('⭐ '+p.nome);});
+    dias.push({key:k,label:r.date+' — '+r.titulo,paragens:paragens});
+  });
+  (appData.roteiros_custom||[]).forEach(function(d){
+    const k='custom_'+d.id;
+    const paragens=(appData.paragens_extra&&appData.paragens_extra[k]||[]).map(function(p){return p.nome;});
+    dias.push({key:k,label:(d.data||'')+' — ★ '+d.titulo,paragens:paragens});
+  });
+  return dias;
+}
+function diaLabel(key){const d=listaDiasMemorias().find(function(x){return x.key===key;});return d?d.label:(key||'Sem dia');}
+function preencherFiltroMemorias(){
+  const sel=document.getElementById('filtro-memorias');if(!sel)return;
+  const atual=sel.value;
+  let opts='<option value="">📅 Todos os dias</option>';
+  listaDiasMemorias().forEach(function(d){opts+='<option value="'+d.key+'">'+d.label+'</option>';});
+  sel.innerHTML=opts;sel.value=atual;
+}
 function renderMemorias(){
+  preencherFiltroMemorias();
+  const filtro=(document.getElementById('filtro-memorias')||{}).value||'';
   let html='';
-  if(appData.fotos&&appData.fotos.length){
-    html+='<div class="card"><div class="card-header"><div class="card-title">📷 Galeria ('+appData.fotos.length+')</div></div><div class="card-body"><div class="photo-grid">';
-    html+=appData.fotos.map((f,i)=>'<img class="photo-thumb" src="'+f.url+'" onclick="window.open(\''+f.url+'\')">').join('');
-    html+='</div></div></div>';
+  const fotos=(appData.fotos||[]).filter(function(f){return !filtro||f.dia===filtro;});
+  if(fotos.length){
+    // agrupar por dia
+    const grupos={};
+    fotos.forEach(function(f){const k=f.dia||'_sem';(grupos[k]=grupos[k]||[]).push(f);});
+    const ordem=listaDiasMemorias().map(function(d){return d.key;}).concat(['_sem']);
+    ordem.forEach(function(k){
+      if(!grupos[k])return;
+      const titulo=k==='_sem'?'📷 Sem dia atribuído':'📅 '+diaLabel(k);
+      html+='<div class="card" style="margin-bottom:1rem"><div class="card-header"><div class="card-title">'+titulo+' ('+grupos[k].length+')</div></div><div class="card-body"><div class="photo-grid">';
+      grupos[k].forEach(function(f){
+        const idx=appData.fotos.indexOf(f);
+        const isVideo=f.tipo==='video'||/\.(mp4|mov|webm|avi|m4v)$/i.test(f.url||'');
+        const thumb=isVideo
+          ? '<div class="photo-thumb" style="position:relative;background:#000;display:flex;align-items:center;justify-content:center" onclick="abrirLightbox('+idx+')"><video src="'+f.url+'#t=0.5" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius)" muted preload="metadata"></video><span style="position:absolute;font-size:1.8rem;color:#fff;text-shadow:0 1px 4px #000">▶</span></div>'
+          : '<img class="photo-thumb" src="'+f.url+'" onclick="abrirLightbox('+idx+')">';
+        html+='<div style="position:relative">'+thumb
+          +'<button class="btn-danger" style="position:absolute;top:.25rem;right:.25rem;font-size:.7rem;padding:.1rem .35rem;opacity:.85" onclick="event.stopPropagation();eliminarFoto(\''+f.id+'\')">🗑</button>'
+          +(f.paragem?'<div style="font-size:.72rem;color:var(--accent);margin-top:.25rem">📍 '+f.paragem+'</div>':'')
+          +(f.legenda?'<div style="font-size:.74rem;color:var(--text2);margin-top:.1rem;line-height:1.4">'+f.legenda+'</div>':'')
+          +'</div>';
+      });
+      html+='</div></div></div>';
+    });
   }
   if(appData.diario&&appData.diario.length){
     html+='<div style="margin-top:1.25rem">';
     html+=appData.diario.slice().reverse().map(d=>'<div class="diario-entry"><div class="diario-date">📅 '+(d.data||'')+(d.local?' · '+d.local:'')+'</div><div class="diario-text">'+d.texto+'</div><button class="btn-danger" style="font-size:.72rem;padding:.15rem .45rem;margin-top:.6rem" onclick="eliminarDiario(\''+d.id+'\')">🗑 Eliminar</button></div>').join('');
     html+='</div>';
   }
-  if(!html)html='<div class="empty-state"><div class="empty-icon">📷</div><div>Sem fotos nem entradas de diário ainda.</div></div>';
+  if(!html)html='<div class="empty-state"><div class="empty-icon">📷</div><div>Sem fotos nem entradas de diário'+(filtro?' para este dia':'')+' ainda.</div></div>';
   document.getElementById('memorias-content').innerHTML=html;
 }
-function handlePhotoUpload(event){
-  const files=event.target.files;if(!files.length)return;
+function abrirModalFoto(){
+  const selDia=document.getElementById('mf-dia');
+  let opts='<option value="">— (sem dia) —</option>';
+  listaDiasMemorias().forEach(function(d){opts+='<option value="'+d.key+'">'+d.label+'</option>';});
+  selDia.innerHTML=opts;
+  // pré-selecionar o dia activo no roteiro
+  if(listaDiasMemorias().some(function(d){return d.key===roteiroAtivo;}))selDia.value=roteiroAtivo;
+  atualizarParagensModal();
+  document.getElementById('mf-legenda').value='';
+  document.getElementById('mf-file').value='';
+  document.getElementById('mf-progresso').style.display='none';
+  openModal('modal-foto');
+}
+function atualizarParagensModal(){
+  const k=document.getElementById('mf-dia').value;
+  const sel=document.getElementById('mf-paragem');
+  const d=listaDiasMemorias().find(function(x){return x.key===k;});
+  let opts='<option value="">— (geral do dia) —</option>';
+  if(d)d.paragens.forEach(function(p){opts+='<option value="'+p.replace(/"/g,'&quot;')+'">'+p+'</option>';});
+  sel.innerHTML=opts;
+}
+function confirmarFoto(){
+  const files=document.getElementById('mf-file').files;
+  if(!files.length){alert('Seleccione pelo menos um ficheiro.');return;}
+  const dia=document.getElementById('mf-dia').value;
+  const paragem=document.getElementById('mf-paragem').value;
+  const legenda=document.getElementById('mf-legenda').value.trim();
   const CLOUD='do4vyqv58',PRESET='fora_do_retangulo';
-  Array.from(files).forEach(file=>{
+  const btn=document.getElementById('mf-btn'),prog=document.getElementById('mf-progresso');
+  btn.disabled=true;prog.style.display='block';
+  let feitos=0,total=files.length;
+  prog.textContent='A carregar 0/'+total+'...';
+  if(!appData.fotos)appData.fotos=[];
+  Array.from(files).forEach(function(file){
     const fd=new FormData();fd.append('file',file);fd.append('upload_preset',PRESET);
     fetch('https://api.cloudinary.com/v1_1/'+CLOUD+'/auto/upload',{method:'POST',body:fd})
       .then(r=>r.json()).then(data=>{
         if(data.secure_url){
-          if(!appData.fotos)appData.fotos=[];
-          appData.fotos.push({id:genId(),url:data.secure_url,nome:file.name,data:new Date().toISOString().slice(0,10)});
-          saveFirestoreData();renderMemorias();
+          appData.fotos.push({id:genId(),url:data.secure_url,nome:file.name,tipo:(file.type.indexOf('video')>=0?'video':'foto'),dia:dia,paragem:paragem,legenda:legenda,data:new Date().toISOString().slice(0,10)});
         }
-      }).catch(e=>alert('Erro no upload: '+e.message));
+        feitos++;prog.textContent='A carregar '+feitos+'/'+total+'...';
+        if(feitos===total){
+          saveFirestoreData();renderMemorias();btn.disabled=false;closeModal('modal-foto');
+        }
+      }).catch(e=>{feitos++;prog.textContent='Erro num ficheiro: '+e.message;if(feitos===total){saveFirestoreData();renderMemorias();btn.disabled=false;}});
   });
 }
+function eliminarFoto(id){
+  if(!confirm('Apagar este item?'))return;
+  appData.fotos=(appData.fotos||[]).filter(function(f){return f.id!==id;});
+  saveFirestoreData();renderMemorias();
+}
+let _lbLista=[],_lbIndex=0;
+function abrirLightbox(idx){
+  const filtro=(document.getElementById('filtro-memorias')||{}).value||'';
+  _lbLista=(appData.fotos||[]).filter(function(f){return !filtro||f.dia===filtro;});
+  const alvo=appData.fotos[idx];
+  _lbIndex=_lbLista.indexOf(alvo);if(_lbIndex<0)_lbIndex=0;
+  mostrarLightbox();
+  document.getElementById('lightbox').style.display='flex';
+}
+function mostrarLightbox(){
+  const f=_lbLista[_lbIndex];if(!f)return;
+  const cont=document.getElementById('lightbox-media');
+  const isVideo=f.tipo==='video'||/\.(mp4|mov|webm|avi|m4v)$/i.test(f.url||'');
+  if(isVideo){
+    cont.innerHTML='<video src="'+f.url+'" controls autoplay playsinline style="max-width:92vw;max-height:78vh;border-radius:8px;background:#000"></video>';
+  } else {
+    cont.innerHTML='<img src="'+f.url+'" style="max-width:92vw;max-height:78vh;border-radius:8px;object-fit:contain">';
+  }
+  const partes=[];
+  if(f.dia)partes.push('📅 '+diaLabel(f.dia));
+  if(f.paragem)partes.push('📍 '+f.paragem);
+  let cap=partes.join('  ·  ');
+  if(f.legenda)cap+=(cap?'<br>':'')+'<span style="color:#ccc">'+f.legenda+'</span>';
+  document.getElementById('lightbox-caption').innerHTML=cap||'';
+}
+function navLightbox(event,dir){
+  event.stopPropagation();
+  if(!_lbLista.length)return;
+  _lbIndex=(_lbIndex+dir+_lbLista.length)%_lbLista.length;
+  mostrarLightbox();
+}
+function fecharLightbox(event,forcar){
+  if(forcar||event.target.id==='lightbox'){
+    document.getElementById('lightbox-media').innerHTML='';
+    document.getElementById('lightbox').style.display='none';
+  }
+}
+document.addEventListener('keydown',function(e){
+  if(document.getElementById('lightbox')&&document.getElementById('lightbox').style.display==='flex'){
+    if(e.key==='Escape')fecharLightbox(e,true);
+    else if(e.key==='ArrowLeft')navLightbox(e,-1);
+    else if(e.key==='ArrowRight')navLightbox(e,1);
+  }
+});
 function guardarDiario(){
   const data=document.getElementById('md-data').value;
   const local=document.getElementById('md-local').value.trim();
