@@ -279,6 +279,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
     <div class="header-logo"><span>🗺️ Fora do <em>Retângulo</em></span></div>
     <div class="header-meta">
       <div class="sync-badge">☁ Sincronizado</div>
+      <select id="seletor-viagem" onchange="mudarViagem(this.value)" style="padding:.4rem .7rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:.85rem;font-family:var(--font);cursor:pointer;max-width:230px"></select>
       <button class="btn-new" onclick="openModal('modal-nova-viagem')">+ Nova viagem</button>
       <div class="user-info" onclick="signOut()">
         <img class="user-avatar" id="user-avatar" src="" alt="">
@@ -652,6 +653,8 @@ const firebaseConfig = {
 let db, auth, currentUser;
 let appData = {viagens:[],reservas:[],despesas:[],diario:[],fotos:[],notas:[],paragens_extra:{}};
 let roteiroAtivo = 'dia1';
+let viagemAtivaId = null;
+const VIAGEM_ALPES_ID = 'v_alpes2026';
 try {
   if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
@@ -701,15 +704,65 @@ async function loadFirestoreData(){
     const snap = await db.collection('users').doc(uid).get();
     if(snap.exists){ Object.assign(appData, snap.data()); }
     if(!appData.viagens.length) initDefaultData();
-    if(!appData.checklist||!appData.checklist.length) initChecklistDefault();
-    if(!appData.mochila||!appData.mochila.length) initMochilaDefault();
+    migrarParaMultiViagem();
     if(!appData.roteiros_custom) appData.roteiros_custom=[];
     if(!appData.partilha) appData.partilha=[];
+    definirViagemAtiva();
     renderAll();
   } catch(e){
     console.error('Firestore load error:', e.message);
-    try { initDefaultData(); renderAll(); } catch(e2){ console.error('renderAll failed:', e2.message); }
+    try { initDefaultData(); migrarParaMultiViagem(); definirViagemAtiva(); renderAll(); } catch(e2){ console.error('renderAll failed:', e2.message); }
   }
+}
+function migrarParaMultiViagem(){
+  // Migração única e não-destrutiva: garante que existe a viagem dos Alpes
+  // e atribui a ela todos os dados antigos que ainda não têm viagemId.
+  if(!appData.viagens) appData.viagens=[];
+  let alpes = appData.viagens.find(v=>v.id===VIAGEM_ALPES_ID);
+  // Compatibilidade: a viagem antiga tinha id 'v1'
+  if(!alpes){
+    const antiga = appData.viagens.find(v=>v.id==='v1' || (v.nome&&v.nome.indexOf('Suíça')>=0));
+    if(antiga){ antiga.id=VIAGEM_ALPES_ID; antiga.temRoteiroFixo=true; alpes=antiga; }
+  }
+  if(!alpes){
+    appData.viagens.unshift({id:VIAGEM_ALPES_ID,nome:'Luxemburgo, Suíça & Itália 2026',pais:'Luxemburgo · Suíça · Itália · França',cidades:'Luxemburgo, Estrasburgo, Berna, Thun, Zermatt, Como, Lugano, Colmar',inicio:'2026-05-26',fim:'2026-05-30',orcamento:3000,stars:5,estado:'planned',temRoteiroFixo:true,notas:'Viagem épica pelos Alpes — 5 dias, 4 países'});
+    alpes = appData.viagens[0];
+  } else {
+    alpes.temRoteiroFixo = true;
+  }
+  // Atribuir dados sem viagemId à viagem dos Alpes (dados pré-multiviagem)
+  ['reservas','despesas','fotos','diario'].forEach(function(col){
+    if(!appData[col]) appData[col]=[];
+    appData[col].forEach(function(item){ if(!item.viagemId) item.viagemId=VIAGEM_ALPES_ID; });
+  });
+  // Checklist e mochila passam a ser por viagem: appData.checklists[viagemId] e appData.mochilas[viagemId]
+  if(!appData.checklists) appData.checklists={};
+  if(!appData.mochilas) appData.mochilas={};
+  // migrar checklist/mochila antigas (globais) para a viagem dos Alpes
+  if(appData.checklist && appData.checklist.length && !appData.checklists[VIAGEM_ALPES_ID]){
+    appData.checklists[VIAGEM_ALPES_ID]=appData.checklist; delete appData.checklist;
+  }
+  if(appData.mochila && appData.mochila.length && !appData.mochilas[VIAGEM_ALPES_ID]){
+    appData.mochilas[VIAGEM_ALPES_ID]=appData.mochila; delete appData.mochila;
+  }
+  if(!appData.checklists[VIAGEM_ALPES_ID]) appData.checklists[VIAGEM_ALPES_ID]=checklistDefaultArray();
+  if(!appData.mochilas[VIAGEM_ALPES_ID]) appData.mochilas[VIAGEM_ALPES_ID]=mochilaDefaultArray();
+}
+function definirViagemAtiva(){
+  if(!viagemAtivaId || !appData.viagens.some(v=>v.id===viagemAtivaId)){
+    viagemAtivaId = (appData.viagens[0]&&appData.viagens[0].id)||VIAGEM_ALPES_ID;
+  }
+}
+function getViagemAtiva(){ return appData.viagens.find(v=>v.id===viagemAtivaId)||appData.viagens[0]; }
+function mudarViagem(id){
+  viagemAtivaId=id;
+  const v=getViagemAtiva();
+  // se a nova viagem não tem roteiro fixo, garantir estruturas próprias
+  if(!appData.checklists[id]) appData.checklists[id]=[];
+  if(!appData.mochilas[id]) appData.mochilas[id]=[];
+  roteiroAtivo = (v&&v.temRoteiroFixo)?'dia1':null;
+  renderAll();
+  showTab('tab-painel');
 }
 async function saveFirestoreData(){
   if(!currentUser) return;
@@ -718,30 +771,33 @@ async function saveFirestoreData(){
 }
 function initDefaultData(){
   appData.viagens = [{
-    id:'v1',nome:'Luxemburgo, Suíça & Itália 2026',
+    id:VIAGEM_ALPES_ID,nome:'Luxemburgo, Suíça & Itália 2026',
     pais:'Luxemburgo · Suíça · Itália · França',
     cidades:'Luxemburgo, Estrasburgo, Berna, Thun, Zermatt, Como, Lugano, Colmar',
     inicio:'2026-05-26',fim:'2026-05-30',orcamento:3000,stars:5,estado:'planned',
+    temRoteiroFixo:true,
     notas:'Viagem épica pelos Alpes — 5 dias, 4 países'
   }];
   appData.reservas = [
-    {id:'r1',tipo:'✈',desc:'TAP Lisboa → Genebra (TP531)',data:'2026-05-26',hora:'06:15',ref:'TP531LIS',fornecedor:'TAP Air Portugal',valor:420,estado:'pago',notas:'Check-in online 24h antes'},
-    {id:'r2',tipo:'✈',desc:'Luxemburgo → Lisboa (TP538)',data:'2026-05-30',hora:'21:40',ref:'TP538LUX',fornecedor:'TAP Air Portugal',valor:380,estado:'pago',notas:''},
-    {id:'r3',tipo:'🚗',desc:'Hertz · Geneva Airport',data:'2026-05-26',hora:'09:00',ref:'HERTZ2026',fornecedor:'Hertz',valor:285,estado:'porpagar',notas:'Classe C ou superior · Devolver Luxemburgo'},
-    {id:'r4',tipo:'🏨',desc:'Mooshof Buchsi Apartments · Münchenbuchsee (2 noites)',data:'2026-05-26',hora:'14:00',ref:'BUCHSI26',fornecedor:'Mooshof',valor:210,estado:'porpagar',notas:'Moosgasse 39 · Check-in 14h'},
-    {id:'r5',tipo:'🏨',desc:'Krattigstrasse 35 · Spiez (1 noite)',data:'2026-05-27',hora:'22:00',ref:'SPIEZ26',fornecedor:'Airbnb',valor:145,estado:'pago',notas:'Vista para Lago de Thun'},
-    {id:'r6',tipo:'🏨',desc:'Hotel Blue Relais Maggiore · Castelletto (1 noite)',data:'2026-05-28',hora:'20:30',ref:'BLUERELAIS26',fornecedor:'Hotel',valor:185,estado:'porpagar',notas:'Via Sempione 182 · Junto a Malpensa'},
-    {id:'r7',tipo:'🏨',desc:'Hotel Alpenrose beim Ballenberg · Brienz (1 noite)',data:'2026-05-29',hora:'21:45',ref:'ALPENROSE26',fornecedor:'Hotel Alpenrose',valor:165,estado:'pago',notas:'Dorfstrasse 60 · Hofstetten b. Brienz'}
+    {id:'r1',viagemId:VIAGEM_ALPES_ID,tipo:'✈',desc:'TAP Lisboa → Genebra (TP531)',data:'2026-05-26',hora:'06:15',ref:'TP531LIS',fornecedor:'TAP Air Portugal',valor:420,estado:'pago',notas:'Check-in online 24h antes'},
+    {id:'r2',viagemId:VIAGEM_ALPES_ID,tipo:'✈',desc:'Luxemburgo → Lisboa (TP538)',data:'2026-05-30',hora:'21:40',ref:'TP538LUX',fornecedor:'TAP Air Portugal',valor:380,estado:'pago',notas:''},
+    {id:'r3',viagemId:VIAGEM_ALPES_ID,tipo:'🚗',desc:'Hertz · Geneva Airport',data:'2026-05-26',hora:'09:00',ref:'HERTZ2026',fornecedor:'Hertz',valor:285,estado:'porpagar',notas:'Classe C ou superior · Devolver Luxemburgo'},
+    {id:'r4',viagemId:VIAGEM_ALPES_ID,tipo:'🏨',desc:'Mooshof Buchsi Apartments · Münchenbuchsee (2 noites)',data:'2026-05-26',hora:'14:00',ref:'BUCHSI26',fornecedor:'Mooshof',valor:210,estado:'porpagar',notas:'Moosgasse 39 · Check-in 14h'},
+    {id:'r5',viagemId:VIAGEM_ALPES_ID,tipo:'🏨',desc:'Krattigstrasse 35 · Spiez (1 noite)',data:'2026-05-27',hora:'22:00',ref:'SPIEZ26',fornecedor:'Airbnb',valor:145,estado:'pago',notas:'Vista para Lago de Thun'},
+    {id:'r6',viagemId:VIAGEM_ALPES_ID,tipo:'🏨',desc:'Hotel Blue Relais Maggiore · Castelletto (1 noite)',data:'2026-05-28',hora:'20:30',ref:'BLUERELAIS26',fornecedor:'Hotel',valor:185,estado:'porpagar',notas:'Via Sempione 182 · Junto a Malpensa'},
+    {id:'r7',viagemId:VIAGEM_ALPES_ID,tipo:'🏨',desc:'Hotel Alpenrose beim Ballenberg · Brienz (1 noite)',data:'2026-05-29',hora:'21:45',ref:'ALPENROSE26',fornecedor:'Hotel Alpenrose',valor:165,estado:'pago',notas:'Dorfstrasse 60 · Hofstetten b. Brienz'}
   ];
   appData.despesas = [
-    {id:'d1',desc:'Combustível A6 Berna→Thun',cat:'Transporte',valor:28,data:'2026-05-27'},
-    {id:'d2',desc:'Bilhetes Trümmelbach Falls (x2)',cat:'Actividades',valor:44,data:'2026-05-27'},
-    {id:'d3',desc:'Almoço Lauterbrunnen',cat:'Alimentação',valor:62,data:'2026-05-27'},
-    {id:'d4',desc:'Parking Thun (2h)',cat:'Transporte',valor:8,data:'2026-05-27'}
+    {id:'d1',viagemId:VIAGEM_ALPES_ID,desc:'Combustível A6 Berna→Thun',cat:'Transporte',valor:28,data:'2026-05-27'},
+    {id:'d2',viagemId:VIAGEM_ALPES_ID,desc:'Bilhetes Trümmelbach Falls (x2)',cat:'Actividades',valor:44,data:'2026-05-27'},
+    {id:'d3',viagemId:VIAGEM_ALPES_ID,desc:'Almoço Lauterbrunnen',cat:'Alimentação',valor:62,data:'2026-05-27'},
+    {id:'d4',viagemId:VIAGEM_ALPES_ID,desc:'Parking Thun (2h)',cat:'Transporte',valor:8,data:'2026-05-27'}
   ];
   appData.diario=[];appData.fotos=[];appData.notas=[];
   appData.paragens_extra={};appData.roteiros_custom=[];appData.partilha=[];
-  initChecklistDefault();initMochilaDefault();
+  appData.checklists={};appData.mochilas={};
+  appData.checklists[VIAGEM_ALPES_ID]=checklistDefaultArray();
+  appData.mochilas[VIAGEM_ALPES_ID]=mochilaDefaultArray();
 }
 const ROTEIROS = {
   dia1:{
@@ -989,8 +1045,8 @@ const GASTRONOMIA = {
     pratos:[{nome:"Choucroute Garnie",desc:"Repolho fermentado com salsichas, bacon fumado e batata cozinhado em Riesling. Prato nacional alsaciano.",vinho:"Riesling d'Alsace",epoca:"Todo o ano. Melhor outono/inverno nas winstubs."},{nome:"Tarte Flambée (Flammekueche)",desc:"Massa fina de forno a lenha com crème fraîche, cebola e lardons. O equivalente alsaciano da pizza.",vinho:"Pinot Blanc ou Sylvaner",epoca:"Todo o ano. ~2 por pessoa ao jantar."},{nome:"Foie Gras d'Alsace",desc:"O foie gras moderno nasceu aqui. Terrina ou salteado com gengibre e frutos.",vinho:"Gewurztraminer VT ou Pinot Gris",epoca:"Entrada de jantar especial."},{nome:"Kugelhopf",desc:"Bolo de fermentação lenta com amêndoas, passas e kirsch em molde de coroa.",vinho:"Crémant d'Alsace ou Muscat",epoca:"Pequeno-almoço ou sobremesa."}]
   }
 };
-function initChecklistDefault(){
-  appData.checklist = [
+function checklistDefaultArray(){
+  return [
     {id:'c1',label:'Verificar validade do passaporte (min. 6 meses)',cat:'doc',done:false},
     {id:'c2',label:'Carta de condução internacional',cat:'doc',done:false},
     {id:'c3',label:'Cartão europeu de saúde (CESD)',cat:'doc',done:false},
@@ -1010,8 +1066,9 @@ function initChecklistDefault(){
     {id:'c17',label:'⚠️ Vinheta suíça (CHF 40) — comprar em Basel ou e-vignette.ch',cat:'res',done:false}
   ];
 }
-function initMochilaDefault(){
-  appData.mochila = [
+function initChecklistDefault(){ if(viagemAtivaId){ if(!appData.checklists)appData.checklists={}; appData.checklists[viagemAtivaId]=checklistDefaultArray(); } }
+function mochilaDefaultArray(){
+  return [
     {id:'m1',nome:'Passaporte válido (min. 6 meses)',cat:'Documentos',obs:'Verificar prazo de validade',packed:false},
     {id:'m2',nome:'Carta de condução internacional',cat:'Documentos',obs:'',packed:false},
     {id:'m3',nome:'Cartão europeu de saúde (CESD)',cat:'Documentos',obs:'',packed:false},
@@ -1037,6 +1094,7 @@ function initMochilaDefault(){
     {id:'m23',nome:'Kit primeiros socorros',cat:'Medicamentos',obs:'Pensos, analgésicos',packed:false}
   ];
 }
+function initMochilaDefault(){ if(viagemAtivaId){ if(!appData.mochilas)appData.mochilas={}; appData.mochilas[viagemAtivaId]=mochilaDefaultArray(); } }
 let _worldMap = null;
 let _roteiroMap = null;
 const ROTEIRO_COORDS = {
@@ -1175,25 +1233,51 @@ function guardarEdicaoViagem(){
   if(nome)v.nome=nome;if(inicio)v.inicio=inicio;if(fim)v.fim=fim;if(paises)v.paises=paises;
   saveFirestoreData();closeModal('modal-editar-viagem');renderPainel();renderDestinos();
 }
-function renderAll(){renderPainel();renderDestinos();renderRoteiros();renderReservas();renderOrcamento();renderMemorias();renderMochila();renderGastronomia();renderPartilha();}
+function reservasViagem(){return (appData.reservas||[]).filter(r=>r.viagemId===viagemAtivaId);}
+function despesasViagem(){return (appData.despesas||[]).filter(d=>d.viagemId===viagemAtivaId);}
+function fotosViagem(){return (appData.fotos||[]).filter(f=>f.viagemId===viagemAtivaId);}
+function diarioViagem(){return (appData.diario||[]).filter(d=>d.viagemId===viagemAtivaId);}
+function checklistViagem(){if(!appData.checklists)appData.checklists={};if(!appData.checklists[viagemAtivaId])appData.checklists[viagemAtivaId]=[];return appData.checklists[viagemAtivaId];}
+function mochilaViagem(){if(!appData.mochilas)appData.mochilas={};if(!appData.mochilas[viagemAtivaId])appData.mochilas[viagemAtivaId]=[];return appData.mochilas[viagemAtivaId];}
+function preencherSeletorViagem(){
+  const sel=document.getElementById('seletor-viagem');if(!sel)return;
+  sel.innerHTML=(appData.viagens||[]).map(v=>'<option value="'+v.id+'"'+(v.id===viagemAtivaId?' selected':'')+'>'+(v.estado==='visited'?'✅ ':'🔜 ')+(v.nome||'(sem nome)')+'</option>').join('');
+}
+function renderAll(){preencherSeletorViagem();renderPainel();renderDestinos();renderRoteiros();renderReservas();renderOrcamento();renderMemorias();renderMochila();renderGastronomia();renderPartilha();}
 function renderPainel(){
   startCountdown();renderNotifBanner();renderChecklistPainel();renderPagamentosPainel();
-  const totalGasto=appData.despesas.reduce((a,b)=>a+(b.valor||0),0);
-  document.getElementById('stats-row').innerHTML=`<div class="stat-card"><div class="stat-num" style="color:var(--accent)">${appData.viagens.length}</div><div class="stat-label">Viagens</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green)">${appData.reservas.length}</div><div class="stat-label">Reservas</div></div><div class="stat-card"><div class="stat-num" style="color:var(--orange)">${appData.despesas.length}</div><div class="stat-label">Despesas</div></div><div class="stat-card"><div class="stat-num" style="color:var(--purple)">4</div><div class="stat-label">Países</div></div><div class="stat-card"><div class="stat-num" style="color:var(--red)">€${totalGasto.toFixed(0)}</div><div class="stat-label">Gasto total</div></div><div class="stat-card"><div class="stat-num" style="color:var(--teal)">5</div><div class="stat-label">Dias de viagem</div></div>`;
-  document.getElementById('proximas-viagens').innerHTML=appData.viagens.map(v=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--border)"><div style="font-size:1.5rem">✈</div><div style="flex:1"><div style="font-weight:600;font-size:.9rem">${v.nome}</div><div style="font-size:.78rem;color:var(--text2)">${v.inicio||'?'} → ${v.fim||'?'} · ${v.pais||''}</div></div><span class="status-badge ${v.estado==='visited'?'status-visited':'status-planned'}">${v.estado==='visited'?'Visitado':'Planeado'}</span></div>`).join('')||'<div class="empty-state"><div class="empty-icon">✈</div><div>Sem viagens registadas</div></div>';
-  const orcTotal=appData.viagens.reduce((a,b)=>a+(b.orcamento||0),0);
-  const catMap={};appData.despesas.forEach(d=>{catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0);});
+  const v=getViagemAtiva();
+  const reservas=reservasViagem(),despesas=despesasViagem();
+  const totalGasto=despesas.reduce((a,b)=>a+(b.valor||0),0);
+  const nPaises=v&&v.pais?v.pais.split(/·|,/).filter(x=>x.trim()).length:0;
+  const nDias=(v&&v.temRoteiroFixo)?5:(appData.roteiros_custom||[]).filter(d=>d.viagemId===viagemAtivaId).length;
+  document.getElementById('stats-row').innerHTML=`<div class="stat-card"><div class="stat-num" style="color:var(--accent)">${appData.viagens.length}</div><div class="stat-label">Viagens</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green)">${reservas.length}</div><div class="stat-label">Reservas</div></div><div class="stat-card"><div class="stat-num" style="color:var(--orange)">${despesas.length}</div><div class="stat-label">Despesas</div></div><div class="stat-card"><div class="stat-num" style="color:var(--purple)">${nPaises}</div><div class="stat-label">Países</div></div><div class="stat-card"><div class="stat-num" style="color:var(--red)">€${totalGasto.toFixed(0)}</div><div class="stat-label">Gasto</div></div><div class="stat-card"><div class="stat-num" style="color:var(--teal)">${nDias||'—'}</div><div class="stat-label">Dias</div></div>`;
+  document.getElementById('proximas-viagens').innerHTML=appData.viagens.map(v=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--border);cursor:pointer;${v.id===viagemAtivaId?'background:rgba(88,166,255,.05)':''}" onclick="mudarViagem('${v.id}')"><div style="font-size:1.5rem">✈</div><div style="flex:1"><div style="font-weight:600;font-size:.9rem">${v.nome}${v.id===viagemAtivaId?' <span style="font-size:.7rem;color:var(--accent)">● activa</span>':''}</div><div style="font-size:.78rem;color:var(--text2)">${v.inicio||'?'} → ${v.fim||'?'} · ${v.pais||''}</div></div><span class="status-badge ${v.estado==='visited'?'status-visited':'status-planned'}">${v.estado==='visited'?'Visitado':'Planeado'}</span></div>`).join('')||'<div class="empty-state"><div class="empty-icon">✈</div><div>Sem viagens registadas</div></div>';
+  const orcTotal=v?(v.orcamento||0):0;
+  const catMap={};despesas.forEach(d=>{catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0);});
   const cats=Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
   const catColors={Alojamento:'#58a6ff',Transporte:'#3fb950','Alimentação':'#d29922',Actividades:'#bc8cff',Compras:'#f85149',Outro:'#8b949e'};
-  document.getElementById('orcamento-resumo-painel').innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:.75rem"><span style="color:var(--text2);font-size:.85rem">Orçamento total</span><span style="font-weight:600">€${orcTotal.toLocaleString()}</span></div><div style="display:flex;justify-content:space-between;margin-bottom:1rem"><span style="color:var(--text2);font-size:.85rem">Gasto registado</span><span style="font-weight:600;color:var(--orange)">€${totalGasto.toFixed(2)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,(totalGasto/orcTotal)*100||0)}%;background:var(--accent)"></div></div>${cats.map(([cat,val])=>`<div style="display:flex;justify-content:space-between;font-size:.82rem;margin:.35rem 0"><span style="color:var(--text2);display:flex;align-items:center;gap:.4rem"><span style="width:8px;height:8px;border-radius:50%;background:${catColors[cat]||'#888'};display:inline-block"></span>${cat}</span><span>€${val.toFixed(2)}</span></div>`).join('')||'<div style="font-size:.82rem;color:var(--text3);text-align:center;padding:.5rem">Sem despesas registadas</div>'}<div class="divider"></div><div style="font-size:.8rem;color:var(--text3)">💡 Dia 1: €85–147/p · Dia 2: €159–335/p · Dia 3: €145–288/p · Dia 4: €75–130/p · Dia 5: €108–211/p</div>`;
+  const dica=(v&&v.temRoteiroFixo)?'<div class="divider"></div><div style="font-size:.8rem;color:var(--text3)">💡 Dia 1: €85–147/p · Dia 2: €159–335/p · Dia 3: €145–288/p · Dia 4: €75–130/p · Dia 5: €108–211/p</div>':'';
+  document.getElementById('orcamento-resumo-painel').innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:.75rem"><span style="color:var(--text2);font-size:.85rem">Orçamento ${v?(v.nome||''):''}</span><span style="font-weight:600">€${orcTotal.toLocaleString()}</span></div><div style="display:flex;justify-content:space-between;margin-bottom:1rem"><span style="color:var(--text2);font-size:.85rem">Gasto registado</span><span style="font-weight:600;color:var(--orange)">€${totalGasto.toFixed(2)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,(totalGasto/orcTotal)*100||0)}%;background:var(--accent)"></div></div>${cats.map(([cat,val])=>`<div style="display:flex;justify-content:space-between;font-size:.82rem;margin:.35rem 0"><span style="color:var(--text2);display:flex;align-items:center;gap:.4rem"><span style="width:8px;height:8px;border-radius:50%;background:${catColors[cat]||'#888'};display:inline-block"></span>${cat}</span><span>€${val.toFixed(2)}</span></div>`).join('')||'<div style="font-size:.82rem;color:var(--text3);text-align:center;padding:.5rem">Sem despesas registadas</div>'}${dica}`;
 }
 function renderDestinos(){
   document.getElementById('destinos-grid').innerHTML=appData.viagens.map(v=>`<div class="dest-card"><span class="status-badge ${v.estado==='visited'?'status-visited':'status-planned'}">${v.estado==='visited'?'Visitado':'Planeado'}</span><div class="dest-flag">✈</div><div class="dest-name">${v.nome}</div><div class="dest-country">${v.pais||''}</div><div class="dest-dates" style="margin-bottom:.5rem">${v.inicio||''} → ${v.fim||''}</div><div class="stars">${'⭐'.repeat(v.stars||0)}</div>${v.notas?`<div style="font-size:.78rem;color:var(--text3);margin-top:.5rem">${v.notas}</div>`:''} ${v.orcamento?`<div style="font-size:.8rem;color:var(--green);margin-top:.4rem">Orçamento: €${v.orcamento.toLocaleString()}</div>`:''}<div style="margin-top:.75rem;display:flex;gap:.4rem;flex-wrap:wrap">${(v.cidades||'').split(',').map(c=>`<span class="tag tag-blue">${c.trim()}</span>`).join('')}</div></div>`).join('')||`<div class="empty-state"><div class="empty-icon">📍</div><div>Sem destinos. Adicione uma nova viagem!</div></div>`;
 }
 function renderRoteiros(){
-  const custom=appData.roteiros_custom||[];
-  const fixedBtns=Object.entries(ROTEIROS).map(([k,r])=>`<button class="roteiro-btn ${k===roteiroAtivo?'active':''}" onclick="setRoteiro('${k}')"><span class="dia">${r.date}</span><span class="titulo">${r.titulo}</span></button>`).join('');
+  const v=getViagemAtiva();
+  const temFixo=v&&v.temRoteiroFixo;
+  const custom=(appData.roteiros_custom||[]).filter(d=>d.viagemId===viagemAtivaId);
+  if(!temFixo && !custom.length){
+    document.getElementById('roteiro-selector').innerHTML='';
+    document.getElementById('roteiro-content').innerHTML='<div class="empty-state"><div class="empty-icon">🗺️</div><div style="font-weight:600;margin-bottom:.4rem">Sem roteiro para «'+(v?v.nome:'')+'»</div><div style="font-size:.85rem;max-width:420px;margin:0 auto;line-height:1.6">Use o botão <strong>«📅 + Novo dia»</strong> acima para começar a construir o itinerário desta viagem, e depois <strong>«+ Paragem»</strong> para adicionar os pontos de cada dia.</div></div>';
+    const cont=document.getElementById('roteiro-map-container');if(cont)cont.style.display='none';
+    return;
+  }
+  const fixedBtns=temFixo?Object.entries(ROTEIROS).map(([k,r])=>`<button class="roteiro-btn ${k===roteiroAtivo?'active':''}" onclick="setRoteiro('${k}')"><span class="dia">${r.date}</span><span class="titulo">${r.titulo}</span></button>`).join(''):'';
   const customBtns=custom.map(d=>`<button class="roteiro-btn ${'custom_'+d.id===roteiroAtivo?'active':''}" onclick="setRoteiro('custom_${d.id}')"><span class="dia">${d.data}</span><span class="titulo">★ ${d.titulo}</span></button>`).join('');
+  // garantir um roteiroAtivo válido para esta viagem
+  if(temFixo){ if(!roteiroAtivo||(roteiroAtivo.startsWith('custom_')&&!custom.some(d=>'custom_'+d.id===roteiroAtivo))) roteiroAtivo='dia1'; }
+  else { if(!roteiroAtivo||!roteiroAtivo.startsWith('custom_')||!custom.some(d=>'custom_'+d.id===roteiroAtivo)) roteiroAtivo='custom_'+custom[0].id; }
   document.getElementById('roteiro-selector').innerHTML=fixedBtns+customBtns;
   renderRoteiroContent();
 }
@@ -1214,6 +1298,7 @@ function buildServicosHTML(key){
   return '<div class="card" style="margin-top:1rem"><div class="card-header"><div class="card-title">🛒 Supermercados & Fast Food na rota</div></div><div class="card-body"><div class="grid-2" style="gap:.75rem"><div><div style="font-size:.79rem;font-weight:600;color:var(--text2);margin-bottom:.35rem">🛒 Supermercados</div>'+supHTML+'</div><div><div style="font-size:.79rem;font-weight:600;color:var(--text2);margin-bottom:.35rem">🍔 Fast Food</div>'+ffHTML+'</div></div></div></div>';
 }
 function renderRoteiroContent(){
+  if(!roteiroAtivo){document.getElementById('roteiro-content').innerHTML='';return;}
   const customKey=roteiroAtivo.startsWith('custom_');
   if(customKey){
     const r=(appData.roteiros_custom||[]).find(d=>'custom_'+d.id===roteiroAtivo);
@@ -1257,8 +1342,9 @@ function renderRoteiroContent(){
 }
 function toggleSeccao(el){const content=el.nextElementSibling;if(content.style.display==='none'){content.style.display='block';el.querySelector('.periodo').textContent=el.querySelector('.periodo').textContent.replace('▸','▾');}else{content.style.display='none';el.querySelector('.periodo').textContent=el.querySelector('.periodo').textContent.replace('▾','▸');}}
 function renderReservas(){
-  const pagas=appData.reservas.filter(r=>r.estado==='pago');
-  const porPagar=appData.reservas.filter(r=>r.estado!=='pago');
+  const lista=reservasViagem();
+  const pagas=lista.filter(r=>r.estado==='pago');
+  const porPagar=lista.filter(r=>r.estado!=='pago');
   const totalPago=pagas.reduce((a,b)=>a+(b.valor||0),0);
   const totalPorPagar=porPagar.reduce((a,b)=>a+(b.valor||0),0);
   let html='<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem">';
@@ -1266,7 +1352,7 @@ function renderReservas(){
   html+='<div class="stat-card" style="flex:1;min-width:140px"><div class="stat-num" style="color:var(--orange);font-size:1.4rem">€'+totalPorPagar.toFixed(0)+'</div><div class="stat-label">Por pagar ('+porPagar.length+')</div></div>';
   html+='<div class="stat-card" style="flex:1;min-width:140px"><div class="stat-num" style="color:var(--accent);font-size:1.4rem">€'+(totalPago+totalPorPagar).toFixed(0)+'</div><div class="stat-label">Total reservas</div></div></div>';
   html+='<div class="card"><div class="card-body" style="padding:0">';
-  html+=appData.reservas.map(function(r){
+  html+=lista.map(function(r){
     const badge=r.estado==='pago'?'<span class="status-badge status-visited" style="position:static">✅ Pago</span>':'<span class="status-badge" style="position:static;background:rgba(210,153,34,.15);color:var(--orange);border:1px solid rgba(210,153,34,.3)">⏳ Por pagar</span>';
     const docs=getReservaDocs(r.id);
     let docsHTML='<div class="res-docs">';
@@ -1301,14 +1387,16 @@ function abrirDoc(rid,did){
 }
 function eliminarReserva(id){if(!confirm('Eliminar esta reserva?'))return;appData.reservas=appData.reservas.filter(r=>r.id!==id);if(appData.reserva_docs)delete appData.reserva_docs[id];saveFirestoreData();renderReservas();renderPainel();}
 function renderOrcamento(){
-  const orcTotal=appData.viagens.reduce((a,b)=>a+(b.orcamento||0),0);
-  const totalGasto=appData.despesas.reduce((a,b)=>a+(b.valor||0),0);
-  const catMap={};appData.despesas.forEach(d=>{catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0);});
+  const v=getViagemAtiva();
+  const despesas=despesasViagem();
+  const orcTotal=v?(v.orcamento||0):0;
+  const totalGasto=despesas.reduce((a,b)=>a+(b.valor||0),0);
+  const catMap={};despesas.forEach(d=>{catMap[d.cat]=(catMap[d.cat]||0)+(d.valor||0);});
   const cats=Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
   const catColors={Alojamento:'#58a6ff',Transporte:'#3fb950','Alimentação':'#d29922',Actividades:'#bc8cff',Compras:'#f85149',Outro:'#8b949e'};
   let html='<div class="stats-row"><div class="stat-card"><div class="stat-num" style="color:var(--accent)">€'+orcTotal.toLocaleString()+'</div><div class="stat-label">Orçamento</div></div><div class="stat-card"><div class="stat-num" style="color:var(--orange)">€'+totalGasto.toFixed(0)+'</div><div class="stat-label">Gasto</div></div><div class="stat-card"><div class="stat-num" style="color:var(--green)">€'+(orcTotal-totalGasto).toFixed(0)+'</div><div class="stat-label">Restante</div></div></div>';
   html+='<div class="grid-2"><div class="card"><div class="card-header"><div class="card-title">📋 Despesas registadas</div><button class="btn-secondary" style="font-size:.75rem;padding:.25rem .6rem" onclick="exportarCSV()">⬇ CSV</button></div><div class="card-body">';
-  html+=appData.despesas.map(d=>'<div class="despesa-item"><span class="cat-dot" style="background:'+(catColors[d.cat]||'#888')+'"></span><div class="despesa-info"><div class="despesa-nome">'+d.desc+'</div><div class="despesa-cat">'+d.cat+' · '+(d.data||'')+'</div></div><div class="despesa-valor">€'+(d.valor||0).toFixed(2)+'</div><button class="btn-danger" style="font-size:.72rem;padding:.15rem .4rem;margin-left:.5rem" onclick="eliminarDespesa(\''+d.id+'\')">🗑</button></div>').join('')||'<div class="empty-state"><div class="empty-icon">💰</div><div>Sem despesas</div></div>';
+  html+=despesas.map(d=>'<div class="despesa-item"><span class="cat-dot" style="background:'+(catColors[d.cat]||'#888')+'"></span><div class="despesa-info"><div class="despesa-nome">'+d.desc+'</div><div class="despesa-cat">'+d.cat+' · '+(d.data||'')+'</div></div><div class="despesa-valor">€'+(d.valor||0).toFixed(2)+'</div><button class="btn-danger" style="font-size:.72rem;padding:.15rem .4rem;margin-left:.5rem" onclick="eliminarDespesa(\''+d.id+'\')">🗑</button></div>').join('')||'<div class="empty-state"><div class="empty-icon">💰</div><div>Sem despesas</div></div>';
   html+='</div></div><div class="card"><div class="card-header"><div class="card-title">📊 Por categoria</div></div><div class="card-body">';
   html+=cats.map(([cat,val])=>'<div style="margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.25rem"><span>'+cat+'</span><span style="font-weight:600">€'+val.toFixed(2)+'</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+((val/totalGasto)*100||0)+'%;background:'+(catColors[cat]||'#888')+'"></div></div></div>').join('')||'<div style="font-size:.82rem;color:var(--text3)">Sem dados</div>';
   html+='<div class="divider"></div><div style="font-size:.8rem;color:var(--text2);line-height:1.7">💱 <strong>Conversor CHF↔EUR</strong><br><div style="display:flex;gap:.5rem;margin-top:.5rem"><input class="form-input" id="conv-chf" type="number" placeholder="CHF" style="flex:1" oninput="converterMoeda()"><span style="align-self:center">→</span><input class="form-input" id="conv-eur" type="number" placeholder="EUR" style="flex:1" readonly></div><div id="conv-rate" style="font-size:.74rem;color:var(--text3);margin-top:.3rem"></div></div>';
@@ -1317,7 +1405,7 @@ function renderOrcamento(){
 }
 function exportarCSV(){
   let csv='Descrição,Categoria,Valor,Data\n';
-  appData.despesas.forEach(d=>{csv+='"'+d.desc+'","'+d.cat+'",'+(d.valor||0)+',"'+(d.data||'')+'"\n';});
+  despesasViagem().forEach(d=>{csv+='"'+d.desc+'","'+d.cat+'",'+(d.valor||0)+',"'+(d.data||'')+'"\n';});
   const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='despesas_fora_do_retangulo.csv';a.click();
 }
@@ -1333,16 +1421,19 @@ function converterMoeda(){
 }
 function eliminarDespesa(id){appData.despesas=appData.despesas.filter(d=>d.id!==id);saveFirestoreData();renderOrcamento();renderPainel();}
 function listaDiasMemorias(){
-  // Devolve [{key, label, paragens:[nomes]}] para dias fixos + personalizados
+  // Devolve [{key, label, paragens:[nomes]}] para a viagem ativa
   const dias=[];
-  Object.entries(ROTEIROS).forEach(function(e){
-    const k=e[0],r=e[1];
-    const paragens=[];
-    (r.seccoes||[]).forEach(function(s){s.paragens.forEach(function(p){if(p.local)paragens.push(p.local);});});
-    (appData.paragens_extra&&appData.paragens_extra[k]||[]).forEach(function(p){if(p.nome)paragens.push('⭐ '+p.nome);});
-    dias.push({key:k,label:r.date+' — '+r.titulo,paragens:paragens});
-  });
-  (appData.roteiros_custom||[]).forEach(function(d){
+  const v=getViagemAtiva();
+  if(v&&v.temRoteiroFixo){
+    Object.entries(ROTEIROS).forEach(function(e){
+      const k=e[0],r=e[1];
+      const paragens=[];
+      (r.seccoes||[]).forEach(function(s){s.paragens.forEach(function(p){if(p.local)paragens.push(p.local);});});
+      (appData.paragens_extra&&appData.paragens_extra[k]||[]).forEach(function(p){if(p.nome)paragens.push('⭐ '+p.nome);});
+      dias.push({key:k,label:r.date+' — '+r.titulo,paragens:paragens});
+    });
+  }
+  (appData.roteiros_custom||[]).filter(function(d){return d.viagemId===viagemAtivaId;}).forEach(function(d){
     const k='custom_'+d.id;
     const paragens=(appData.paragens_extra&&appData.paragens_extra[k]||[]).map(function(p){return p.nome;});
     dias.push({key:k,label:(d.data||'')+' — ★ '+d.titulo,paragens:paragens});
@@ -1361,7 +1452,7 @@ function renderMemorias(){
   preencherFiltroMemorias();
   const filtro=(document.getElementById('filtro-memorias')||{}).value||'';
   let html='';
-  const fotos=(appData.fotos||[]).filter(function(f){return !filtro||f.dia===filtro;});
+  const fotos=fotosViagem().filter(function(f){return !filtro||f.dia===filtro;});
   if(fotos.length){
     // agrupar por dia
     const grupos={};
@@ -1386,9 +1477,10 @@ function renderMemorias(){
       html+='</div></div></div>';
     });
   }
-  if(appData.diario&&appData.diario.length){
+  const diarios=diarioViagem();
+  if(diarios.length){
     html+='<div style="margin-top:1.25rem">';
-    html+=appData.diario.slice().reverse().map(d=>'<div class="diario-entry"><div class="diario-date">📅 '+(d.data||'')+(d.local?' · '+d.local:'')+'</div><div class="diario-text">'+d.texto+'</div><button class="btn-danger" style="font-size:.72rem;padding:.15rem .45rem;margin-top:.6rem" onclick="eliminarDiario(\''+d.id+'\')">🗑 Eliminar</button></div>').join('');
+    html+=diarios.slice().reverse().map(d=>'<div class="diario-entry"><div class="diario-date">📅 '+(d.data||'')+(d.local?' · '+d.local:'')+'</div><div class="diario-text">'+d.texto+'</div><button class="btn-danger" style="font-size:.72rem;padding:.15rem .45rem;margin-top:.6rem" onclick="eliminarDiario(\''+d.id+'\')">🗑 Eliminar</button></div>').join('');
     html+='</div>';
   }
   if(!html)html='<div class="empty-state"><div class="empty-icon">📷</div><div>Sem fotos nem entradas de diário'+(filtro?' para este dia':'')+' ainda.</div></div>';
@@ -1432,7 +1524,7 @@ function confirmarFoto(){
     fetch('https://api.cloudinary.com/v1_1/'+CLOUD+'/auto/upload',{method:'POST',body:fd})
       .then(r=>r.json()).then(data=>{
         if(data.secure_url){
-          appData.fotos.push({id:genId(),url:data.secure_url,nome:file.name,tipo:(file.type.indexOf('video')>=0?'video':'foto'),dia:dia,paragem:paragem,legenda:legenda,data:new Date().toISOString().slice(0,10)});
+          appData.fotos.push({id:genId(),viagemId:viagemAtivaId,url:data.secure_url,nome:file.name,tipo:(file.type.indexOf('video')>=0?'video':'foto'),dia:dia,paragem:paragem,legenda:legenda,data:new Date().toISOString().slice(0,10)});
         }
         feitos++;prog.textContent='A carregar '+feitos+'/'+total+'...';
         if(feitos===total){
@@ -1449,7 +1541,7 @@ function eliminarFoto(id){
 let _lbLista=[],_lbIndex=0;
 function abrirLightbox(idx){
   const filtro=(document.getElementById('filtro-memorias')||{}).value||'';
-  _lbLista=(appData.fotos||[]).filter(function(f){return !filtro||f.dia===filtro;});
+  _lbLista=fotosViagem().filter(function(f){return !filtro||f.dia===filtro;});
   const alvo=appData.fotos[idx];
   _lbIndex=_lbLista.indexOf(alvo);if(_lbIndex<0)_lbIndex=0;
   mostrarLightbox();
@@ -1496,7 +1588,7 @@ function guardarDiario(){
   const texto=document.getElementById('md-texto').value.trim();
   if(!texto){alert('Escreva algum texto.');return;}
   if(!appData.diario)appData.diario=[];
-  appData.diario.push({id:genId(),data:data||new Date().toISOString().slice(0,10),local,texto});
+  appData.diario.push({id:genId(),viagemId:viagemAtivaId,data:data||new Date().toISOString().slice(0,10),local,texto});
   saveFirestoreData();closeModal('modal-diario');renderMemorias();
   document.getElementById('md-texto').value='';document.getElementById('md-local').value='';
 }
@@ -1515,10 +1607,11 @@ function renderGastronomia(){
   document.getElementById('gastronomia-content').innerHTML=html;
 }
 function renderMochila(){
-  if(!appData.mochila)appData.mochila=[];
-  const total=appData.mochila.length,packed=appData.mochila.filter(m=>m.packed).length;
-  const cats={};appData.mochila.forEach(m=>{(cats[m.cat]=cats[m.cat]||[]).push(m);});
+  const mochila=mochilaViagem();
+  const total=mochila.length,packed=mochila.filter(m=>m.packed).length;
+  const cats={};mochila.forEach(m=>{(cats[m.cat]=cats[m.cat]||[]).push(m);});
   let html='<div class="card" style="margin-bottom:1rem"><div class="card-body"><div style="display:flex;justify-content:space-between;font-size:.85rem"><span>Progresso da bagagem</span><span style="font-weight:600">'+packed+'/'+total+'</span></div><div class="checklist-progress-bar"><div class="checklist-progress-fill" style="width:'+((packed/total)*100||0)+'%"></div></div></div></div>';
+  if(!total){ html+='<div class="empty-state"><div class="empty-icon">🎒</div><div>Sem itens. Use «+ Adicionar item».</div></div>'; document.getElementById('mochila-content').innerHTML=html; return; }
   html+='<div class="grid-2">';
   Object.entries(cats).forEach(([cat,items])=>{
     html+='<div class="card"><div class="card-header"><div class="card-title">'+cat+' ('+items.length+')</div></div><div class="card-body" style="padding:0">';
@@ -1528,30 +1621,30 @@ function renderMochila(){
   html+='</div>';
   document.getElementById('mochila-content').innerHTML=html;
 }
-function toggleMochila(id){const m=appData.mochila.find(x=>x.id===id);if(m){m.packed=!m.packed;saveFirestoreData();renderMochila();}}
-function eliminarMochila(id){appData.mochila=appData.mochila.filter(m=>m.id!==id);saveFirestoreData();renderMochila();}
+function toggleMochila(id){const m=mochilaViagem().find(x=>x.id===id);if(m){m.packed=!m.packed;saveFirestoreData();renderMochila();}}
+function eliminarMochila(id){appData.mochilas[viagemAtivaId]=mochilaViagem().filter(m=>m.id!==id);saveFirestoreData();renderMochila();}
 function guardarItemMochila(){
   const nome=document.getElementById('am-nome').value.trim();
   const cat=document.getElementById('am-cat').value;
   const obs=document.getElementById('am-obs').value.trim();
   if(!nome){alert('Indique o item.');return;}
-  if(!appData.mochila)appData.mochila=[];
-  appData.mochila.push({id:genId(),nome,cat,obs,packed:false});
+  mochilaViagem().push({id:genId(),nome,cat,obs,packed:false});
   saveFirestoreData();closeModal('modal-add-mochila');renderMochila();
   document.getElementById('am-nome').value='';document.getElementById('am-obs').value='';
 }
 function renderChecklistPainel(){
-  if(!appData.checklist)appData.checklist=[];
-  const total=appData.checklist.length,done=appData.checklist.filter(c=>c.done).length;
+  const checklist=checklistViagem();
+  const total=checklist.length,done=checklist.filter(c=>c.done).length;
   const catLabels={doc:'Documentos',res:'Reservas',bag:'Bagagem',fin:'Finanças',tec:'Técnico',saude:'Saúde'};
   let html='<div style="display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:.3rem"><span>Progresso</span><span style="font-weight:600">'+done+'/'+total+'</span></div><div class="checklist-progress-bar"><div class="checklist-progress-fill" style="width:'+((done/total)*100||0)+'%"></div></div>';
-  html+=appData.checklist.slice(0,8).map(c=>'<div class="checklist-item '+(c.done?'done':'')+'"><input type="checkbox" '+(c.done?'checked':'')+' onchange="toggleChecklist(\''+c.id+'\')"><span class="checklist-label">'+c.label+'</span><span class="checklist-cat">'+(catLabels[c.cat]||c.cat)+'</span></div>').join('');
+  if(!total){ html+='<div style="font-size:.8rem;color:var(--text3);text-align:center;padding:.75rem 0">Sem tarefas para esta viagem.</div>'; document.getElementById('checklist-painel').innerHTML=html; return; }
+  html+=checklist.slice(0,8).map(c=>'<div class="checklist-item '+(c.done?'done':'')+'"><input type="checkbox" '+(c.done?'checked':'')+' onchange="toggleChecklist(\''+c.id+'\')"><span class="checklist-label">'+c.label+'</span><span class="checklist-cat">'+(catLabels[c.cat]||c.cat)+'</span></div>').join('');
   if(total>8)html+='<div style="font-size:.78rem;color:var(--text3);text-align:center;padding:.5rem 0">+ '+(total-8)+' tarefas — ver tab "O que levar"</div>';
   document.getElementById('checklist-painel').innerHTML=html;
 }
-function toggleChecklist(id){const c=appData.checklist.find(x=>x.id===id);if(c){c.done=!c.done;saveFirestoreData();renderChecklistPainel();}}
+function toggleChecklist(id){const c=checklistViagem().find(x=>x.id===id);if(c){c.done=!c.done;saveFirestoreData();renderChecklistPainel();}}
 function renderPagamentosPainel(){
-  const porPagar=appData.reservas.filter(r=>r.estado!=='pago');
+  const porPagar=reservasViagem().filter(r=>r.estado!=='pago');
   const total=porPagar.reduce((a,b)=>a+(b.valor||0),0);
   let html='';
   if(porPagar.length){
@@ -1589,7 +1682,9 @@ function guardarNovoDia(){
   const notas=document.getElementById('nd2-notas').value.trim();
   if(!data||!titulo){alert('Data e título são obrigatórios.');return;}
   if(!appData.roteiros_custom)appData.roteiros_custom=[];
-  appData.roteiros_custom.push({id:genId(),data,titulo,rota,pais,custo,notas});
+  const novoDiaId=genId();
+  appData.roteiros_custom.push({id:novoDiaId,viagemId:viagemAtivaId,data,titulo,rota,pais,custo,notas});
+  roteiroAtivo='custom_'+novoDiaId;
   saveFirestoreData();closeModal('modal-novo-dia');renderRoteiros();
   ['nd2-data','nd2-titulo','nd2-rota','nd2-pais','nd2-custo','nd2-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
@@ -1663,20 +1758,25 @@ function eliminarNota(id){appData.notas=appData.notas.filter(n=>n.id!==id);saveF
 function criarViagem(){
   const nome=document.getElementById('nv-nome').value.trim();
   if(!nome){alert('Indique o nome da viagem.');return;}
-  appData.viagens.push({id:genId(),nome,pais:document.getElementById('nv-pais').value.trim(),cidades:document.getElementById('nv-cidades').value.trim(),inicio:document.getElementById('nv-inicio').value,fim:document.getElementById('nv-fim').value,orcamento:parseFloat(document.getElementById('nv-orcamento').value)||0,stars:parseInt(document.getElementById('nv-stars').value)||3,estado:document.getElementById('nv-estado').value,notas:document.getElementById('nv-notas').value.trim()});
-  saveFirestoreData();closeModal('modal-nova-viagem');renderPainel();renderDestinos();
+  const novoId=genId();
+  appData.viagens.push({id:novoId,nome,pais:document.getElementById('nv-pais').value.trim(),cidades:document.getElementById('nv-cidades').value.trim(),inicio:document.getElementById('nv-inicio').value,fim:document.getElementById('nv-fim').value,orcamento:parseFloat(document.getElementById('nv-orcamento').value)||0,stars:parseInt(document.getElementById('nv-stars').value)||3,estado:document.getElementById('nv-estado').value,notas:document.getElementById('nv-notas').value.trim(),temRoteiroFixo:false});
+  if(!appData.checklists)appData.checklists={};if(!appData.mochilas)appData.mochilas={};
+  appData.checklists[novoId]=[];appData.mochilas[novoId]=[];
+  saveFirestoreData();closeModal('modal-nova-viagem');
+  ['nv-nome','nv-pais','nv-cidades','nv-orcamento','nv-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  mudarViagem(novoId);
 }
 function guardarReserva(){
   const desc=document.getElementById('nr-desc').value.trim();
   if(!desc){alert('Indique a descrição.');return;}
-  appData.reservas.push({id:genId(),tipo:document.getElementById('nr-tipo').value,desc,data:document.getElementById('nr-data').value,hora:document.getElementById('nr-hora').value,ref:document.getElementById('nr-ref').value.trim(),fornecedor:document.getElementById('nr-fornecedor').value.trim(),valor:parseFloat(document.getElementById('nr-valor').value)||0,estado:document.getElementById('nr-estado').value,notas:document.getElementById('nr-notas').value.trim()});
+  appData.reservas.push({id:genId(),viagemId:viagemAtivaId,tipo:document.getElementById('nr-tipo').value,desc,data:document.getElementById('nr-data').value,hora:document.getElementById('nr-hora').value,ref:document.getElementById('nr-ref').value.trim(),fornecedor:document.getElementById('nr-fornecedor').value.trim(),valor:parseFloat(document.getElementById('nr-valor').value)||0,estado:document.getElementById('nr-estado').value,notas:document.getElementById('nr-notas').value.trim()});
   saveFirestoreData();closeModal('modal-nova-reserva');renderReservas();renderPainel();
   ['nr-desc','nr-ref','nr-fornecedor','nr-valor','nr-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 function guardarDespesa(){
   const desc=document.getElementById('nd-desc').value.trim();
   if(!desc){alert('Indique a descrição.');return;}
-  appData.despesas.push({id:genId(),desc,cat:document.getElementById('nd-cat').value,valor:parseFloat(document.getElementById('nd-valor').value)||0,data:document.getElementById('nd-data').value});
+  appData.despesas.push({id:genId(),viagemId:viagemAtivaId,desc,cat:document.getElementById('nd-cat').value,valor:parseFloat(document.getElementById('nd-valor').value)||0,data:document.getElementById('nd-data').value});
   saveFirestoreData();closeModal('modal-nova-despesa');renderOrcamento();renderPainel();
   document.getElementById('nd-desc').value='';document.getElementById('nd-valor').value='';
 }
