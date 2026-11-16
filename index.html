@@ -681,16 +681,15 @@ function signInWithGoogle(){
   if(!auth){ alert('Firebase não iniciado. Actualize a página (F5).'); return; }
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
-  if(isMobile){
-    firebase.auth().signInWithRedirect(provider).catch(function(e){ alert('Erro: '+e.message); });
-  } else {
-    firebase.auth().signInWithPopup(provider).catch(function(e){
-      if(e.code==='auth/popup-blocked'||e.code==='auth/popup-closed-by-user'){
-        firebase.auth().signInWithRedirect(provider).catch(function(e2){ alert('Erro: '+e2.message); });
-      } else { alert('Erro ao iniciar sessão: '+e.message); }
-    });
-  }
+  // Popup em todos os aparelhos: o redirect falha em telemóveis porque o site (github.io)
+  // e o domínio de login (firebaseapp.com) são diferentes e os navegadores isolam o armazenamento.
+  firebase.auth().signInWithPopup(provider).catch(function(e){
+    if(e.code==='auth/popup-blocked'){
+      firebase.auth().signInWithRedirect(provider).catch(function(e2){ alert('Erro: '+e2.message); });
+    } else if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'){
+      // o utilizador fechou a janela de login: não fazer nada
+    } else { alert('Erro ao iniciar sessão: '+e.message); }
+  });
 }
 if(typeof firebase !== 'undefined'){
   firebase.auth().getRedirectResult().then(function(result){
